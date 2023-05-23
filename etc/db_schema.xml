@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="perspective_novaposhta_shipping_sales_onestep_price_cache" resource="default" engine="innodb"
+           comment="Client\'s shipping price cache for two step">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="int" name="cart_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="cart_id"/>
+        <column xsi:type="text" name="price"  nullable="false"
+                comment="price"/>
+        <column xsi:type="text" name="method"  nullable="false"
+                comment="method"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_shipping_sales_order_address" resource="default" engine="innodb"
+           comment="Client\'s warehouses">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="int" name="cart_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="cart_id"/>
+        <column xsi:type="text" name="warehouse_id" nullable="false"
+                comment="warehouse_id"/>
+        <column xsi:type="text" name="city_id"  nullable="false"
+                comment="city_id"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_shipping_sales_order_client_address" resource="default" engine="innodb"
+           comment="Client\'s address ">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="int" name="cart_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="cart_id"/>
+        <column xsi:type="text" name="city" nullable="false" comment="Client's city"/>
+        <column xsi:type="text" name="area" nullable="false" comment="Client's Area exmpl: Sumy region"/>
+        <column xsi:type="text" name="region" nullable="false" comment="Client's region"/>
+        <column xsi:type="text" name="street" nullable="false" comment="Client's street"/>
+        <column xsi:type="text" name="building" nullable="false" comment="Client's building"/>
+        <column xsi:type="text" name="flat" nullable="false" comment="Client's flat"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_counterparty_index" resource="default" engine="innodb"
+           comment="Index of counterparty">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="text" name="counterpartyRef" nullable="true" comment="Counterparty Ref"/>
+        <column xsi:type="text" name="contactProperty" nullable="true" comment="Name in uk_UA"/>
+        <column xsi:type="text" name="city_ref" nullable="true" comment="City Ref"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_counterparty_address_index" resource="default" engine="innodb"
+           comment="Warehouse types">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="text" name="CounterpartyRef" nullable="true" comment="Counterparty Ref"/>
+        <column xsi:type="text" name="CityRef" nullable="true" comment="CityRef"/>
+        <column xsi:type="text" name="Ref" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="Description" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="CityDescription" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="StreetRef" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="StreetDescription" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="BuildingRef" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="BuildingDescription" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="Note" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="AddressName" nullable="true" comment="Ref"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_counterparty_org_thirdparty" resource="default" engine="innodb"
+           comment="Counterparty third party affiliate senders dictionary">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="text" name="description" nullable="true" comment="description"/>
+        <column xsi:type="text" name="ref" nullable="true" comment="ref"/>
+        <column xsi:type="text" name="firstname" nullable="true" comment="firstname"/>
+        <column xsi:type="text" name="middlename" nullable="true" comment="middlename"/>
+        <column xsi:type="text" name="lastname" nullable="true" comment="lastname"/>
+        <column xsi:type="text" name="counterpartyRef" nullable="true" comment="counterpartyRef"/>
+        <column xsi:type="text" name="phone" nullable="true" comment="phone"/>
+        <column xsi:type="text" name="info" nullable="true" comment="info"/>
+        <column xsi:type="text" name="email" nullable="true" comment="email"/>
+        <column xsi:type="text" name="contact_person_note" nullable="true" comment="contact_person_note"/>
+        <column xsi:type="text" name="addresses" nullable="true" comment="addresses"/>
+        <column xsi:type="text" name="additional_phone" nullable="true" comment="additional_phone"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_counterparty_addresses_doors" resource="default" engine="innodb"
+           comment="Counterparty address doors allowed points dictionary">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="text" name="ContactPersonRef" nullable="true" comment="ContactPersonRef"/>
+        <column xsi:type="text" name="Ref" nullable="true" comment="ref"/>
+        <column xsi:type="text" name="CityRef" nullable="true" comment="CityRef"/>
+        <column xsi:type="text" name="SettlementRef" nullable="true" comment="SettlementRef"/>
+        <column xsi:type="text" name="SettlementDescription" nullable="true" comment="SettlementDescription"/>
+        <column xsi:type="text" name="RegionDescription" nullable="true" comment="RegionDescription"/>
+        <column xsi:type="text" name="AreaDescription" nullable="true" comment="AreaDescription"/>
+        <column xsi:type="text" name="StreetRef" nullable="true" comment="StreetRef"/>
+        <column xsi:type="text" name="StreetDescription" nullable="true" comment="StreetDescription"/>
+        <column xsi:type="text" name="Description" nullable="true" comment="Description"/>
+        <column xsi:type="text" name="BuildingNumber" nullable="true" comment="BuildingNumber"/>
+        <column xsi:type="text" name="Flat" nullable="true" comment="Flat"/>
+        <column xsi:type="text" name="Floor" nullable="true" comment="Floor"/>
+        <column xsi:type="text" name="Note" nullable="true" comment="Note"/>
+        <column xsi:type="text" name="AddressName" nullable="true" comment="AddressName"/>
+        <column xsi:type="text" name="General" nullable="true" comment="General"/>
+        <column xsi:type="text" name="StreetsTypeRef" nullable="true" comment="StreetsTypeRef"/>
+        <column xsi:type="text" name="StreetsType" nullable="true" comment="StreetsType"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="perspective_novaposhta_counterparty_addresses_warehouses" resource="default" engine="innodb"
+           comment="Counterparty address doors allowed points dictionary">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="text" name="ContactPersonRef" nullable="true" comment="ContactPersonRef"/>
+        <column xsi:type="text" name="Ref" nullable="true" comment="Ref"/>
+        <column xsi:type="text" name="CityRef" nullable="true" comment="CityRef"/>
+        <column xsi:type="text" name="CityDescription" nullable="true" comment="CityDescription"/>
+        <column xsi:type="text" name="AddressDescription" nullable="true" comment="AddressDescription"/>
+        <column xsi:type="text" name="WarehouseNumber" nullable="true" comment="WarehouseNumber"/>
+        <column xsi:type="text" name="TypeOfWarehouse" nullable="true" comment="TypeOfWarehouse"/>
+        <column xsi:type="text" name="General" nullable="true" comment="General"/>
+        <column xsi:type="text" name="TotalMaxWeightAllowed" nullable="true" comment="TotalMaxWeightAllowed"/>
+        <column xsi:type="text" name="PlaceMaxWeightAllowed" nullable="true" comment="PlaceMaxWeightAllowed"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>

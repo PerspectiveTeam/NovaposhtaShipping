@@ -1,0 +1,24 @@
+<?php /**@var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo */ ?>
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php if ($block->getEnabled()): ?>
+    <section class="block block-order-np-details-view">
+        <div class="block-title">
+            <span class="title"><?= $escaper->escapeHtml(__('Novaposhta info')) ?></span>
+        </div>
+        <?php foreach ($this->getShipping()->getData() as $key => $value): ?>
+
+            <?php if ($block->allowedToShow($key, $value)): ?>
+                <div class="block-content">
+                    <div class="box box-order-<?= $key ?>">
+                        <div class="box-title">
+                            <span class="title"><?= $escaper->escapeHtml(__($key)) ?></span>
+                            <div class="box-content">
+                                <?= $escaper->escapeHtml(__($this->decorateValue($key, (string) $value))) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </section>
+<?php endif ?>

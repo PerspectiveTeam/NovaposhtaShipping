@@ -1,0 +1,19 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+<script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "warehouseInputAutocompleteShipping":{
+                "component": "Perspective_NovaposhtaShipping/js/order/shipping/warehouse",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
+                "inputName":"np_w2c_warehouse",
+                "warehouseLabel":"<?= $block->getWarehouseLabel() ?>",
+                "warehouseValue":"<?= $block->getWarehouseValue() ?>"
+                }
+            }
+        }
+    }
+}
+</script>

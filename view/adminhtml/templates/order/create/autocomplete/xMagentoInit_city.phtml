@@ -1,0 +1,27 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+<script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "cityInputAutocompleteShipping":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/city",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                "inputName":"order[shipping_address][novaposhta_city]"
+                },
+            "cityInputAutocompleteBilling":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/city",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                "inputName":"order[billing_address][novaposhta_city]"
+                },
+            "cityInputAutocompleteOrphan":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/city",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                "inputName":"novaposhta_city"
+                }
+            }
+        }
+    }
+}
+</script>

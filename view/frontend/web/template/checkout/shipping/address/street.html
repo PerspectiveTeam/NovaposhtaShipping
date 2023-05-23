@@ -1,0 +1,28 @@
+<div style="margin-top: 0px;" class="input-block-level" data-bind="visible: selectedMethodCode() == 'c2c' || selectedMethodCode() == 'w2c'">
+    <label class="label-np-help" data-bind="i18n: 'Street'"></label>
+    <select style="width:100%" class="select" data-bind="
+    attr: {
+        name: inputName,
+        'aria-describedby': noticeId,
+        id: uid,
+        disabled: disabled,
+        'aria-required': required,
+        'aria-invalid': error() ? true : 'false',
+        placeholder: placeholder
+    },
+    value: value,
+    hasFocus: focused,
+    optgroup: options,
+    optionsCaption: caption,
+    optionsValue: 'value',
+    optionsText: 'label',
+    afterRender: function (element) {
+            select2(element);
+        },
+    optionsAfterRender: function(option, item) {
+        if (item && item.disabled) {
+            ko.applyBindingsToNode(option, {attr: {disabled: true}}, item);
+        }
+    }"
+    />
+</div>

@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Perspective_NovaposhtaShipping::css/loader.css"/>
+        <css src="Perspective_NovaposhtaShipping::css/jquery-ui.css"/>
+        <css src="Perspective_NovaposhtaShipping::css/select2.css"/>
+        <css src="Perspective_NovaposhtaShipping::css/styles.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+
+                <referenceContainer name="extra_shipment_info">
+                    <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\OrganisationDeterminer"
+                           name="sales_order_shipping_organisation_determiner"
+                           template="Perspective_NovaposhtaShipping::order/shipping/organisationDeterminer.phtml">
+                        <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\AbstractShipment"
+                               name="sales_order_shipping_abstract_organisation"
+                               template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/abstract.phtml">
+                            <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\AddressShipment"
+                                   name="type_address_delivery_organisation"
+                                   template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/addressShipment.phtml">
+                                <block
+                                    class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                    template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/address/scriptsAddAutocompleteToCityInputAddress.phtml"
+                                    name="perspective_autocomplete_address_city_input_js_organisation">
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/address/xMagentoInit_address_city.phtml"
+                                        name="perspective_autocomplete_city_x_magento_js_organisation"/>
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/address/xMagentoInit_address_street.phtml"
+                                        name="perspective_autocomplete_street_x_magento_js_organisation"/>
+                                </block>
+                            </block>
+                            <block
+                                class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\WarehouseShipment"
+                                name="type_warehouse_delivery_organisation"
+                                template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/warehouseShipment.phtml">
+                                <block
+                                    class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                    template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/warehouse/scriptsAddAutocompleteToCityInputWarehouse.phtml"
+                                    name="perspective_autocomplete_warehouse_city_input_js_organisation">
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/warehouse/xMagentoInit_warehouse_city.phtml"
+                                        name="perspective_autocomplete_warehouse_city_x_magento_js_organisation"/>
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/organisation/warehouse/xMagentoInit_warehouse.phtml"
+                                        name="perspective_autocomplete_warehouse_x_magento_js_organisation"/>
+                                </block>
+                            </block>
+
+                        </block>
+                        <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\AbstractShipment"
+                               name="sales_order_shipping_abstract_person"
+                               template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/abstract.phtml">
+                            <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\AddressShipment"
+                                   name="type_address_delivery_person"
+                                   template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/addressShipment.phtml">
+                                <block
+                                    class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                    template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/address/scriptsAddAutocompleteToCityInputAddress.phtml"
+                                    name="perspective_autocomplete_address_city_input_js_person">
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/address/xMagentoInit_address_city.phtml"
+                                        name="perspective_autocomplete_city_x_magento_js_person"/>
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/address/xMagentoInit_address_street.phtml"
+                                        name="perspective_autocomplete_street_x_magento_js_person"/>
+                                </block>
+                            </block>
+                            <block
+                                class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\WarehouseShipment"
+                                name="type_warehouse_delivery_person"
+                                template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/warehouseShipment.phtml">
+                                <block
+                                    class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                    template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/warehouse/scriptsAddAutocompleteToCityInputWarehouse.phtml"
+                                    name="perspective_autocomplete_warehouse_city_input_js_person">
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/warehouse/xMagentoInit_warehouse_city.phtml"
+                                        name="perspective_autocomplete_warehouse_city_x_magento_js_person"/>
+                                    <block
+                                        class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                                        template="Perspective_NovaposhtaShipping::order/shipping/autocomplete/person/warehouse/xMagentoInit_warehouse.phtml"
+                                        name="perspective_autocomplete_warehouse_x_magento_js_person"/>
+                                </block>
+                            </block>
+
+                        </block>
+                    </block>
+                </referenceContainer>
+        </referenceContainer>
+    </body>
+</page>

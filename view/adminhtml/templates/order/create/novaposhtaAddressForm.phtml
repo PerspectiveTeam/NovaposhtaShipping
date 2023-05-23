@@ -1,0 +1,101 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php /**No Need to check if module is enabled because it checks magento when resolve list of shipping */ ?>
+<?php //if ($block->helperNovaposhta->getEnabled()): ?>
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<fieldset class="fieldset admin__fieldset-wrapper">
+    <legend class="legend admin__legend">
+        <span><?= /* @escapeNotVerified */
+            __('Novaposhta address') ?></span>
+    </legend>
+    <br>
+    <?php /**@var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaOnAdminChangeAddress */ ?>
+    <section class="admin__page-section order-addresses">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $escaper->escapeHtml(__('Novaposhta info')) ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="admin__page-section-item order-new-data">
+                <div class="admin__page-section-item-title">
+                    <span class="title"><?= $escaper->escapeHtml(__('New Novaposhta address')) ?></span>
+                </div>
+                <div class="admin__page-section-item-content">
+                    <div class="message message-notice">
+                        <div class="message-inner">
+                            <div class="message-content"><?= /* @escapeNotVerified */
+                                __('Please select the city and the warehouse from lists.') ?></div>
+                        </div>
+                    </div>
+                    <br/>
+                    <span class="collect-indicator" id="spinner_span_indicator">
+    <img class="processing" hidden="hidden" alt="Processing" style="margin:0 5px"
+         src="<?php echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+    <img class="success" hidden="hidden" alt="Success" style="margin:-3px 5px"
+         src="<?php echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+                            <span class="messageContainer" style="display: none;"></span>
+</span>
+                    <br/>
+                    <div id="novaposhtaForm"></div>
+
+                    <br/>
+                    <button id="getNovaposhtaHtml" type="button">
+                            <span class="ui-button-text">
+                                <span><?= __('Change Novaposhta data'); ?></span>
+                            </span>
+                    </button>
+                    <script>
+                        require(['jquery', 'mage/translate', 'ko'], function ($, translate,ko) {
+                            var spinnerSpanIndicator = $("#spinner_span_indicator");
+                            $("#getNovaposhtaHtml").on('click', function () {
+                                spinnerSpanIndicator.find('.processing').show();
+                                spinnerSpanIndicator.find('.success').hide();
+                                spinnerSpanIndicator.find('.messageContainer').show();
+                                spinnerSpanIndicator.find('.messageContainer').text(
+                                    translate("Trying to fetch form"));
+                                $.ajax({
+                                    url: "<?= $escaper->escapeUrl($block->getUrl('novaposhtashipping/order_address/addressblock'))?>",
+                                    data: {
+                                        form_key: window.FORM_KEY
+                                    },
+                                    type: "POST",
+                                    showLoader: true,
+                                    error: function (data) {
+                                        //alert(translate("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                        console.log(data.responseText);
+                                        spinnerSpanIndicator.find('.processing').hide();
+                                        spinnerSpanIndicator.find('.success').hide();
+                                        spinnerSpanIndicator.find('.messageContainer').text(
+                                            translate("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                    },
+                                    success: function (data) {
+                                        if (data !== undefined) {
+                                            $("#getNovaposhtaHtml").hide();
+                                            $("#novaposhtaForm").html(data);
+                                            spinnerSpanIndicator.find('.processing').hide();
+                                            spinnerSpanIndicator.find('.messageContainer').text(translate("Form loaded."));
+                                            spinnerSpanIndicator.find('.success').show();
+                                            $("#novaposhtaForm").trigger('contentUpdated');
+                                            try {
+                                                ko.applyBindings(this, document.getElementById("warehouse-and-city-wrapper"));
+                                            } catch (e) {
+                                                console.log(e);
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </section>
+</fieldset>
+<?php //endif ?>

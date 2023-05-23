@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Perspective\NovaposhtaShipping\Model\Carrier\Mapping" >
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="w2c" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface</item>
+                <item name="c2c" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface</item>
+                <item name="c2w" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface</item>
+                <item name="w2w" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Model\Adminhtml\Quote\Info\Type\AbstractChain">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Model\Adminhtml\Quote\Info\Type\WarehouseProcessor</item>
+                <item name="address" xsi:type="object">Perspective\NovaposhtaShipping\Model\Adminhtml\Quote\Info\Type\AddressProcessor</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\Adminhtml\ShippingAddressRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\Adminhtml\ShippingWarehouseRepository"/>
+    <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Address">
+        <plugin name="ps_block_adminhtml_order_create_form_plugin"
+                type="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\AbstractFormPlugin"/>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\AbstractFormPlugin">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Warehouse</item>
+                <item name="street" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Street</item>
+                <item name="city" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\City</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Sales\Controller\Adminhtml\Order\AddressSave">
+        <plugin name="ps_sales_controller_adminhtml_order_address_save_plugin"
+                type="Perspective\NovaposhtaShipping\Plugin\Controller\Adminhtml\Order\AddressSavePlugin"/>
+    </type>
+</config>

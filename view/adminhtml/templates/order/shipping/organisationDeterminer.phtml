@@ -1,0 +1,7 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /* @var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\OrganisationDeterminer */ ?>
+<?php if($block->isOrganisation()): ?>
+<?= $block->getChildBlock('sales_order_shipping_abstract_organisation')->toHtml();?>
+<?php else: ?>
+<?= $block->getChildBlock('sales_order_shipping_abstract_person')->toHtml();?>
+<?php endif; ?>

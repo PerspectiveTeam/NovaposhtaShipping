@@ -1,0 +1,19 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+<script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "cityInputAutocompleteShipping":{
+                "component": "Perspective_NovaposhtaShipping/js/order/shipping/city",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                "inputName":"np_c2c_cityValue",
+                "cityLabel":"<?= $block->getCityLabel() ?>",
+                "cityValue":"<?= $block->getCityValue() ?>"
+                }
+            }
+        }
+    }
+}
+</script>

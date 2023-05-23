@@ -1,0 +1,263 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+?><?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php if ($block->helperNovaposhta->getEnabled()): ?>
+    <fieldset class="fieldset admin__fieldset-wrapper">
+        <legend class="legend admin__legend">
+        <span><?= /* @escapeNotVerified */
+            __('Novaposhta address') ?></span>
+        </legend>
+        <br>
+        <?php /**@var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaOnAdminChangeAddress */ ?>
+        <?php if ($block->helperNovaposhta->getEnabled()): ?>
+            <section class="admin__page-section order-addresses">
+                <div class="admin__page-section-title">
+                    <span class="title"><?= $block->helperNovaposhta->escapeHtml(__('Novaposhta info')) ?></span>
+                </div>
+                <div class="admin__page-section-content">
+                    <div class="admin__page-section-item order-city">
+                        <div class="admin__page-section-item-title">
+                            <span class="title"><?= $block->helperNovaposhta->escapeHtml(__('Current City')) ?></span>
+                        </div>
+                        <?php if ($block->helperNovaposhta->getNovaposhtaCity() !== null): ?>
+                            <div
+                                class="admin__page-section-item-content"><?= $block->helperNovaposhta->escapeHtml(__($block->helperNovaposhta->getNovaposhtaCity())) ?></div>
+                        <?php else: ?>
+                            <div
+                                class="admin__page-section-item-content"><?= $block->helperNovaposhta->escapeHtml(__('No city data found')) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <br/>
+                    <div class="admin__page-section-item order-warehouse">
+                        <div class="admin__page-section-item-title">
+                            <span
+                                class="title"><?= $block->helperNovaposhta->escapeHtml(__('Current Warehouse')) ?></span>
+                        </div>
+                        <?php if ($block->helperNovaposhta->getNovaposhtaWarehouse() !== null): ?>
+                            <div
+                                class="admin__page-section-item-content"><?= $block->helperNovaposhta->escapeHtml($block->helperNovaposhta->getNovaposhtaWarehouse()) ?></div>
+                        <?php else: ?>
+                            <div
+                                class="admin__page-section-item-content"><?= $block->helperNovaposhta->escapeHtml(__('No warehouse data found')) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <br/>
+                    <div class="admin__page-section-item order-new-data">
+                        <div class="admin__page-section-item-title">
+                            <span
+                                class="title"><?= $block->helperNovaposhta->escapeHtml(__('New Novaposhta address')) ?></span>
+                        </div>
+                        <div class="admin__page-section-item-content">
+                            <div class="message message-notice">
+                                <div class="message-inner">
+                                    <div class="message-content"><?= /* @escapeNotVerified */
+                                        __('Changing Novaposhta address information will not recalculate shipping price.') ?></div>
+                                </div>
+                            </div>
+                            <br/>
+                            <span class="collect-indicator" id="spinner_span_indicator">
+    <img class="processing" hidden="hidden" alt="Processing" style="margin:0 5px"
+         src="<?php echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+    <img class="success" hidden="hidden" alt="Success" style="margin:-3px 5px"
+         src="<?php echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+    <img class="error" hidden="hidden" alt="Error"
+         src="<?php echo $block->getViewFileUrl('images/rule_component_remove.gif') ?>"/>
+                            <span class="messageContainer" style="display: none; color: #eb5202"></span>
+</span>
+                            <br/>
+                            <div id="novaposhtaForm"></div>
+                            <div id="novaposhtaAddressForm"></div>
+
+                            <br/>
+                            <button id="getNovaposhtaHtml" type="button">
+                            <span class="ui-button-text">
+                                <span><?= __('Change Novaposhta data'); ?></span>
+                            </span>
+                            </button>
+                            <div style="display: none" id="deliveryTypeRadioWrapper">
+                                <br> <strong>  <?= __('Choose delivery type') ?> </strong><span style="color:#e22626 ">*</span><br>
+                                <div>
+                                    <br>
+                                    <input type="radio" id="warehouse_radio" name="deliveryTypeRadio"
+                                           value="warehouse_radio">
+                                    <label for="warehouse_radio"><?= __('Warehouse delivery type') ?></label><br>
+                                    <br>
+                                    <input type="radio" id="address_radio" name="deliveryTypeRadio"
+                                           value="address_radio">
+                                    <label for="address_radio"><?= __('Address delivery type') ?></label><br>
+                                </div>
+                            </div>
+                            <br/>
+                            <button id="saveNewNovaposhtaData" class="primary" style="display: none;" type="button">
+                            <span class="ui-button-text">
+                                <span><?= __('Save edited Novaposhta data'); ?></span>
+                            </span>
+                            </button>
+                            <button id="cancelNewNovaposhtaData" class="back" style="display: none;" type="button">
+                            <span class="ui-button-text">
+                                <span><?= __('Cancel editing Novaposhta data'); ?></span>
+                            </span>
+                            </button>
+                            <script>
+                                require(['jquery', 'mage/translate', 'ko'], function ($, translate, ko) {
+                                    var spinnerSpanIndicator = $("#spinner_span_indicator");
+                                    $("#getNovaposhtaHtml").on('click', function () {
+                                        spinnerSpanIndicator.find('.processing').show();
+                                        spinnerSpanIndicator.find('.success').hide();
+                                        spinnerSpanIndicator.find('.error').hide();
+                                        spinnerSpanIndicator.find('.messageContainer').show();
+                                        spinnerSpanIndicator.find('.messageContainer').text(
+                                            $.mage.__("Trying to fetch form"));
+                                        $.ajax({
+                                            url: "<?= $escaper->escapeUrl($block->getUrl('novaposhtashipping/order_address/addressblock'))?>",
+                                            data: {
+                                                form_key: window.FORM_KEY
+                                            },
+                                            type: "POST",
+                                            showLoader: true,
+                                            error: function (data) {
+                                                //alert($.mage.__("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                                console.log(data.responseText);
+                                                spinnerSpanIndicator.find('.processing').hide();
+                                                spinnerSpanIndicator.find('.success').hide();
+                                                spinnerSpanIndicator.find('.error').show();
+                                                spinnerSpanIndicator.find('.messageContainer').text(
+                                                    $.mage.__("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                            },
+                                            success: function (data) {
+                                                if (data !== undefined) {
+                                                    $("#getNovaposhtaHtml").hide();
+                                                    $("#novaposhtaForm").html(data).trigger('contentUpdated');
+                                                    $("#novaposhtaForm").show();
+                                                    try {
+                                                        ko.applyBindings(this, document.getElementById("warehouse-and-city-wrapper"));
+                                                    } catch (e) {
+                                                        console.log(e);
+                                                    }
+                                                    $("#saveNewNovaposhtaData").show();
+                                                    $("#cancelNewNovaposhtaData").show();
+                                                    $("#deliveryTypeRadioWrapper").show();
+                                                    spinnerSpanIndicator.find('.processing').hide();
+                                                    spinnerSpanIndicator.find('.error').hide();
+                                                    spinnerSpanIndicator.find('.messageContainer').text($.mage.__("Form loaded."));
+                                                    spinnerSpanIndicator.find('.success').show();
+                                                }
+                                            }
+                                        });
+                                        $.ajax({
+                                            url: "<?= $escaper->escapeUrl($block->getUrl('novaposhtashipping/order_address/addressclientblock'))?>",
+                                            data: {
+                                                form_key: window.FORM_KEY
+                                            },
+                                            type: "POST",
+                                            showLoader: true,
+                                            error: function (data) {
+                                                //alert($.mage.__("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                                console.log(data.responseText);
+                                                spinnerSpanIndicator.find('.processing').hide();
+                                                spinnerSpanIndicator.find('.error').show();
+                                                spinnerSpanIndicator.find('.success').hide();
+                                                spinnerSpanIndicator.find('.messageContainer').text(
+                                                    $.mage.__("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                            },
+                                            success: function (data) {
+                                                if (data !== undefined) {
+                                                    $("#getNovaposhtaHtml").hide();
+                                                    $("#novaposhtaAddressForm").html(data).trigger('contentUpdated');
+                                                    $("#novaposhtaAddressForm").show();
+                                                    try {
+                                                        ko.applyBindings(this, document.getElementById("novaposhta-address-change-wrapper"));
+                                                    } catch (e) {
+                                                        console.log(e);
+                                                    }
+                                                    $("#saveNewNovaposhtaData").show();
+                                                    $("#cancelNewNovaposhtaData").show();
+                                                    spinnerSpanIndicator.find('.processing').hide();
+                                                    spinnerSpanIndicator.find('.messageContainer').text($.mage.__("Form loaded."));
+                                                    spinnerSpanIndicator.find('.success').show();
+                                                }
+                                            }
+                                        });
+
+                                    });
+                                    $("#cancelNewNovaposhtaData").on('click', function () {
+                                        $("#getNovaposhtaHtml").show();
+                                        $("#saveNewNovaposhtaData").hide();
+                                        $("#cancelNewNovaposhtaData").hide();
+                                        $("#novaposhtaForm").hide();
+                                        $("#novaposhtaAddressForm").hide();
+                                        $("#deliveryTypeRadioWrapper").hide();
+                                        $("#spinner_span_indicator").hide();
+                                    });
+                                    $("#saveNewNovaposhtaData").on('click', function () {
+                                        var allowToProceed = false;
+                                        if ($("input[name='deliveryTypeRadio']:checked").val() === 'address_radio') {
+                                            allowToProceed = $("#novaposhta-address-change").valid();
+                                        }
+                                        if ($("input[name='deliveryTypeRadio']:checked").val() === 'warehouse_radio') {
+                                            allowToProceed = $('#novaposhta-warehouse-and-city').valid();
+                                        }
+                                        if (
+                                            !allowToProceed
+                                        ) {
+                                            spinnerSpanIndicator.find('.messageContainer').text($.mage.__('Not all elements selected'));
+                                            spinnerSpanIndicator.find('.messageContainer').show();
+                                            spinnerSpanIndicator.find('.success').hide();
+                                            spinnerSpanIndicator.find('.error').show();
+                                            $("body,html").animate({scrollTop: spinnerSpanIndicator.find('.messageContainer').offset().top}, 1000);
+                                            $("#messageContainer").fadeOut(7000);
+                                        } else {
+                                            spinnerSpanIndicator.find('.processing').show();
+                                            spinnerSpanIndicator.find('.success').hide();
+                                            spinnerSpanIndicator.find('.messageContainer').text($.mage.__("Trying to save data to DB"));
+                                            $.ajax({
+                                                url: "<?= $escaper->escapeUrl($block->getUrl('novaposhtashipping/order_address/NovaposhtaSaveUpdatedData'))?>",
+                                                data: {
+                                                    form_key: window.FORM_KEY,
+                                                    perspective_novaposhta_shipping_order_id: <?= $block->getOrderId()?>,
+                                                    perspective_novaposhta_shipping_address_form: $('#novaposhta-address-change').serializeArray(),
+                                                    perspective_novaposhta_shipping_warehouse_form: $('#novaposhta-warehouse-and-city').serializeArray(),
+                                                    activeDeliveryType: $("input[name='deliveryTypeRadio']:checked").val()
+                                                },
+                                                type: "POST",
+                                                showLoader: true,
+                                                error: function (data) {
+                                                    //alert($.mage.__("An error have been occurred while fetching form. Try to reload page or contact with us"));
+                                                    console.log(data.responseText);
+                                                    spinnerSpanIndicator.find('.processing').hide();
+                                                    spinnerSpanIndicator.find('.success').hide();
+                                                    spinnerSpanIndicator.find('.error').show();
+                                                    spinnerSpanIndicator.find('.messageContainer').text(
+                                                        $.mage.__("An error have been occurred while saving data to DB. Try to reload page or contact with us"));
+                                                },
+                                                success: function (data) {
+                                                    if (data !== undefined) {
+                                                        if($("input[name='deliveryTypeRadio']:checked").val())
+                                                        $(".order-city").find(".admin__page-section-item-content")
+                                                            .text($('#novaposhta_city').text());
+                                                        $(".order-warehouse").find(".admin__page-section-item-content")
+                                                            .text($('#novaposhta_warehouse option:selected').text());
+                                                        spinnerSpanIndicator.find('.processing').hide();
+                                                        spinnerSpanIndicator.find('.messageContainer').text($.mage.__("Successfully saved to DB"));
+                                                        spinnerSpanIndicator.find('.success').show();
+                                                        $("#cancelNewNovaposhtaData").hide();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif ?>
+    </fieldset>
+<?php endif ?>

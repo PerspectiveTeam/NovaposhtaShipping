@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/novaposhtashipping/city" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\PreparedCitiesRepositoryInterface" method="prepareCityArray"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/warehouses" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface" method="prepareWarehouseArray"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/filtered_warehouses" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface" method="filteredWarehouseArrayByCityRefAndTerm"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/streets" method="POST">
+        <service class="Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface" method="getByCityRef"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/streets-formatted" method="POST">
+        <service class="Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface" method="getFormattedByCityRef"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/streets-formatted-by-city-name" method="POST">
+        <service class="Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface" method="getFormattedByCityName"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/streets-formatted-for-select" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\PreparedStreetsRepositoryInterface" method="filteredStreetsArrayByCityRefAndTerm"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>

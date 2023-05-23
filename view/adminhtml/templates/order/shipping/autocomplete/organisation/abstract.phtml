@@ -1,0 +1,22 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /* @var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\AbstractShipment */ ?>
+<?php
+switch ($block->getRenderBlock()) {
+    case 'w2c':
+        $childBlock = $block->getChildBlock('type_address_delivery_organisation')->setType('w2c');
+        echo $childBlock->toHtml();
+        break;
+    case 'c2c':
+        $childBlock = $block->getChildBlock('type_address_delivery_organisation')->setType('c2c');
+        echo $childBlock->toHtml();
+        break;
+    case 'w2w':
+        $childBlock = $block->getChildBlock('type_warehouse_delivery_organisation')->setType('w2w');
+        echo $childBlock->toHtml();
+        break;
+    case 'c2w':
+        $childBlock = $block->getChildBlock('type_warehouse_delivery_organisation')->setType('c2w');
+        echo $childBlock->toHtml();
+        break;
+}
+?>

@@ -1,0 +1,78 @@
+<?php /**@var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo*/?>
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<div data-bind="scope: 'warehouseOnChange'"
+     data-mage-init='{
+ "Magento_Ui/js/core/app":{
+        "components":{
+            "warehouseOnChange":{
+                    "component": "Perspective_NovaposhtaShipping/js/order/address/change/warehouse",
+                    "cityUrl":"<?=$escaper->escapeUrl($block->getUrl("novaposhtashipping/ajax/city")); ?>",
+                    "warehouseUrl":"<?= $escaper->escapeUrl($block->getUrl("novaposhtashipping/ajax/warehouse")) ?>"
+
+ }
+ }
+ }
+ }'
+     id="warehouse-and-city-wrapper">
+    <form class="form" id="novaposhta-warehouse-and-city">
+        <fieldset class="fieldset">
+        <br/>
+        <label class="label" for="novaposhta_city">
+            <span><strong><?= $escaper->escapeHtml(__('Warehouse delivery')) ?></strong></span>
+        </label>
+        <br/>
+        <label class="label" for="novaposhta_city">
+            <span><?= $escaper->escapeHtml(__('City')) ?></span>
+        </label>
+        <br/>
+        <input data-validate-no-empty='true' data-validate-novaposhta-city="true" type="text" data-bind="
+cityAutocompleteWarehouse:{
+             options: availableCity,
+             selected: selectedItem},
+             value:cityCaption,
+    attr: {
+        name: 'novaposhta_city',
+        placeholder: placeholder,
+        'aria-describedby': noticeId,
+        id: 'novaposhta_city',
+        disabled: disabled
+"
+               id="novaposhta_city" class="input-text" name="novaposhta_city" style="width: 65%;"/>
+        <input data-validate-no-empty='true' type="hidden" data-bind="
+             value:selectedItem,
+    attr: {
+        name: 'novaposhta_address_hidden',
+        placeholder: cityCaption,
+        'aria-describedby': noticeId,
+        id: 'novaposhta_address_hidden',
+        disabled: disabled
+"
+               id="novaposhta_address_hidden" class="input-text" name="novaposhta_address_hidden" />
+        <br/>
+
+        <br/>
+        <label class="label" for="novaposhta_warehouse">
+            <span><?= $escaper->escapeHtml(__('Warehouse')) ?></span>
+        </label>
+
+        <br/>
+        <select data-validate-select='true'
+                data-bind="
+             options: availableWarehouse,
+             optionsText: 'label',
+             optionsValue: 'value',
+             value: selectedWarehouse,
+             optionsCaption: warehouseCaption,
+              attr: {
+                    name: 'novaposhta_warehouse',
+                    placeholder: placeholder,
+                    'aria-describedby': noticeId,
+                    id: 'novaposhta_warehouse',
+                    disabled: disabled
+"
+                id="novaposhta_warehouse" name="novaposhta_warehouse" style="width: 65%" >
+
+        </select>
+        </fieldset>
+    </form>
+</div>

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AbstractChain">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\WarehouseProcessor</item>
+                <item name="address" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AddressProcessor</item>
+                <item name="city" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\CityProcessor</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Model\Carrier\Mapping" >
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="w2c" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface</item>
+                <item name="c2c" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface</item>
+                <item name="c2w" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface</item>
+                <item name="w2w" xsi:type="object">Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Model\Carrier\Method\AbstractChain" >
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="client_organization" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Carrier\Method\AddressDeliveryOrganization
+                </item>
+                <item name="warehouse_organization" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Carrier\Method\WarehouseDeliveryOrganization
+                </item>
+                <item name="client_non_organization" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Carrier\Method\AddressDeliveryNonOrganization
+                </item>
+                <item name="warehouse_non_organization" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Carrier\Method\WarehouseDeliveryNonOrganization
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Checkout\Model\ShippingInformationManagement">
+        <plugin name="perspective_novaposhta_shipping_address"
+                type="Perspective\NovaposhtaShipping\Model\Quote\SaveAddressInformationPlugin" sortOrder="1"
+                disabled="false"/>
+    </type>
+   <!-- <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+        <plugin name="process_perspective_novaposhta_shipping_address"
+                type="Perspective\NovaposhtaShipping\Block\Checkout\SaveAddressInformationProcessor" sortOrder="1"
+                disabled="true"/>
+    </type>-->
+    <type name="\Magento\Sales\Controller\Adminhtml\Order\Create\Save">
+        <plugin name="perspective_novaposhta_admin_shipping_address"
+                type="Perspective\NovaposhtaShipping\Plugin\Controller\Adminhtml\SaveAddressInformationPlugin" sortOrder="1"
+                disabled="false"/>
+    </type>
+    <preference for="Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterface"
+                type="Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex" />
+    <preference for="Perspective\NovaposhtaShipping\Api\Data\CounterpartyIndexInterface"
+                type="Perspective\NovaposhtaShipping\Model\CounterpartyIndex" />
+    <preference for="Perspective\NovaposhtaShipping\Api\Data\ShippingWarehouseInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingWarehouse" />
+    <preference for="Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingCheckoutOnestepPriceCache" />
+    <preference for="Perspective\NovaposhtaShipping\Api\Data\ShippingAddressInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingAddress" />
+    <virtualType name="Perspective\NovaposhtaShipping\ProceedToUpdateNovaposhtaData" type="Perspective\NovaposhtaCatalog\Block\System\Config\Collect">
+        <arguments>
+            <argument name="actionUrl" xsi:type="string">adminhtml/system_config/edit/section/novaposhta_catalog</argument>
+            <argument name="buttonName" translatable="true" xsi:type="string">Proceed to Update Novaposhta Data</argument>
+            <argument name="buttonComment" translatable="true" xsi:type="string">Proceeds to page where the admin can update Novaposhta data</argument>
+            <argument name="template" xsi:type="string">Perspective_NovaposhtaCatalog::system/config/redirect.phtml</argument>
+        </arguments>
+    </virtualType>
+    <preference for="Perspective\NovaposhtaShipping\Api\PreparedCitiesRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepositoryInterface"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\PreparedWarehousesRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\PreparedStreetsRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\PreparedStreetsRepository"/>
+
+    <preference for="Perspective\NovaposhtaShipping\Api\ShippingCheckoutOnestepPriceCacheRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingCheckoutOnestepPriceCacheRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\ShippingAddressRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingAddressRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\ShippingWarehouseRepository"/>
+</config>

@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+     <head>
+       <css src="Perspective_NovaposhtaShipping::css/jquery-ui.css"/>
+       <css src="Perspective_NovaposhtaShipping::css/select2.css"/>
+       <css src="Perspective_NovaposhtaShipping::css/styles.css"/>
+   </head>
+    <body>
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="shipping-step" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                 <item name="step-config" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="shipping-rates-validation" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="shipping-rates" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Perspective_NovaposhtaShipping/js/view/shipping-rates-validation</item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                                <item name="shippingAddress" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="shipping-address-fieldset" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="city_novaposhta_field" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/city
+                                                                    </item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="imports" xsi:type="array">
+                                                                            <item name="setOptions" xsi:type="string">index = checkoutProvider:dictionaries.city</item>
+                                                                        </item>
+                                                                        <item name="template" xsi:type="string">
+                                                                            ui/form/field
+                                                                        </item>
+                                                                        <item name="elementTmpl" xsi:type="string">
+                                                                            Perspective_NovaposhtaShipping/checkout/shipping/city
+                                                                        </item>
+                                                                        <item name="visible" xsi:type="boolean">true
+                                                                        </item>
+                                                                    </item>
+                                                                    <item name="dataScope" xsi:type="string">
+                                                                        shippingAddress.city_novaposhta_field
+                                                                    </item>
+                                                                    <item name="provider" xsi:type="string">
+                                                                        checkoutProvider
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">50</item>
+                                                                    <item name="label" xsi:type="string">City</item>
+                                                                    <item name="validation" xsi:type="array">
+                                                                        <item name="required-entry" xsi:type="boolean">
+                                                                            true
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
+                                                                <item name="city" xsi:type="array">
+                                                                    <item name="sortOrder" xsi:type="string">51</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="visible" xsi:type="boolean">false</item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                        <item name="shippingAdditional" xsi:type="array">
+                                                            <item name="component" xsi:type="string">uiComponent</item>
+                                                            <item name="displayArea" xsi:type="string">
+                                                                shippingAdditional
+                                                            </item>
+                                                            <item name="children" xsi:type="array">
+                                                                <!--                                                                to warehouse-->
+                                                                <item name="perspective_novaposhtashipping_warehouse"
+                                                                      xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/warehouse/warehouse
+                                                                    </item>
+                                                                    <item name="template" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/checkout/shipping/warehouse/warehouse
+                                                                    </item>
+                                                                </item>
+                                                                <!--                                                                to address-->
+                                                                <item
+                                                                    name="perspective_novaposhtashipping_warehouse_house_street"
+                                                                    xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/street
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">0</item>
+                                                                    <item name="template" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/checkout/shipping/address/street
+                                                                    </item>
+                                                                </item>
+                                                                <item
+                                                                    name="perspective_novaposhtashipping_warehouse_house_build_num"
+                                                                    xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/build_num
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">1</item>
+                                                                    <item name="template" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/checkout/shipping/address/build_num
+                                                                    </item>
+                                                                </item>
+                                                                <item
+                                                                    name="perspective_novaposhtashipping_house_door_num"
+                                                                    xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/house_door_num
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">2</item>
+                                                                    <item name="template" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/checkout/shipping/address/house_door_num
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

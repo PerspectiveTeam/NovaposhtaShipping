@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<section id="carriers" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1000" translate="label">
+			<group id="novaposhtashipping" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+				<label>Novaposhta Shipping with shipping price calculation and TTN creation</label>
+				<field id="active" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
+					<label>Enabled</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="sort_order" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="900" translate="label" type="text">
+					<label>Sort Order</label>
+                    <depends>
+                        <field id="active">1</field>
+                    </depends>
+				</field>
+				<field id="title" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="text">
+					<label>Title</label>
+				</field>
+				<field id="sallowspecific" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="select">
+					<label>Ship to Applicable Countries</label>
+					<frontend_class>shipping-applicable-country</frontend_class>
+					<source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
+				</field>
+				<field id="specificcountry" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="multiselect">
+					<label>Ship to Specific Countries</label>
+					<can_be_empty>1</can_be_empty>
+					<source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+				</field>
+				<field id="specificerrmsg" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="80" translate="label" type="textarea">
+					<label>Displayed Error Message</label>
+				</field>
+                <field id="sender_city" translate="label" type="multiselect" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Available cities</label>
+                    <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleCity</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="is_organization" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
+                    <label>Is Organization</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="sale_sender" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Sender with sale</label>
+                    <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\Sale</source_model>
+                    <backend_model>Perspective\NovaposhtaShipping\Model\Config\Backend\Sender\Sale</backend_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="is_organization">1</field>
+                    </depends>
+                </field>
+                <field id="sale_sender_contact" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Contact Sender with sale</label>
+                    <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContact</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="is_organization">1</field>
+                    </depends>
+                </field>
+                <field id="sale_sender_contact_address" translate="label" type="select" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Contact Counterparty Sender Address with sale</label>
+                    <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContactAddress</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="is_organization">1</field>
+                    </depends>
+                </field>
+
+                <field id="allowed_methods" translate="label" type="multiselect" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Allowed Methods</label>
+                    <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\Method</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="free_cost" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Free shipping cost</label>
+                    <validate>validate-number</validate>
+                    <depends>
+                        <field id="active">1</field>
+                    </depends>
+                </field>
+                <field id="lathing" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Lathing cost</label>
+                    <validate>validate-number</validate>
+                    <depends>
+                        <field id="active">1</field>
+                    </depends>
+                </field>
+                <field  id="api_key" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Api key</label>
+                </field>
+                <field id="update_novaposhta_data" translate="label" type="button" sortOrder="850" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Proceed to Update Novaposhta Data</label>
+                    <depends>
+                        <field id="active">1</field>
+                    </depends>
+                    <frontend_model>Perspective\NovaposhtaShipping\ProceedToUpdateNovaposhtaData</frontend_model>
+                </field>
+			</group>
+		</section>
+	</system>
+</config>
