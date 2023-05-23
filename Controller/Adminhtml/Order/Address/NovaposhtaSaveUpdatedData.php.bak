@@ -1,0 +1,170 @@
+<?php
+
+namespace Perspective\NovaposhtaShipping\Controller\Adminhtml\Order\Address;
+
+use Perspective\NovaposhtaShipping\Api\Data\ShippingWarehouseInterface;
+use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingWarehouse;
+
+/**
+ * Class NovaposhtaSaveUpdatedData
+ * manage and save data when admin changes novaposhta data
+ */
+class NovaposhtaSaveUpdatedData implements \Magento\Framework\App\ActionInterface
+{
+    /**
+     * @var \Magento\Sales\Api\Data\OrderInterface
+     */
+    protected $orderModel;
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
+    protected $layoutFactory;
+    /**
+     * @var \Magento\Framework\App\Action\Context
+     */
+    protected $context;
+    /**
+     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     */
+    protected $orderRepository;
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\ShippingCheckoutAddressFactory
+     */
+    protected $shippingCheckoutAddressFactory;
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingWarehouse
+     */
+    protected $shippingCheckoutAddressResourceModel;
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\ShippingWarehouse
+     */
+    protected $shippingCheckoutAddress;
+    /**
+     * @var \Perspective\NovaposhtaCatalog\Model\CityRepository
+     */
+    private $cityRepository;
+    /**
+     * @var \Perspective\NovaposhtaShipping\Helper\Config
+     */
+    private $novaposhtaModuleConfig;
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    private $request;
+
+    /**
+     * NovaposhtaSaveUpdatedData constructor.
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+     * @param \Perspective\NovaposhtaShipping\Model\ShippingCheckoutAddressFactory $shippingCheckoutAddressFactory
+     * @param ShippingWarehouse $shippingCheckoutAddressResourceModel
+     * @param \Perspective\NovaposhtaCatalog\Model\CityRepository $cityRepository
+     * @param \Perspective\NovaposhtaShipping\Helper\Config $novaposhtaModuleConfig
+     * @param \Magento\Sales\Api\Data\OrderInterface $orderModel
+     */
+    public function __construct(
+        \Magento\Framework\App\RequestInterface $request,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        \Perspective\NovaposhtaShipping\Model\ShippingCheckoutAddressFactory $shippingCheckoutAddressFactory,
+        ShippingWarehouse $shippingCheckoutAddressResourceModel,
+        \Perspective\NovaposhtaCatalog\Model\CityRepository $cityRepository,
+        \Perspective\NovaposhtaShipping\Helper\Config $novaposhtaModuleConfig
+    ) {
+        $this->orderRepository = $orderRepository;
+        $this->shippingCheckoutAddressFactory = $shippingCheckoutAddressFactory;
+        $this->shippingCheckoutAddressResourceModel = $shippingCheckoutAddressResourceModel;
+        $this->cityRepository = $cityRepository;
+        $this->novaposhtaModuleConfig = $novaposhtaModuleConfig;
+        $this->request = $request;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function execute()
+    {
+        $orderId = $this->request->getParam('perspective_novaposhta_shipping_order_id');
+        if ($this->request->getParam('activeDeliveryType') === 'address_radio') {
+            $addressDataArr = $this->request->getParam('perspective_novaposhta_shipping_address_form');
+            $this->orderModel = $this->orderRepository->get($this->request->getParam('perspective_novaposhta_shipping_order_id'));
+            if ($addressDataArr) {
+                foreach ($addressDataArr as $key => $value) {
+                    if ($value['name'] === 'novaposhta_address_hidden') {
+                        $cityId = $this->cityRepository->getCityByCityId($value['value'])->getCityID();
+                    }
+                    if ($value['name'] === 'novaposhta_street_address') {
+                        $streetAddress = $value['value'];
+                    }
+                    if ($value['name'] === 'novaposhta_street_num_address') {
+                        $streetNumAddress = $value['value'];
+                    }
+                    if ($value['name'] === 'novaposhta_flat_num_address') {
+                        $streetFlatAddress = $value['value'];
+                    }
+                }
+            }
+            $allowedMethods = explode(',', $this->novaposhtaModuleConfig->getAllowedShippingMethods());
+            /*
+             * сделано так. нужно будет, действительно докрутить этот функционал если понадобится.
+             * менеджер не должен знать начальную точку отправки(склад или забор с адреса),
+             * так как это не его дело.
+             * по-этому, пока, выбранным методом будет последний из подходищих по критерию
+             */
+            if (count($allowedMethods) > 0) {
+                if (in_array('c2w', $allowedMethods)) {
+                    $this->orderModel->setShippingMethod('novaposhtashipping_c2w');
+                } elseif (in_array('w2w', $allowedMethods)) {
+                    $this->orderModel->setShippingMethod('novaposhtashipping_w2w');
+                }
+            }
+            $this->orderModel->setShippingDescription('Admin Manual Novaposhta Warehouse Shipping');
+            $this->orderModel = $this->orderRepository->save($this->orderModel);
+        } else {
+            $warehouseDataArr = $this->request->getParam('perspective_novaposhta_shipping_warehouse_form');
+            $this->orderModel = $this->orderRepository->get($this->request->getParam('perspective_novaposhta_shipping_order_id'));
+            $warehouseId = 0;
+            $cityId = 0;
+            if ($warehouseDataArr) {
+                foreach ($warehouseDataArr as $key => $value) {
+                    if ($value['name'] === 'novaposhta_address_hidden') {
+                        $cityId = $this->cityRepository->getCityByCityId($value['value'])->getCityID();
+                    }
+                    if ($value['name'] === 'novaposhta_warehouse') {
+                        $warehouseId = $value['value'];
+                    }
+                }
+            }
+            $allowedMethods = explode(',', $this->novaposhtaModuleConfig->getAllowedShippingMethods());
+            /*
+             * сделано так. нужно будет, действительно докрутить этот функционал если понадобится.
+             * менеджер не должен знать начальную точку отправки(склад или забор с адреса),
+             * так как это не его дело.
+             * по-этому, пока, выбранным методом будет последний из подходищих по критерию
+             */
+            if (count($allowedMethods) > 0) {
+                if (in_array('c2w', $allowedMethods)) {
+                    $this->orderModel->setShippingMethod('novaposhtashipping_c2w');
+                } elseif (in_array('w2w', $allowedMethods)) {
+                    $this->orderModel->setShippingMethod('novaposhtashipping_w2w');
+                }
+            }
+            $this->orderModel->setShippingDescription('Admin Manual Novaposhta Warehouse Shipping');
+            $this->orderModel = $this->orderRepository->save($this->orderModel);
+            $existCartId = $this->shippingCheckoutAddressFactory->create();
+            $this->shippingCheckoutAddressResourceModel
+                ->load(
+                    $existCartId,
+                    (int)($this->orderModel->getQuoteId()),
+                    ShippingWarehouseInterface::CART_ID
+                );
+            $this->shippingCheckoutAddress = $this->shippingCheckoutAddressFactory->create();
+            $this->shippingCheckoutAddress->setWarehouse($warehouseId ? (int)($warehouseId) : 0);
+            $this->shippingCheckoutAddress->setCartId($this->orderModel->getQuoteId()
+                ? (int)($this->orderModel->getQuoteId())
+                : 0);
+            $this->shippingCheckoutAddress->setCity($cityId ? (int)($cityId) : 0);
+            $this->shippingCheckoutAddress->setId((int)($existCartId->getId()));
+            $this->shippingCheckoutAddressResourceModel->save($this->shippingCheckoutAddress);
+        }
+    }
+}

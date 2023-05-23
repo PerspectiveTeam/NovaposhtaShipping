@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+	<default>
+		<carriers>
+			<novaposhtashipping>
+				<model>Perspective\NovaposhtaShipping\Model\Carrier\NovaposhtaShipping</model>
+				<active>0</active>
+				<title>Доставка Новою Поштою</title>
+				<name>Доставка Новою Поштою</name>
+				<price>55.00</price>
+				<is_organization>0</is_organization>
+				<sender_city>4</sender_city>
+				<specificerrmsg>Этот способ доставки на текущий момент не доступен. Если вы желаете, чтобы мы доставили заказ Новой Почтой, обратитесь к менеджеру интернет-магазина.</specificerrmsg>
+				<sallowspecific>1</sallowspecific>
+				<specificcountry>UA</specificcountry>
+				<api_key>Your-key-here</api_key>
+				<allowed_methods>w2c,w2w,c2c,c2w</allowed_methods>
+			</novaposhtashipping>
+		</carriers>
+        <customer>
+            <address>
+                <street_lines>3</street_lines>
+            </address>
+        </customer>
+	</default>
+</config>

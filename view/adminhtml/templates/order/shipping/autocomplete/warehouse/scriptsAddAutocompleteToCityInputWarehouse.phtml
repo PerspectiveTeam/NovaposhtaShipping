@@ -1,0 +1,24 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+    <script>
+        require([
+            'jquery',
+            'ko',
+            "prototype"
+        ], function () {
+
+            <?php /**
+         * Максимально мягко вклиниваемся в форму адреса
+         */?>
+
+        });
+    </script>
+<?php
+echo $block->getChildBlock('perspective_autocomplete_warehouse_city_x_magento_js')
+    ->setData('city_value', $block->getCityValue() ?? '')
+    ->setData('city_label', $block->getCityLabel() ?? '')
+    ->toHtml();
+echo $block->getChildBlock('perspective_autocomplete_warehouse_x_magento_js')
+    ->setData('warehouse_label', $block->getWarehouseLabel())
+    ->setData('warehouse_value', $block->getWarehouseValue())
+    ->toHtml();

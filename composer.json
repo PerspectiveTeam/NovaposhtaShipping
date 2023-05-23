@@ -1,0 +1,50 @@
+{
+  "name": "perspective/module-novaposhtashipping",
+  "description": "",
+  "type": "magento2-module",
+  "license": "proprietary",
+  "version": "2.4.5.1",
+  "authors": [
+    {
+      "email": "faqreg@gmail.com",
+      "name": "Sergey Kusch"
+    }
+  ],
+    "require": {
+        "php": "~7.4.0 || ~8.1",
+        "magento/framework": "*",
+        "magento/module-catalog": "*",
+        "magento/module-checkout": "*",
+        "magento/module-config": "*",
+        "magento/module-customer": "*",
+        "magento/module-developer": "*",
+        "magento/module-eav": "*",
+        "magento/module-payment": "*",
+        "magento/module-quote": "*",
+        "magento/module-sales": "*",
+        "magento/module-store": "*",
+        "perspective/module-novaposhtacatalog": "dev-prod-2.4.5 || 2.4.5.4",
+        "dvdoug/boxpacker": "*"
+    },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Perspective\\NovaposhtaShipping\\": ""
+    },
+    "files": [
+      "registration.php"
+    ]
+  },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://bitbucket.org/monteshot/novaposhta_catalog.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://bitbucket.org/monteshot/perspective_novaposhtacataloggraphql.git"
+        }
+    ]
+}

@@ -1,0 +1,141 @@
+<?php /**@var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo */ ?>
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<div data-bind="scope: 'addressOnChangeForm'"
+     id="novaposhta-address-change-wrapper">
+    <form class="form" id="novaposhta-address-change">
+        <fieldset class="fieldset">
+            <br/>
+            <label class="label" for="novaposhta_city_address">
+                <span><strong><?= $escaper->escapeHtml(__('Address delivery')) ?></strong></span>
+            </label>
+            <br/>
+            <div class="field name required">
+                <label class="label" for="novaposhta_city_address">
+                    <span>
+                        <?= $escaper->escapeHtml(__('Novaposhta City')) ?>
+                    </span>
+                </label>
+                <br/>
+                <div class="control">
+                    <input data-validate-no-empty='true' data-validate-novaposhta-city="true" type="text" data-bind="
+cityAutocompleteAddress:{
+             options: availableCity,
+             selected: selectedItem},
+             value:cityCaption,
+    attr: {
+        name: 'novaposhta_city_address',
+        placeholder: cityCaption,
+        'aria-describedby': noticeId,
+        id: 'novaposhta_city_address',
+        disabled: disabled
+"
+                           id="novaposhta_city_address" class="input-text" name="novaposhta_city_address"
+                           style="width: 65%;"/>
+
+                    <input data-validate-no-empty='true' type="hidden" data-bind="
+             value:selectedItem,
+    attr: {
+        name: 'novaposhta_city_address_hidden',
+        placeholder: placeholder,
+        'aria-describedby': noticeId,
+        id: 'novaposhta_city_address_hidden',
+        disabled: disabled
+"
+                           id="novaposhta_city_address_hidden" class="input-text"
+                           name="novaposhta_city_address_hidden"/>
+                </div>
+            </div>
+            <br/>
+            <div class="field required">
+                <label class="label" for="novaposhta_street_address">
+                     <span>
+                         <?= $escaper->escapeHtml(__('Novaposhta street')) ?>
+                     </span>
+                </label>
+                <br/>
+                <div class="control">
+                    <input data-validate-no-empty='true' data-bind="
+             value: selectedStreet,
+
+              attr: {
+                    name: 'novaposhta_street_address',
+                    placeholder: placeholder,
+                    'aria-describedby': noticeId,
+                    id: 'novaposhta_street_address',
+                    disabled: disabled
+"
+                        id="novaposhta_street_address" name="novaposhta_street_address" type="text" class="input-text"
+                        style="width: 65%;"/>
+                </div>
+            </div>
+            <br/>
+            <div class="field name required">
+                <label class="label" for="novaposhta_street_num_address">
+                    <span>
+                        <?= $escaper->escapeHtml(__('Novaposhta street num')) ?>
+                    </span>
+                </label>
+                <br/>
+                <div class="control">
+                    <input data-validate-no-empty='true' data-bind="
+
+             value: selectedStreetNum,
+
+              attr: {
+                    name: 'novaposhta_street_num_address',
+                    placeholder: placeholder,
+                    'aria-describedby': noticeId,
+                    id: 'novaposhta_street_num_address',
+                    disabled: disabled
+"
+                id="novaposhta_street_num_address" name="novaposhta_street_num_address" type="text" class="input-text"
+                style="width: 65%;"/>
+        </div>
+
+        </div>
+        <br/>
+        <div>
+            <label class="label" for="novaposhta_flat_num_address">
+        <span>
+             <?= $escaper->escapeHtml(__('Novaposhta flat num')) ?>
+            </span>
+            </label>
+            <br/>
+            <input
+                data-bind="
+
+             value: selectedFlatNum,
+
+              attr: {
+                    name: 'novaposhta_flat_num_address',
+                    placeholder: placeholder,
+                    'aria-describedby': noticeId,
+                    id: 'novaposhta_flat_num_address',
+                    disabled: disabled
+"
+                id="novaposhta_flat_num_address" name="novaposhta_flat_num_address" type="text" class="input-text"
+                style="width: 65%;"/>
+
+
+        </div>
+    </fieldset>
+    </form>
+</div>
+<script type="text/x-magento-init">
+{
+"#novaposhta-address-change-wrapper":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "addressOnChangeForm":{
+                "component": "addressOnChange",
+                "cityUrl":"<?= $escaper->escapeUrl($block->getUrl("novaposhtashipping/ajax/city")); ?>"
+                }
+            }
+        }
+    }
+}
+
+
+
+
+</script>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <extension_attributes for="Magento\Quote\Api\Data\AddressInterface">
+        <attribute code="perspective_novaposhta_shipping_city" type="string" />
+        <attribute code="perspective_novaposhta_shipping_warehouse" type="string" />
+        <attribute code="perspective_novaposhta_shipping_street" type="string" />
+        <attribute code="perspective_novaposhta_shipping_building" type="string" />
+        <attribute code="perspective_novaposhta_shipping_flat" type="string" />
+        <attribute code="perspective_novaposhta_shipping_method" type="string" />
+    </extension_attributes>
+</config>
+

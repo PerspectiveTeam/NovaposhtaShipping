@@ -1,0 +1,185 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /* @var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\Npc2cshipment */ ?>
+<?php $_order = $block->getOrder() ?>
+<?php if (!$block->getIsActive()) {
+    return;
+} ?>
+<?php $block->getRecalculatedPrice() ?>
+<section data-bind="scope: 'npc2cShippingForm'" class="admin__page-section order-npShippingForm">
+
+    <div class="admin__page-section-title">
+        <span class="title"><?php echo __('Create Address to Address Novaposhta delivery') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-npc2cShippingForm">
+            <form id="npc2c_shipping_form" name="npc2c_shipping_form" method="post">
+                <div class="row-gray">
+                    <label for="np_c2c_city"><?= __('City that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <?= $block->getCityAutocompleteHtml() ?>
+                        <input type="checkbox" checked name="np_c2c_city_checkbox" id="np_c2c_city_checkbox"/>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <label for="np_c2c_street"><?= __('Street that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <?= $block->getStreetAutocompleteHtml() ?>
+                        <input type="checkbox" checked name="np_c2c_street_checkbox" id="np_c2c_street_checkbox"/>
+                    </div>
+                </div>
+                <br/>
+                <div class="row-gray">
+                    <label
+                        for="np_c2c_street_num"><?= __('Building number that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <input type="text" disabled name="np_c2c_street_num" id="np_c2c_street_num"
+                               value="<?php echo $block->getBuildNumData(); ?>"/>
+                        <input type="checkbox" checked name="np_c2c_street_num_checkbox"
+                               id="np_c2c_street_num_checkbox"/>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <label for="np_c2c_flat"><?= __('Flat number that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <input type="text" disabled name="np_c2c_flat" id="np_c2c_flat"
+                               value="<?php echo $block->getFlat(); ?>"/>
+                        <input type="checkbox" checked name="np_c2c_flat_checkbox" id="np_c2c_flat_checkbox"/>
+                    </div>
+                </div>
+                <br/>
+                <div class="row-gray">
+                    <label for="np_c2c_customer_saw"><?= __('Customer saw that price on checkout:') ?></label>
+                    <div class="input-to-right">
+                        <label type="text" disabled name="np_c2c_customer_saw_price" id="np_c2c_customer_saw_price"
+                        >
+                            <?php echo $block->getShipmentPrice() . ' ' . __('UAH'); ?>
+                        </label>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: block;">
+                    <label for="np_c2c_prev_calculated_price"><?= __('Recalculated price of delivery:') ?></label>
+                    <div class="input-to-right">
+                        <label type="text" disabled name="np_c2c_prev_calculated_price"
+                               id="np_c2c_prev_calculated_price">
+                            <?php
+                            $table = [];
+                            foreach ($block->getDeiveryPrice() as $ind => $val) {
+                                if (isset($val['data'][0]['CostRedelivery'])) {
+                                    $cost = $val['data'][0]['Cost'] + $val['data'][0]['CostRedelivery'] . ' (' . $val['data'][0]['Cost'] . '+' . +$val['data'][0]['CostRedelivery'] . ')';
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $cost . '</td>' . '</tr>';
+                                } else {
+                                    if (isset($val['data'][0]['Cost'])) {
+                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
+                                    } else {
+                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . '0' . '</td>' . '</tr>';
+                                    }
+                                }
+                            }
+                            $tableStr = join('', $table);
+                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery price') . '</th></tr>' . $tableStr . '</table>';
+                            ?>
+                        </label>
+                    </div>
+                </div>
+                <br/>
+                <div class="row-gray" style="display: block;">
+                    <label for="np_c2c_prev_calculated_day"><?= __('Recalculated day of delivery:') ?></label>
+                    <div class="input-to-right">
+                        <label type="text" disabled name="np_c2c_prev_calculated_day" id="np_c2c_prev_calculated_day">
+                            <?php
+                            $table = [];
+                            foreach ($block->getDeliveryDate() as $ind => $val) {
+                                if (isset($val['data'][0]['DeliveryDate']['date'])) {
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['data'][0]['DeliveryDate']['date'] . '</td>' . '</tr>';
+                                } else {
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . date('d-m-Y') . '</td>' . '</tr>';
+                                }
+                            }
+                            $tableStr = join('', $table);
+                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery date') . '</th></tr>' . $tableStr . '</table>';
+                            ?>
+                        </label>
+                    </div>
+                </div>
+                <br/>
+                <input type="hidden" name="order_id" id="order_id" value="<?php echo $_order->getId(); ?>"/>
+                <input type="hidden" name="form_key" value="<?php echo $block->getFormKey(); ?>"/>
+                <div id="loader"></div>
+                <div>
+                    <label for="np_c2c_choosen_city_address"><?= __('Choose city') ?></label>
+                    <div class="input-to-right">
+                    <select id="np_c2c_choosen_city_address" name="np_c2c_choosen_city_address">
+                        <option value="-1"><?= __("Select city") ?></option>
+                        <?php $cityData = $block->getCitiesDataForSelect() ?>
+                        <?php foreach ($cityData as $indexAddress => $dataAddress): ?>
+                            <?php if ($dataAddress['CityRef'] && $dataAddress['CounterpartyRef'] && $dataAddress['CityDescription']): ?>
+                                <option
+                                    value="<?= $dataAddress['CityRef'] . ',' . $dataAddress['CounterpartyRef'] ?>"><?= $dataAddress['CityDescription'] ?></option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                    </div>
+                </div>
+                <br/>
+                <div class="row-gray">
+                    <label for="np_c2c_choosen_contact_person_address"><?= __('Choose contact person') ?></label>
+                    <div class="input-to-right">
+                        <select id="np_c2c_choosen_contact_person_address" name="np_c2c_choosen_contact_person_address">
+                            <option value="-1"><?= __("Select city then contact person") ?></option>
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <label
+                        for="np_c2c_choosen_contact_person_address_place"><?= __('Choose address of contact person') ?></label>
+                    <div class="input-to-right">
+                        <select id="np_c2c_choosen_contact_person_address_place"
+                                name="np_c2c_choosen_contact_person_address_place">
+                            <option value="-1"><?= __("Select address of contact person") ?></option>
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <button type="button" id="create_ttn_c2c" class="scalable save">
+                        <span><?php echo __('Send to Novaposhta server the parcel parameters') ?></span>
+                    </button>
+                </div>
+                <div id="error-list-desc" name="error-list-desc-c2c"></div>
+                <div id="error-list-codes" name="error-list-codes-c2c"></div>
+            </form>
+        </div>
+    </div>
+
+
+    <script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "npc2cShippingForm":{
+                "component": "NPc2cDelivery",
+                "npUrl": "<?= $block->getUrl('novaposhtashipping/order_shipment/produceTtnAddressAction') ?>",
+                "contactPersonSearchUrl": "<?= $block->getUrl('novaposhtashipping/order_shipment/searchContactPersonAction') ?>",
+                "contactPersonAddressSearchUrl": "<?= $block->getUrl('novaposhtashipping/order_shipment/searchCounterpartyAddressAction') ?>",
+                "form_key": "<?= $block->getFormKey() ?>",
+                "quote_id": "<?= $block->getQuoteId() ?>",
+                "cityColl": <?= json_encode($block->getCitiesForFrontend()['UA_city']); ?>
+                }
+            }
+        }
+    }
+}
+
+    </script>
+    <?php $childrenBlock = $block->getChildBlock('perspective_autocomplete_address_city_input_js');
+    $childrenBlock->setData('city_value', $block->getCityData());
+    $childrenBlock->setData('city_label', $block->getCityLabel());
+    $childrenBlock->setData('street_value', $block->getStreetData());
+    $childrenBlock->setData('street_label', $block->getStreetLabel());
+    ?>
+    <?= $childrenBlock->toHtml(); ?>

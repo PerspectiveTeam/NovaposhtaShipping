@@ -1,0 +1,27 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+<script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "warehouseInputAutocompleteShipping":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
+                "inputName":"order[shipping_address][novaposhta_warehouse]"
+                },
+            "warehouseInputAutocompleteBilling":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
+                "inputName":"order[billing_address][novaposhta_warehouse]"
+                },
+            "warehouseInputAutocompleteOrphan":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
+                "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
+                "inputName":"novaposhta_warehouse"
+                }
+            }
+        }
+    }
+}
+</script>

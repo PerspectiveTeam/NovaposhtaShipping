@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Perspective_NovaposhtaShipping::css/jquery-ui.css"/>
+        <css src="Perspective_NovaposhtaShipping::css/select2.css"/>
+        <css src="Perspective_NovaposhtaShipping::css/styles.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo"
+                   name="perspective_shipping_delivery_info"
+                   template="Perspective_NovaposhtaShipping::order/novaposhtaDeliveryDescription.phtml">
+            </block>
+            <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                   template="Perspective_NovaposhtaShipping::order/create/autocomplete/scriptsAddAutocompleteToCityInput.phtml"
+                   name="perspective_autocomplete_city_input_js">
+                <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                       template="Perspective_NovaposhtaShipping::order/create/autocomplete/xMagentoInit_city.phtml"
+                       name="perspective_autocomplete_city_x_magento_js"/>
+                <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                       template="Perspective_NovaposhtaShipping::order/create/autocomplete/xMagentoInit_street.phtml"
+                       name="perspective_autocomplete_street_x_magento_js"/>
+                <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                       template="Perspective_NovaposhtaShipping::order/create/autocomplete/xMagentoInit_warehouse.phtml"
+                       name="perspective_autocomplete_warehose_x_magento_js"/>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

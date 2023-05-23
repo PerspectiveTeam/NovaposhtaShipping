@@ -1,0 +1,139 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /* @var $block \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping\WarehouseShipment */ ?>
+<?php $_order = $block->getOrder() ?>
+<?php if (!$block->getIsActive()) {
+    return;
+} ?>
+<?php $block->getRecalculatedPrice() ?>
+<section data-bind="scope: 'WarehouseShippingForm'" class="admin__page-section order-npShippingForm">
+
+    <div class="admin__page-section-title">
+        <span class="title"><?php echo __('Create Address to Warehouse Novaposhta delivery') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-WarehouseShippingForm">
+            <form id="npw2c_shipping_form" name="npw2c_shipping_form" method="post">
+                <div class="row-gray" style="display: flow-root;">
+                    <label for="np_w2c_city"><?= __('City that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <?= $block->getCityAutocompleteHtml() ?>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flow-root;">
+                    <label for="np_w2c_warehouse"><?= __('Warehouse that has been chosen by the customer') ?></label>
+                    <div class="input-to-right">
+                        <?= $block->getWarehouseAutocompleteHtml() ?>
+                    </div>
+                </div>
+                <br/>
+
+                <div class="row-gray" style="display: flow-root;">
+                    <label for="np_w2c_prev_calculated_price"><?= __('Recalculated price of delivery:') ?></label>
+                    <div class="input-to-right">
+                        <label type="text" disabled name="np_w2c_prev_calculated_price"
+                               id="np_w2c_prev_calculated_price">
+                            <?php
+                            $table = [];
+                            foreach ($block->getDeiveryPrice() as $ind => $val) {
+                                if (isset($val['data'][0]['CostRedelivery'])) {
+                                    $cost = $val['data'][0]['Cost'] + $val['data'][0]['CostRedelivery'] . ' (' . $val['data'][0]['Cost'] . '+' . +$val['data'][0]['CostRedelivery'] . ')';
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $cost . '</td>' . '</tr>';
+                                } else {
+                                    if (isset($val['data'][0]['Cost'])) {
+                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
+                                    } else {
+                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . '0' . '</td>' . '</tr>';
+                                    }
+                                }
+                            }
+                            $tableStr = join('', $table);
+                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery price') . '</th></tr>' . $tableStr . '</table>';
+                            ?>
+                        </label>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flow-root;">
+                    <label for="np_w2c_prev_calculated_day"><?= __('Recalculated day of delivery:') ?></label>
+                    <div class="input-to-right">
+                        <label type="text" disabled name="np_w2c_prev_calculated_day" id="np_w2c_prev_calculated_day">
+                            <?php
+                            $table = [];
+                            foreach ($block->getDeliveryDate() as $ind => $val) {
+                                if (isset($val['data'][0]['DeliveryDate']['date'])) {
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['date'] . '</td>' . '</tr>';
+                                } else {
+                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . date('d-m-Y') . '</td>' . '</tr>';
+                                }
+                            }
+                            $tableStr = join('', $table);
+                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery date') . '</th></tr>' . $tableStr . '</table>';
+                            ?>
+                        </label>
+                    </div>
+                </div>
+                <br/>
+                <input type="hidden" name="order_id" id="order_id" value="<?php echo $_order->getId(); ?>"/>
+                <input type="hidden" name="form_key" value="<?php echo $block->getFormKey(); ?>"/>
+                <div id="loader"></div>
+                <div style="display: flow-root;" class="row-gray">
+                    <label for="np_w2c_choosen_city_address"><?= __('Choose city') ?></label>
+                    <div class="input-to-right">
+                        <select id="np_w2c_choosen_city_address" name="np_w2c_choosen_city_address">
+                            <option value="-1"><?= __("Select city") ?></option>
+                            <?php $cityData = $block->getCitiesDataForSelect() ?>
+                            <?php foreach ($cityData as $indexAddress => $dataAddress): ?>
+                                <?php if ($dataAddress['CityRef'] && $dataAddress['CounterpartyRef'] && $dataAddress['CityDescription']): ?>
+                                    <option
+                                        value="<?= $dataAddress['CityRef'] . ',' . $dataAddress['CounterpartyRef'] ?>"><?= $dataAddress['CityDescription'] ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <label for="np_w2c_choosen_contact_person_address"><?= __('Choose contact person') ?></label>
+                    <div class="input-to-right">
+                        <select id="np_w2c_choosen_contact_person_address" name="np_w2c_choosen_contact_person_address">
+                            <option value="-1"><?= __("Select city then contact person") ?></option>
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flow-root;" class="row-gray">
+                    <label
+                        for="np_w2c_choosen_contact_person_address_place"><?= __('Choose address of contact person') ?></label>
+                    <div class="input-to-right">
+                        <select id="np_w2c_choosen_contact_person_address_place"
+                                name="np_w2c_choosen_contact_person_address_place">
+                            <option value="-1"><?= __("Select address of contact person") ?></option>
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flow-root;">
+                    <button type="button" id="create_ttn_w2c" class="scalable save">
+                        <span><?php echo __('Send to Novaposhta server the parcel parameters') ?></span>
+                    </button>
+                </div>
+                <div style="display: flow-root;" id="error-list-desc-w2c" name="error-list-desc"></div>
+                <div style="display: flow-root;" id="error-list-codes-w2c" name="error-list-codes"></div>
+            </form>
+        </div>
+    </div>
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+            }
+        }
+    </script>
+    <?php $childrenBlock = $block->getChildBlock('perspective_autocomplete_warehouse_city_input_js_organisation');
+    $childrenBlock->setData('city_value', $block->getCityData());
+    $childrenBlock->setData('city_label', $block->getCityLabel());
+    $childrenBlock->setData('warehouse_value', $block->getWarehouse());
+    $childrenBlock->setData('warehouse_label', $block->getWarehouseLabel());
+    ?>
+    <?= $childrenBlock->toHtml(); ?>
