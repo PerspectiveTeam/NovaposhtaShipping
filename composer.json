@@ -3,7 +3,7 @@
     "description": "",
     "type": "magento2-module",
     "license": "MIT",
-    "version": "2.4.5.3",
+    "version": "2.4.5.4",
     "authors": [
         {
             "email": "faqreg@gmail.com",
@@ -23,7 +23,7 @@
         "magento/module-quote": "*",
         "magento/module-sales": "*",
         "magento/module-store": "*",
-        "perspective/module-novaposhtacatalog": "dev-prod-2.4.5 || 2.4.5.5",
+        "perspectiveteam/module-novaposhtacatalog": "dev-prod-2.4.5 || 2.4.5.5",
         "dvdoug/boxpacker": "*"
     },
   "require-dev": {
