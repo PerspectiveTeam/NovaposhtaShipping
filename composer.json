@@ -23,7 +23,7 @@
         "magento/module-quote": "*",
         "magento/module-sales": "*",
         "magento/module-store": "*",
-        "perspectiveteam/module-novaposhtacatalog": "dev-prod-2.4.5 || 2.4.5.6",
+        "perspectiveteam/module-novaposhtacatalog": "dev-prod-2.4.5 || 2.4.5.6 || dev-main",
         "dvdoug/boxpacker": "*"
     },
   "require-dev": {
