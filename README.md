@@ -19,7 +19,7 @@ To install this package use the following steps:
 
        3.1.3. Install Perspective Novaposhta Catalog Module
         ```
-        composer require perspective/module-novaposhtacatalog:"*"  
+        composer require perspectiveteam/module-novaposhtacatalog:"*"  
         ```
 
        3.1.4. Install Perspective Novaposhta Shipping Repository
@@ -28,11 +28,11 @@ To install this package use the following steps:
         ```  
        3.1.5. Install Perspective Novaposhta Shipping Module
         ```
-        composer require perspective/module-novaposhtashipping:"*"  
+        composer require perspectiveteam/module-novaposhtashipping:"*"  
         ```
        3.2. Installation via composer
         ```
-        composer require perspective/module-novaposhtashipping:"*"  
+        composer require perspectiveteam/module-novaposhtashipping:"*"  
         ```  
 4. Wait while dependencies are updated.
 5. Make an ordinary setup for the module
