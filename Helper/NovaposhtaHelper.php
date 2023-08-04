@@ -86,6 +86,21 @@ class NovaposhtaHelper
     protected static $cityShippingPriceAndDateArr;
 
     /**
+     * @var \Perspective\NovaposhtaShipping\Api\NovaPoshtaApi2Factory
+     */
+    protected NovaPoshtaApi2Factory $novaPoshtaApi2Factory;
+
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndexFactory
+     */
+    protected CounterpartyAddressIndexFactory $counterpartyAddressIndexFactory;
+
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory
+     */
+    protected CollectionFactory $counterpartyAddressIndexCollectionFactory;
+
+    /**
      * NovaposhtaHelper constructor.
      * @param \Perspective\NovaposhtaShipping\Helper\Config $config
      * @param \Perspective\NovaposhtaShipping\Api\NovaPoshtaApi2Factory $novaPoshtaApi2Factory
