@@ -13,22 +13,12 @@ To install this package use the following steps:
         composer require dvdoug/boxpacker
         ```  
 
-3.1.2. Install Perspective Novaposhta Catalog Repository  
-        ``` 
-        composer config repositories.perspective_novaposhtacatalog vcs https://github.com/PerspectiveTeam/NovaposhtaCatalog.git
-        ```  
-
-3.1.3. Install Perspective Novaposhta Catalog Module  
+3.1.2. Install Perspective Novaposhta Catalog Module  
         ```
         composer require perspectiveteam/module-novaposhtacatalog:"*"  
         ```  
 
-3.1.4. Install Perspective Novaposhta Shipping Repository  
-        ```
-        composer config repositories.perspective_novaposhtashipping vcs https://github.com/PerspectiveTeam/NovaposhtaShipping.git
-        ```  
-
-3.1.5. Install Perspective Novaposhta Shipping Module  
+3.1.3. Install Perspective Novaposhta Shipping Module  
         ```
         composer require perspectiveteam/module-novaposhtashipping:"*"  
         ```  
@@ -37,6 +27,5 @@ To install this package use the following steps:
         ```
         composer require perspectiveteam/module-novaposhtashipping:"*"  
         ```  
-
-4. Wait while dependencies are updated.
-5. Make an ordinary setup for the module
+4. Wait while dependencies are updated.  
+5. Make an ordinary setup for the module  
