@@ -334,8 +334,8 @@ class NovaposhtaHelper
         $today = time();
         $result = [];
         if ($specialprice && ($productModel->getPrice() > $productModel->getFinalPrice())) {
-            if ($today >= strtotime($specialPriceFromDate) && $today <= strtotime($specialPriceToDate) ||
-                $today >= strtotime($specialPriceFromDate) && is_null($specialPriceToDate)) {
+            if ($today >= strtotime($specialPriceFromDate ?? '') && $today <= strtotime($specialPriceToDate ?? '') ||
+                $today >= strtotime($specialPriceFromDate ?? '') && is_null($specialPriceToDate)) {
                 $result['sale'] = [$item->getSku()];
             }
         }
