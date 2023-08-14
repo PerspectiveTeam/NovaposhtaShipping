@@ -17,6 +17,21 @@ class PreparedStreetsRepository implements PreparedStreetsRepositoryInterface
     private $streetRepository;
 
     /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
+    protected Resolver $resolver;
+
+    /**
+     * @var \Magento\Framework\Serialize\SerializerInterface
+     */
+    protected SerializerInterface $serializer;
+
+    /**
+     * @var \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface
+     */
+    protected CityRepositoryInterface $cityRepository;
+
+    /**
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      * @param \Magento\Framework\Locale\Resolver $resolver
      * @param \Magento\Framework\Serialize\SerializerInterface $serializer

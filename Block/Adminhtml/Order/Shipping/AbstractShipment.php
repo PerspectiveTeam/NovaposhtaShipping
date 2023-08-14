@@ -57,7 +57,7 @@ class AbstractShipment extends Template
 
     protected StoreManagerInterface $storeManager;
 
-    private Select2SmallFactory $select2;
+    protected Select2SmallFactory $select2;
 
 
     /**
@@ -71,6 +71,7 @@ class AbstractShipment extends Template
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
+     * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2SmallFactory
      * @param array $data
      * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
      * @param \Magento\Directory\Helper\Data|null $directoryHelper

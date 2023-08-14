@@ -2,20 +2,11 @@
 
 namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping;
 
-use Exception;
 use Magento\Backend\Block\Template\Context;
 use Magento\Catalog\Api\ProductRepositoryInterfaceFactory;
 use Magento\Directory\Helper\Data as DirectoryHelper;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
-use Magento\Framework\Registry;
-use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Block\Adminhtml\Order\AbstractOrder;
-use Magento\Sales\Helper\Admin;
-use Magento\Shipping\Helper\Data as ShippingHelper;
-use Magento\Tax\Helper\Data as TaxHelper;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
@@ -32,7 +23,6 @@ use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyIndex\Collect
 use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory as CounterpartyOrgThirdpartyCollectionFactory;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingAddress\Collection;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class Npc2cshipment
@@ -105,14 +95,49 @@ class Npc2cshipment extends AbstractShipment
     private Collection $shippingCheckoutAddressResourceModelCollection;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory
-     */
-    private Select2SmallFactory $select2SmallFactory;
-
-    /**
      * @var \Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface
      */
     private StreetRepositoryInterface $streetRepository;
+
+    /**
+     * @var string
+     */
+    protected $code = 'c2c';
+
+    /**
+     * @var null
+     */
+    protected $npAddressData = null;
+
+    /**
+     * @var array|mixed|null
+     */
+    private $_senderCityObjArr;
+
+    /**
+     * @var array|mixed|null
+     */
+    private $destinationCityRef;
+    /**
+     * @var array|mixed|null
+     */
+    private $deliveryDate;
+    /**
+     * @var array|mixed|null
+     */
+    private $deiveryPrice;
+    /**
+     * @var array|mixed|null
+     */
+    private $allThirdpartyCounterparties;
+    /**
+     * @var array|mixed|null
+     */
+    private $counterpartyAddress;
+    /**
+     * @var array|mixed|null
+     */
+    private $optionsSeat;
 
     /**
      * @param \Magento\Backend\Block\Template\Context $context
@@ -166,49 +191,8 @@ class Npc2cshipment extends AbstractShipment
             $jsonHelper,
             $directoryHelper);
         $this->shippingCheckoutAddressResourceModelCollection = $shippingCheckoutAddressResourceModelCollection;
-        $this->select2SmallFactory = $select2SmallFactory;
         $this->streetRepository = $streetRepository;
     }
-
-    /**
-     * @var string
-     */
-    protected $code = 'c2c';
-
-    /**
-     * @var null
-     */
-    protected $npAddressData = null;
-
-    /**
-     * @var array|mixed|null
-     */
-    private $_senderCityObjArr;
-    /**
-     * @var array|mixed|null
-     */
-    private $destinationCityRef;
-    /**
-     * @var array|mixed|null
-     */
-    private $deliveryDate;
-    /**
-     * @var array|mixed|null
-     */
-    private $deiveryPrice;
-    /**
-     * @var array|mixed|null
-     */
-    private $allThirdpartyCounterparties;
-    /**
-     * @var array|mixed|null
-     */
-    private $counterpartyAddress;
-
-    /**
-     * @var array|mixed|null
-     */
-    private $optionsSeat;
 
     /**
      * @return mixed
@@ -303,10 +287,13 @@ class Npc2cshipment extends AbstractShipment
         return $senderObjArr;
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getCityAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2SmallFactory->create();
+        $element = $this->select2->create();
         $element->setData('name', City::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'cityInputAutocompleteShipping\'';
         $element->addClass('cityInputAutocompleteShippingClass');
@@ -314,10 +301,13 @@ class Npc2cshipment extends AbstractShipment
         return $element->toHtml();
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getStreetAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2SmallFactory->create();
+        $element = $this->select2->create();
         $element->setData('name', Street::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'streetInputAutocompleteShipping\'';
         $element->addClass('streetInputAutocompleteShippingClass');

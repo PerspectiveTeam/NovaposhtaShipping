@@ -35,7 +35,7 @@ class IncreaseStreetLines implements DataPatchInterface
      */
     public function apply()
     {
-        $this->moduleDataSetup->getConnection()->startSetup();;
+        $this->moduleDataSetup->getConnection()->startSetup();
         $this->configWriter->save('customer/address/street_lines','3');
         $this->moduleDataSetup->getConnection()->endSetup();
         return $this;

@@ -84,4 +84,10 @@
                 type="Perspective\NovaposhtaShipping\Model\ShippingAddressRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\ShippingWarehouseRepositoryInterface"
                 type="Perspective\NovaposhtaShipping\Model\ShippingWarehouseRepository"/>
+    <type name="Perspective\NovaposhtaShipping\Model\Quote\Info\Session\QuoteObject">
+        <arguments>
+            <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
+            <argument name="backendQuoteSession" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
+        </arguments>
+    </type>
 </config>

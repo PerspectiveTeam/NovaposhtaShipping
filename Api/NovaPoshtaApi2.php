@@ -677,7 +677,7 @@ class NovaPoshtaApi2
     {
         // Any param can be skipped
         $params = array();
-        $params['CounterpartyProperty'] = $counterpartyProperty ? $counterpartyProperty : 'Recipient';
+        $params['CounterpartyProperty'] = $counterpartyProperty ? : 'Recipient';
         $page and $params['Page'] = $page;
         $findByString and $params['FindByString'] = $findByString;
         $cityRef and $params['City'] = $cityRef;
@@ -809,7 +809,7 @@ class NovaPoshtaApi2
      */
     public function getDocumentList($params = null)
     {
-        return $this->request('InternetDocument', 'getDocumentList', $params ? $params : null);
+        return $this->request('InternetDocument', 'getDocumentList', $params ? : null);
     }
 
     /**
@@ -949,7 +949,7 @@ class NovaPoshtaApi2
                 $sender['Sender'] = $senderCounterpartyExisting['data'][0]['Ref'];
                 $contactSender = $this->getCounterpartyContactPersons($sender['Sender']);
                 $sender['ContactSender'] = $contactSender['data'][0]['Ref'];
-                $sender['SendersPhone'] = $sender['Phone'] ? $sender['Phone'] : $contactSender['data'][0]['Phones'];
+                $sender['SendersPhone'] = $sender['Phone'] ?  : $contactSender['data'][0]['Phones'];
             }
         }
 

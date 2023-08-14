@@ -95,11 +95,6 @@ class Npw2cshipment extends AbstractShipment
     private WarehouseRepositoryInterface $warehouseRepository;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory
-     */
-    private Select2SmallFactory $select2Factory;
-
-    /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory $checkoutOnestepPriceCacheFactory

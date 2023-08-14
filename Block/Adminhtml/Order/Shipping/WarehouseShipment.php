@@ -39,11 +39,6 @@ class WarehouseShipment extends AbstractShipment
     private WarehouseRepositoryInterface $warehouseRepository;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory
-     */
-    private Select2SmallFactory $select2Factory;
-
-    /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory $checkoutOnestepPriceCacheFactory
@@ -97,7 +92,6 @@ class WarehouseShipment extends AbstractShipment
         );
         $this->shippingCheckoutWarehouseResourceModelCollection = $shippingCheckoutWarehouseResourceModelCollection;
         $this->warehouseRepository = $warehouseRepository;
-        $this->select2Factory = $select2Factory;
     }
 
     private array $deliveryDate;
@@ -123,7 +117,7 @@ class WarehouseShipment extends AbstractShipment
     public function getCityAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2Factory->create();
+        $element = $this->select2->create();
         $element->setData('name', City::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'cityInputAutocompleteShipping\'';
         $element->addClass('cityInputAutocompleteShippingClass');
@@ -133,7 +127,7 @@ class WarehouseShipment extends AbstractShipment
     public function getWarehouseAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2Factory->create();
+        $element = $this->select2->create();
         $element->setData('name', Warehouse::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'warehouseInputAutocompleteShipping\'';
         $element->addClass('warehouseInputAutocompleteShippingClass');

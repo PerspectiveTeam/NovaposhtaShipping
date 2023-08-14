@@ -40,4 +40,14 @@
         <plugin name="ps_sales_controller_adminhtml_order_address_save_plugin"
                 type="Perspective\NovaposhtaShipping\Plugin\Controller\Adminhtml\Order\AddressSavePlugin"/>
     </type>
+    <type name="Perspective\NovaposhtaShipping\Controller\Adminhtml\Ajax\City">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Controller\Adminhtml\Ajax\Warehouse">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
 </config>

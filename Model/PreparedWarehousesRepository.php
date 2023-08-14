@@ -14,7 +14,22 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
     /**
      * @var \Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface
      */
-    private $warehouseRepository;
+    protected $warehouseRepository;
+
+    /**
+     * @var \Magento\Framework\Serialize\SerializerInterface
+     */
+    protected SerializerInterface $serializer;
+
+    /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
+    protected Resolver $resolver;
+
+    /**
+     * @var \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface
+     */
+    protected CityRepositoryInterface $cityRepository;
 
     /**
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository

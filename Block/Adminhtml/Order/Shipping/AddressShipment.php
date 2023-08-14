@@ -30,11 +30,6 @@ class AddressShipment extends AbstractShipment
     private Collection $shippingCheckoutAddressResourceModelCollection;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory
-     */
-    private Select2SmallFactory $select2SmallFactory;
-
-    /**
      * @var \Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface
      */
     private StreetRepositoryInterface $streetRepository;
@@ -79,7 +74,6 @@ class AddressShipment extends AbstractShipment
             $jsonHelper,
             $directoryHelper);
         $this->shippingCheckoutAddressResourceModelCollection = $shippingCheckoutAddressResourceModelCollection;
-        $this->select2SmallFactory = $select2SmallFactory;
         $this->streetRepository = $streetRepository;
         $this->serializer = $serializer;
     }
@@ -228,7 +222,7 @@ class AddressShipment extends AbstractShipment
     public function getCityAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2SmallFactory->create();
+        $element = $this->select2->create();
         $element->setData('name', City::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'cityInputAutocompleteShipping\'';
         $element->addClass('cityInputAutocompleteShippingClass');
@@ -239,7 +233,7 @@ class AddressShipment extends AbstractShipment
     public function getStreetAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2SmallFactory->create();
+        $element = $this->select2->create();
         $element->setData('name', Street::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'streetInputAutocompleteShipping\'';
         $element->addClass('streetInputAutocompleteShippingClass');

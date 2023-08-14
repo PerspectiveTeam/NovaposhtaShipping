@@ -63,7 +63,7 @@ class SearchCounterpartyAddressAction implements \Magento\Framework\App\ActionIn
         } else {
             return $this->resultJsonFactory->create()->setData([]);
         }
-        $result = $this->sender->searchCounterpartyAddress($counterpartyRef, $citySender, $this->novaposhtaHelper);
+        $result = $this->sender->searchCounterpartyAddress($counterpartyRef, $citySender);
         $this->serializedJsonString = $this->jsonSerializer->serialize($result);
         return $this->resultJsonFactory->create()->setData($this->serializedJsonString);
     }
