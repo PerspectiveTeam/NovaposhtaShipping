@@ -7,9 +7,9 @@ namespace Perspective\NovaposhtaShipping\Helper;
 use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer;
 use DVDoug\BoxPacker\PackerFactory;
-use DVDoug\BoxPacker\Test\LimitedSupplyTestBoxFactory;
-use DVDoug\BoxPacker\Test\TestBoxFactory;
-use DVDoug\BoxPacker\Test\TestItemFactory;
+use Perspective\NovaposhtaShipping\Model\Box\LimitedSupplyTestBoxFactory;
+use Perspective\NovaposhtaShipping\Model\Box\TestBoxFactory;
+use Perspective\NovaposhtaShipping\Model\Box\TestItemFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Sales\Model\Order\Item as OrderItem;
@@ -59,8 +59,8 @@ class Boxpacker
      * @param PackerFactory $packerFactory
      * @param TestBoxFactory $BoxFactory
      * @param TestItemFactory $ItemFactory
-     * @param \DVDoug\BoxPacker\Test\LimitedSupplyTestBox $limitedSupplyBoxFactory
      * @param ProductRepositoryInterface $productRepositoryInterface
+     * @param \Perspective\NovaposhtaShipping\Model\Box\LimitedSupplyTestBoxFactory $limitedSupplyBoxFactory
      */
     public function __construct(
         PackerFactory $packerFactory,
