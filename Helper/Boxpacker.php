@@ -130,7 +130,7 @@ class Boxpacker
                 'length' => $lengthProduct,
                 'depth' => $heightProduct,
                 'weight' => $weightProduct,
-                'keepFlat' => false
+                'allowedRotation' => ((int)ceil($productValQty)) <= 2,
             ]), (int) ceil($productValQty));
         }
 
