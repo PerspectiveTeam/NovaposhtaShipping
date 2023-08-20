@@ -58,7 +58,7 @@ class ShippingSales
             }
             //Бесплатная доставка при сумме товара от определенной суммы и при отсутсвии признака товара со спешл прайсом
             if (!empty($this->config->getShippingConfigByCode('novaposhtashipping', 'free_cost'))
-                && count($result['sale']) === 0
+                && isset($result['sale']) && count($result['sale']) === 0
             ) {
                 if ($subtotal >= $this->config->getShippingConfigByCode('novaposhtashipping', 'free_cost')) {
                     $result['price'] = 0;
