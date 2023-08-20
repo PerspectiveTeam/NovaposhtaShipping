@@ -338,7 +338,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      */
     protected function makeCarrierWithError($val)
     {
-        $errorNPmessage = __('Nova Poshta is unable to calculate shipping to your city. You still can to make order with your cart and our manager will contact with you');
+        $errorNPmessage = __('Shipping cost by carrier');
         if (isset($val)) {
             $this->method->setCarrierTitle($this->getConfigData('name') . ' ' . __($val));
         } else {
@@ -348,8 +348,8 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $this->method->setMethodTitle($errorNPmessage);
         $this->method->setMethod($val);
         $this->method->setMethodDescription($errorNPmessage);
-        $this->method->setPrice(0);
-        $this->method->setCost(0);
+        $this->method->setPrice($this->getConfigData('default_cost') ?? 0);
+        $this->method->setCost($this->getConfigData('default_cost') ?? 0);
         $this->result->append($this->method);
     }
 

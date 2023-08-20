@@ -125,6 +125,10 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
             }
 
         }
+        $result = $result ?? [[
+            'value' => 'no-ref',
+            'label' => __('No city data found')
+        ]];
         return $this->serializer->serialize($result);
     }
 }

@@ -55,7 +55,7 @@
                                                                         checkoutProvider
                                                                     </item>
                                                                     <item name="sortOrder" xsi:type="string">50</item>
-                                                                    <item name="label" xsi:type="string">City</item>
+                                                                    <item name="label" translate="true" xsi:type="string">City</item>
                                                                     <item name="validation" xsi:type="array">
                                                                         <item name="required-entry" xsi:type="boolean">
                                                                             true

@@ -10,11 +10,14 @@
 				<price>55.00</price>
 				<is_organization>0</is_organization>
 				<sender_city>4</sender_city>
-				<specificerrmsg>Этот способ доставки на текущий момент не доступен. Если вы желаете, чтобы мы доставили заказ Новой Почтой, обратитесь к менеджеру интернет-магазина.</specificerrmsg>
+				<specificerrmsg>Вартість доставки за тарифами перевізника.</specificerrmsg>
 				<sallowspecific>1</sallowspecific>
 				<specificcountry>UA</specificcountry>
 				<api_key>Your-key-here</api_key>
-				<allowed_methods>w2c,w2w,c2c,c2w</allowed_methods>
+				<allowed_methods>c2c,c2w</allowed_methods>
+				<default_cost>100</default_cost>
+				<free_cost>20000</free_cost>
+				<lathing>200</lathing>
 			</novaposhtashipping>
 		</carriers>
         <customer>

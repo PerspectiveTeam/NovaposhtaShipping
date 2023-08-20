@@ -17,22 +17,23 @@
 				<field id="title" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="text">
 					<label>Title</label>
 				</field>
-				<field id="sallowspecific" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="select">
+				<field id="sallowspecific" showInDefault="0" showInStore="0" showInWebsite="0" sortOrder="60" translate="label" type="select">
 					<label>Ship to Applicable Countries</label>
 					<frontend_class>shipping-applicable-country</frontend_class>
 					<source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
 				</field>
-				<field id="specificcountry" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="multiselect">
+				<field id="specificcountry" showInDefault="0" showInStore="0" showInWebsite="0" sortOrder="70" translate="label" type="multiselect">
 					<label>Ship to Specific Countries</label>
 					<can_be_empty>1</can_be_empty>
 					<source_model>Magento\Directory\Model\Config\Source\Country</source_model>
 				</field>
-				<field id="specificerrmsg" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="80" translate="label" type="textarea">
+				<field id="specificerrmsg" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="80" translate="label" canRestore="1" type="textarea">
 					<label>Displayed Error Message</label>
 				</field>
                 <field id="sender_city" translate="label" type="multiselect" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Available cities</label>
+                    <label>Cities with Warehouse </label>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleCity</source_model>
+                    <comment>aka Available cities or Sender City. Choose cities where you have the warehouses. Method will calculate shipping price among the cities. Kyiv is default city.</comment>
                     <can_be_empty>1</can_be_empty>
                 </field>
                 <field id="is_organization" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
@@ -76,6 +77,15 @@
                     <depends>
                         <field id="active">1</field>
                     </depends>
+                    <comment>Threshold to remove the Lathing Cost</comment>
+                </field>
+                <field id="default_cost" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Default Cost</label>
+                    <validate>validate-number</validate>
+                    <depends>
+                        <field id="active">1</field>
+                    </depends>
+                    <comment>Default cost for shipping. For situations when we cannot calculate shipping costs for some reasons.</comment>
                 </field>
                 <field id="lathing" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Lathing cost</label>
@@ -83,6 +93,7 @@
                     <depends>
                         <field id="active">1</field>
                     </depends>
+                    <comment>It will applies only if real weight of goods is above 85kg(aka Pallet threshold).</comment>
                 </field>
                 <field  id="api_key" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Api key</label>
