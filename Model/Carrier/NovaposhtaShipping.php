@@ -3,10 +3,7 @@
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Locale\Resolver;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\Stdlib\ArrayManager;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory;
@@ -14,8 +11,6 @@ use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\ResultFactory;
-use Magento\Store\Api\Data\StoreInterface;
-use Perspective\NovaposhtaCatalog\Helper\Config;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
@@ -49,29 +44,9 @@ class NovaposhtaShipping extends AbstractCarrier implements
     protected $_rateMethodFactory;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
      * @var \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory
      */
-    private $rateErrorFactory;
-
-    /**
-     * @var \Perspective\NovaposhtaCatalog\Helper\Config
-     */
-    private $configHelper;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var array
-     */
-    private $data;
+    protected $rateErrorFactory;
 
     /**
      * @var
@@ -84,106 +59,59 @@ class NovaposhtaShipping extends AbstractCarrier implements
     protected $method;
 
     /**
-     * @var \Magento\Checkout\Api\Data\ShippingInformationInterface
-     */
-    private $addressInformation;
-
-    /**
-     * @var \Magento\Framework\Stdlib\ArrayManager
-     */
-    private $arrayManager;
-
-    /**
-     * @var string
-     */
-    const NP_CITY = 'perspective_novaposhta_shipping_city';
-
-    /**
-     * @var string
-     */
-    const NP_WAREHOUSE = 'perspective_novaposhta_shipping_warehouse';
-
-    /**
      * @var \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper
      */
-    private $novaposhtaHelper;
+    protected $novaposhtaHelper;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
      */
-    private $timezone;
-
-    /**
-     * @var \Magento\Framework\Message\ManagerInterface
-     */
-    private $messageManager;
-
-    /**
-     * @var \Magento\Store\Api\Data\StoreInterface
-     */
-    private $store;
+    protected $timezone;
 
     /**
      * @var \Magento\Framework\Locale\Resolver
      */
-    private $resolver;
-
-    /**
-     * @var \Magento\Shipping\Model\Rate\Result
-     */
-    private $rateResult;
+    protected $resolver;
 
     /**
      * @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory
      */
-    private $checkoutOnestepPriceCacheFactory;
-
-    /**
-     * @var \Magento\Quote\Api\Data\CartInterface
-     */
-    private $cart;
+    protected $checkoutOnestepPriceCacheFactory;
 
     /**
      * @var QuoteObject
      */
-    private $session;
+    protected $session;
 
     /**
      * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache
      */
-    private $checkoutOnestepPriceCacheResourceModel;
-
-    /**
-     * @var \Magento\Framework\App\RequestInterface
-     */
-    private $request;
+    protected $checkoutOnestepPriceCacheResourceModel;
 
     /**
      * @var \Perspective\NovaposhtaShipping\Model\Carrier\Mapping
      */
-    private $carrierMapping;
+    protected $carrierMapping;
 
-    private OperationsCache $cache;
+    /**
+     * @var \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache
+     */
+    protected OperationsCache $cache;
 
     /**
      * Constructor
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
-     * @param \Perspective\NovaposhtaCatalog\Helper\Config $configHelper
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory
      * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory
-     * @param \Magento\Framework\Stdlib\ArrayManager $arrayManager
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \Magento\Store\Api\Data\StoreInterface $store
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
      * @param \Magento\Framework\Locale\Resolver $resolver
      * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory $checkoutOnestepPriceCacheFactory
      * @param \Perspective\NovaposhtaShipping\Model\Quote\Info\Session\QuoteObject $sessionQuote
-     * @param \Magento\Framework\App\RequestInterface $request
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel
      * @param array $data
@@ -191,41 +119,28 @@ class NovaposhtaShipping extends AbstractCarrier implements
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         ErrorFactory $rateErrorFactory,
-        Config $configHelper,
         LoggerInterface $logger,
         ResultFactory $rateResultFactory,
         MethodFactory $rateMethodFactory,
-        ArrayManager $arrayManager,
         TimezoneInterface $timezone,
-        ManagerInterface $messageManager,
-        StoreInterface $store,
         NovaposhtaHelper $novaposhtaHelper,
         Mapping $carrierMapping,
         Resolver $resolver,
         ShippingCheckoutOnestepPriceCacheInterfaceFactory $checkoutOnestepPriceCacheFactory,
         QuoteObject $sessionQuote,
-        RequestInterface $request,
         OperationsCache $cache,
         ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel,
         array $data = []
     ) {
         $this->_rateResultFactory = $rateResultFactory;
         $this->_rateMethodFactory = $rateMethodFactory;
-        $this->scopeConfig = $scopeConfig;
         $this->rateErrorFactory = $rateErrorFactory;
-        $this->configHelper = $configHelper;
-        $this->logger = $logger;
-        $this->data = $data;
-        $this->arrayManager = $arrayManager;
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->timezone = $timezone;
-        $this->messageManager = $messageManager;
-        $this->store = $store;
         $this->resolver = $resolver;
         $this->checkoutOnestepPriceCacheFactory = $checkoutOnestepPriceCacheFactory;
         $this->session = $sessionQuote;
         $this->checkoutOnestepPriceCacheResourceModel = $checkoutOnestepPriceCacheResourceModel;
-        $this->request = $request;
         $this->carrierMapping = $carrierMapping;
         $this->cache = $cache;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
@@ -233,13 +148,16 @@ class NovaposhtaShipping extends AbstractCarrier implements
 
     /**
      * {@inheritdoc}
+     * @param \Magento\Quote\Model\Quote\Address\RateRequest $request
+     * @return false
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function collectRates(RateRequest $request)
     {
         if (!$this->getConfigFlag('active')) {
             return false;
         }
-        $shippingPrice = (int)($this->getConfigData('price'));
         $this->result = $this->_rateResultFactory->create();
         $data = $this->prepareData();
         $deliveryText = __('Delivery via Nova Poshta');
@@ -281,7 +199,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
     /**
      * @return array
      */
-    private function prepareData(): array
+    protected function prepareData(): array
     {
         $data = [];
         $data = $this->prepareLocale($data);
@@ -296,7 +214,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @return void
      * @throws \Magento\Framework\Exception\AlreadyExistsException
      */
-    private function createNormalCarrier($shippingData, $allowedMethod, $deliveryText)
+    public function createNormalCarrier($shippingData, $allowedMethod, $deliveryText)
     {
         $this->method->setCarrierTitle($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y') . ' - ' . $deliveryText);
         if (isset($shippingData)) {
@@ -336,7 +254,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
     /**
      * @param $val
      */
-    protected function makeCarrierWithError($val)
+    public function makeCarrierWithError($val)
     {
         $errorNPmessage = __('Shipping cost by carrier');
         if (isset($val)) {
@@ -353,18 +271,6 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $this->result->append($this->method);
     }
 
-    /**
-     * @param $string
-     * @return bool
-     */
-    protected function isJson($string)
-    {
-        try {
-            json_decode($string);
-        } finally {
-            return (json_last_error() == JSON_ERROR_NONE);
-        }
-    }
 
     /**
      * getAllowedMethods
@@ -383,7 +289,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @return void
      * @throws \Magento\Framework\Exception\AlreadyExistsException
      */
-    private function cacheOrRetriveCachedData(array $shippingData, $allowedMethod)
+    protected function cacheOrRetriveCachedData(array $shippingData, $allowedMethod)
     {
         /** @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $priceCache */
         $tempModelPriceCache = $this->loadCachedData();
@@ -412,7 +318,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
     /**
      * @return \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface
      */
-    private function loadCachedData(): ShippingCheckoutOnestepPriceCacheInterface
+    protected function loadCachedData(): ShippingCheckoutOnestepPriceCacheInterface
     {
         $tempModelPriceCache = $this->checkoutOnestepPriceCacheFactory->create();
         $this->checkoutOnestepPriceCacheResourceModel
@@ -430,7 +336,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param $shippingData
      * @return array
      */
-    private function prepareCachedData(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, $allowedMethods, $shippingData): array
+    protected function prepareCachedData(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, $allowedMethods, $shippingData): array
     {
         if ($tempModelPriceCache->getId() && $tempModelPriceCache->getShippingMethod() === $allowedMethods) {
             if (!isset($shippingData['price'])) {
@@ -450,7 +356,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param array $data
      * @return array
      */
-    private function prepareLocale(array $data): array
+    protected function prepareLocale(array $data): array
     {
         $currentStore = $this->resolver->getLocale();
         $data['locale'] = $currentStore;
@@ -461,7 +367,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param array $data
      * @return array
      */
-    private function appendQuoteId(array $data): array
+    protected function appendQuoteId(array $data): array
     {
         $data['quote_id'] = $this->getQuoteId();
         return $data;
@@ -478,7 +384,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
     /**
      * @return false|string[]
      */
-    private function getNovaposhtaAllowedMethods()
+    protected function getNovaposhtaAllowedMethods()
     {
         $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
         return $allowedMethods;
@@ -489,7 +395,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param array $data
      * @return array
      */
-    private function addCurrentMethodToData($allowedMethod, array $data): array
+    protected function addCurrentMethodToData($allowedMethod, array $data): array
     {
         $data['current_method'] = $allowedMethod;
         return $data;
@@ -500,7 +406,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param array $data
      * @return array
      */
-    private function appendCurrentUserAddress(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, array $data): array
+    protected function appendCurrentUserAddress(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, array $data): array
     {
         $data['current_user_address'] = $this->carrierMapping->
         getShippingMethodClassByCode(
