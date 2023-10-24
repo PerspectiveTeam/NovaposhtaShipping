@@ -8,17 +8,23 @@
             "streetInputAutocompleteShipping":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/street",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/streets-formatted-for-select') ?>",
-                "inputName":"order[shipping_address][novaposhta_street]"
+                "inputName":"order[shipping_address][novaposhta_street]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getStreet()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>"
                 },
             "streetInputAutocompleteBilling":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/street",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/streets-formatted-for-select') ?>",
-                "inputName":"order[billing_address][novaposhta_street]"
+                "inputName":"order[billing_address][novaposhta_street]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getStreet()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>"
                 },
             "streetInputAutocompleteOrphan":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/street",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/streets-formatted-for-select') ?>",
-                "inputName":"novaposhta_street"
+                "inputName":"novaposhta_street",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getStreet()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>"
                 }
             }
         }

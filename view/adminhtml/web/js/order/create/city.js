@@ -14,7 +14,9 @@ define([
             template: 'Perspective_NovaposhtaShipping/order/create/city',
             backendRestURL: '',
             inputCustomName: '',
-            classCustomName: ''
+            classCustomName: '',
+            preselectedLabel: '',
+            preselectedValue: ''
         },
 
         initialize: function (config) {
@@ -29,6 +31,8 @@ define([
             this.observe('backendRestURL');
             this.observe('inputCustomName');
             this.observe('classCustomName');
+            this.observe('preselectedLabel');
+            this.observe('preselectedValue');
             return this;
         },
 
@@ -41,6 +45,12 @@ define([
             if ($('html').attr('lang') == "uk") {
                 lang = "uk";
             }
+            var preselectObject = {};
+            if (this.preselectedLabel() && this.preselectedValue()) {
+                preselectObject = {id: this.preselectedValue(), text: $.mage.__(this.preselectedLabel())};
+            } else {
+                preselectObject = {id: 0, text: $.mage.__('Choose city')};
+            }
             $(element).select2({
                 name: this.inputCustomName(),
                 placeholder: $.mage.__(''),
@@ -48,7 +58,7 @@ define([
                 width: '100%',
                 minimumInputLength: 2,
                 language: lang,
-                data: [{id: 0, text: $.mage.__('Choose city')}],
+                data: [preselectObject],
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",

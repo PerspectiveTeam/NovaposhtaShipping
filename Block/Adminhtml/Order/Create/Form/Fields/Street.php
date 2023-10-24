@@ -28,7 +28,7 @@ class Street extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Creat
         $element = $result->getElement(static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $element->setData('label', __('NP Street'));
         $element->setData('name', static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
-        $element->setData('required', true);
+//        $element->setData('required', true);
         $prefix = explode('-', $result->getHtmlIdPrefix() ?? '');
         if ($prefix && is_array($prefix) && count($prefix) > 1) {
             if ($prefix[1] == 'billing_address_') {

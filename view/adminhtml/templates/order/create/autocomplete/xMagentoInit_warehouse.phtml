@@ -8,17 +8,23 @@
             "warehouseInputAutocompleteShipping":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
-                "inputName":"order[shipping_address][novaposhta_warehouse]"
+                "inputName":"order[shipping_address][novaposhta_warehouse]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getWarehouseId()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>"
                 },
             "warehouseInputAutocompleteBilling":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
-                "inputName":"order[billing_address][novaposhta_warehouse]"
+                "inputName":"order[billing_address][novaposhta_warehouse]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getWarehouseId()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>"
                 },
             "warehouseInputAutocompleteOrphan":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
-                "inputName":"novaposhta_warehouse"
+                "inputName":"novaposhta_warehouse",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getWarehouseId()) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>"
                 }
             }
         }

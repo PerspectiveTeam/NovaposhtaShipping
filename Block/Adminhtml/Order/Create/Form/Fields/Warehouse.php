@@ -27,7 +27,7 @@ class Warehouse extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Cr
         $element = $result->getElement(static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $element->setData('label', __('NP Warehouse'));
         $element->setData('name', static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
-        $element->setData('required', true);
+//        $element->setData('required', true);
         $prefix = explode('-', $result->getHtmlIdPrefix() ?? '');
         if ($prefix && is_array($prefix) && count($prefix) > 1) {
             if ($prefix[1] == 'billing_address_') {

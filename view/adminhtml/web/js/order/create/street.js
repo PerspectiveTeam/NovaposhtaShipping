@@ -20,6 +20,8 @@ define([
             backendRestURL: '',
             inputCustomName: '',
             classCustomName: '',
+            preselectedLabel: '',
+            preselectedValue: '',
             isOrphan: false
         },
 
@@ -39,6 +41,8 @@ define([
             this.observe('cityShipping');
             this.observe('cityOrphan');
             this.observe('isOrphan');
+            this.observe('preselectedLabel');
+            this.observe('preselectedValue');
             return this;
         },
 
@@ -46,6 +50,12 @@ define([
             if (this.inputCustomName()) {
                 //такое нужно чтобы не пропадал name после изменения инпута
                 this.inputName = element.name = this.inputCustomName();
+            }
+            var preselectObject = {};
+            if (this.preselectedLabel() && this.preselectedValue()) {
+                preselectObject = {id: this.preselectedValue(), text: $.mage.__(this.preselectedLabel())};
+            } else {
+                preselectObject = {id: 0, text: $.mage.__('Choose street')};
             }
             var lang = "ru";
             if ($('html').attr('lang') == "uk") {
@@ -58,7 +68,7 @@ define([
                 width: '100%',
                 minimumInputLength: 0,
                 language: lang,
-                data: [{id: 0, text: $.mage.__('Choose street')}],
+                data: [preselectObject],
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",

@@ -167,7 +167,10 @@ class NovaposhtaDeliveryInfo extends Template
         $order_id_from_registry = $this->registry->registry('order_address')
             ? $this->registry->registry('order_address')->getParentId()
             : null;
-        $order_id = $order_id_from_request ?: $order_id_from_registry;
+        $order_id_reorder = $this->registry->registry('current_order')
+            ? $this->registry->registry('current_order')->getId()
+            : null;
+        $order_id = $order_id_from_request ?: $order_id_from_registry?: $order_id_reorder;
         return $this->orderRepository->get($order_id);
     }
 
