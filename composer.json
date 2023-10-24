@@ -3,11 +3,11 @@
     "description": "",
     "type": "magento2-module",
     "license": "MIT",
-    "version": "2.4.5.13",
+    "version": "2.4.5.15",
     "authors": [
         {
             "email": "faqreg@gmail.com",
-            "name": "Sergey Kusch"
+            "name": "Serhii Kushch"
         }
     ],
     "require": {
