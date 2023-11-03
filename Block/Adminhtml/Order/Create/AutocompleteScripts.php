@@ -54,11 +54,13 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
                 $this->registry->register('current_order', $this->sessionQuote->getOrder());
             }
             $shippingInfo = $this->novaposhtaDeliveryInfo->getShipping();
-            if (in_array($key, array_keys($shippingInfo->getData()))) {
-                return $shippingInfo->getData($key);
-            } else if (str_ends_with($key, 'label')) {
-                $realKey = str_replace('_label', '', $key);
-                return $this->novaposhtaDeliveryInfo->decorateValue($realKey, $shippingInfo->getData($realKey) ?? '');
+            if ($shippingInfo && $shippingInfo->getData()) {
+                if (in_array($key, array_keys($shippingInfo->getData()))) {
+                    return $shippingInfo->getData($key);
+                } else if (str_ends_with($key, 'label')) {
+                    $realKey = str_replace('_label', '', $key);
+                    return $this->novaposhtaDeliveryInfo->decorateValue($realKey, $shippingInfo->getData($realKey) ?? '');
+                }
             }
         } catch (Exception $e) {
             return parent::getData($key, $index);
