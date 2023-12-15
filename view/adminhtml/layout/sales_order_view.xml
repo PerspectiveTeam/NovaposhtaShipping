@@ -7,6 +7,10 @@
                    name="perspective_shipping_delivery_info"
                    template="Perspective_NovaposhtaShipping::order/novaposhtaDeliveryDescription.phtml">
             </block>
+            <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaShippingVisualisation"
+                   name="perspective_shipping_visualisation_links"
+                   template="Perspective_NovaposhtaShipping::order/novaposhtaDeliveryVisualisation.phtml">
+            </block>
         </referenceContainer>
     </body>
 </page>

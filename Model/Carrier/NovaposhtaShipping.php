@@ -166,8 +166,12 @@ class NovaposhtaShipping extends AbstractCarrier implements
             $data = $this->addCurrentMethodToData($allowedMethods[$i], $data);
             $tempModelPriceCache = $this->loadCachedData();
             $data = $this->appendCurrentUserAddress($tempModelPriceCache, $data);
-            //это общее кеширование по городу. по пользователю есть отдельная модель
-            $requestDataHash = spl_object_hash($request);
+            $hashmapOfItemsOfProducts = [];
+            $allVisibleItems = $this->session->getQuote()->getAllVisibleItems();
+            foreach ($allVisibleItems as $item) {
+                $hashmapOfItemsOfProducts [] = $item->getProductId() . '_' . $item->getQty();
+            }
+            $requestDataHash = 'product_' . implode('-', $hashmapOfItemsOfProducts);
             $cacheId = "np_price__city_{$data['current_user_address']->getCity()}_method_{$data['current_method']}_quoteId_{$data['quote_id']}_hash_{$requestDataHash}";
             if (!empty(unserialize($this->cache->load($cacheId)))) {
                 $shippingData = unserialize($this->cache->load($cacheId));

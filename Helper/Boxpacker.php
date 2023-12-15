@@ -54,6 +54,8 @@ class Boxpacker
 
     private LimitedSupplyTestBoxFactory $limitedSupplyBoxFactory;
 
+    private array $boxVisualisationLinksArray;
+
     /**
      * Boxpacker constructor.
      *
@@ -135,7 +137,7 @@ class Boxpacker
                 'allowedRotation' => 2,
             ]), (int) ceil($productValQty));
         }
-
+        $this->boxVisualisationLinksArray = [];
         /** @var PackedBox $box */
         foreach ($this->packer->pack() as $box) {
             $boxWidth = $box->getUsedWidth() / 10;
@@ -152,7 +154,7 @@ class Boxpacker
                 $width = $boxWidth;
                 $height = $boxHeight;
                 $length = $boxLength;
-                $weight = $box->getBox()->getMaxWeight() / 1000;
+                $weight = $box->getWeight() / 1000;
             }
 
             $finalOptionSeats[] = [
@@ -162,6 +164,11 @@ class Boxpacker
                 'volumetricLength' => $length,
                 'weight' => $weight,
             ];
+            try {
+                $this->boxVisualisationLinksArray[] = $box->generateVisualisationURL();
+            } catch (\Exception $e) {
+                $this->boxVisualisationLinksArray[] = '';
+            }
         }
 
         return $finalOptionSeats;
@@ -218,13 +225,13 @@ class Boxpacker
                 $this->packer->addBox($this->boxFactory->create(
                     [
                         'reference' => '141*141*170',
-                        'outerWidth' => 1410,
-                        'outerLength' => 1410,
-                        'outerDepth' => 1700,
+                        'outerWidth' => 141,
+                        'outerLength' => 141,
+                        'outerDepth' => 170,
                         'emptyWeight' => 0,
-                        'innerWidth' => 1410,
-                        'innerLength' => 1410,
-                        'innerDepth' => 1700,
+                        'innerWidth' => 141,
+                        'innerLength' => 141,
+                        'innerDepth' => 170,
                         'maxWeight' => 1000000
                     ]
                 ));
@@ -234,13 +241,13 @@ class Boxpacker
                 $this->packer->addBox($this->boxFactory->create(
                     [
                         'reference' => '120*120*170',
-                        'outerWidth' => 1200,
-                        'outerLength' => 1200,
-                        'outerDepth' => 1700,
+                        'outerWidth' => 120,
+                        'outerLength' => 120,
+                        'outerDepth' => 170,
                         'emptyWeight' => 0,
-                        'innerWidth' => 1200,
-                        'innerLength' => 1200,
-                        'innerDepth' => 1700,
+                        'innerWidth' => 120,
+                        'innerLength' => 120,
+                        'innerDepth' => 170,
                         'maxWeight' => 750000
                     ]
                 ));
@@ -250,13 +257,13 @@ class Boxpacker
                 $this->packer->addBox($this->boxFactory->create(
                     [
                         'reference' => '80*120*170',
-                        'outerWidth' => 800,
-                        'outerLength' => 1200,
-                        'outerDepth' => 1700,
+                        'outerWidth' => 80,
+                        'outerLength' => 120,
+                        'outerDepth' => 170,
                         'emptyWeight' => 0,
-                        'innerWidth' => 800,
-                        'innerLength' => 1200,
-                        'innerDepth' => 1700,
+                        'innerWidth' => 80,
+                        'innerLength' => 120,
+                        'innerDepth' => 170,
                         'maxWeight' => 500000
                     ]
                 ));
@@ -276,5 +283,10 @@ class Boxpacker
          * так как апи НП не отдаёт ошибку при обработке минусовых значений
          */
         return ($dimension / 10) > 0;
+    }
+
+    public function getBoxVisualisationLinksArray(): array
+    {
+        return $this->boxVisualisationLinksArray;
     }
 }

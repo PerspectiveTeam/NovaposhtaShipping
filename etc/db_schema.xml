@@ -155,4 +155,20 @@
             <column name="id"/>
         </constraint>
     </table>
+    <table name="perspective_novaposhta_shipping_visualisation" resource="default" engine="innodb"
+           comment="Client\'s shipping boxes visualisation">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="int" name="cart_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="cart_id"/>
+        <column xsi:type="text" name="box_url"  nullable="false"
+                comment="Box url(single box)"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
 </schema>
