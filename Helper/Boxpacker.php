@@ -7,6 +7,7 @@ namespace Perspective\NovaposhtaShipping\Helper;
 use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer;
 use DVDoug\BoxPacker\PackerFactory;
+use DVDoug\BoxPacker\Rotation;
 use Perspective\NovaposhtaShipping\Model\Box\LimitedSupplyTestBoxFactory;
 use Perspective\NovaposhtaShipping\Model\Box\TestBoxFactory;
 use Perspective\NovaposhtaShipping\Model\Box\TestItemFactory;
@@ -124,13 +125,14 @@ class Boxpacker
                 ? $productVal->getQtyToShip()
                 : $productVal->getQty();
 
+            /** $allowedRotation <---- Rotation::KeepFlat == 2*/
             $this->packer->addItem($this->itemFactory->create([
                 'description' => $productIdx,
                 'width' => $widthProduct,
                 'length' => $lengthProduct,
                 'depth' => $heightProduct,
                 'weight' => $weightProduct,
-                'allowedRotation' => ((int)ceil($productValQty)) <= 2,
+                'allowedRotation' => 2,
             ]), (int) ceil($productValQty));
         }
 

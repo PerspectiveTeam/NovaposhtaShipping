@@ -9,73 +9,46 @@ declare(strict_types=1);
 namespace Perspective\NovaposhtaShipping\Model\Box;
 
 use DVDoug\BoxPacker\Item;
+use DVDoug\BoxPacker\Rotation;
 use JsonSerializable;
 use ReturnTypeWillChange;
 use stdClass;
 
 class TestItem implements Item, JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $description;
-
-    /**
-     * @var int
-     */
-    private $width;
-
-    /**
-     * @var int
-     */
-    private $length;
-
-    /**
-     * @var int
-     */
-    private $depth;
-
-    /**
-     * @var int
-     */
-    private $weight;
-
-    /**
-     * @var int
-     */
-    private $keepFlat;
+    private mixed $jsonSerializeOverride = null;
 
     /**
      * Test objects that recurse.
      *
      * @var stdClass
      */
-    private $a;
+    private readonly stdClass $a;
 
     /**
      * Test objects that recurse.
      *
      * @var stdClass
      */
-    private $b;
+    private readonly stdClass $b;
+
+    /**
+     * @var \DVDoug\BoxPacker\Rotation|int
+     */
+    private mixed $keepFlat;
 
     /**
      * TestItem constructor.
      */
     public function __construct(
-        string $description,
-        int $width,
-        int $length,
-        int $depth,
-        int $weight,
-        int $allowedRotation
+       private readonly string $description,
+       private readonly int $width,
+       private readonly int $length,
+       private readonly int $depth,
+       private readonly int $weight,
+       private readonly int $allowedRotation
     ) {
-        $this->description = $description;
-        $this->width = $width;
-        $this->length = $length;
-        $this->depth = $depth;
-        $this->weight = $weight;
-        $this->keepFlat = $allowedRotation <= 2;
+        $this->keepFlat = $allowedRotation;
 
         $this->a = new stdClass();
         $this->b = new stdClass();
@@ -113,10 +86,23 @@ class TestItem implements Item, JsonSerializable
     {
         return $this->keepFlat;
     }
+    public function getAllowedRotation(): Rotation
+    {
+        return match ($this->allowedRotation) {
+            Rotation::Never => Rotation::Never,
+            Rotation::KeepFlat => Rotation::KeepFlat,
+            Rotation::BestFit => Rotation::BestFit,
+            default => Rotation::KeepFlat,
+        };
+    }
 
     #[ReturnTypeWillChange]
     public function jsonSerialize()/* : mixed */
     {
+        if (isset($this->jsonSerializeOverride)) {
+            return $this->jsonSerializeOverride;
+        }
+
         return [
             'description' => $this->description,
             'width' => $this->width,
@@ -124,6 +110,12 @@ class TestItem implements Item, JsonSerializable
             'depth' => $this->depth,
             'weight' => $this->weight,
             'keepFlat' => $this->keepFlat,
+            'allowedRotation' => $this->allowedRotation,
         ];
+    }
+
+    public function setJsonSerializeOverride(mixed $override): void
+    {
+        $this->jsonSerializeOverride = $override;
     }
 }
