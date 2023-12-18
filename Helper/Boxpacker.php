@@ -86,7 +86,7 @@ class Boxpacker
     public function calcSeats(array $products): array
     {
         $finalOptionSeats = [];
-        $this->packer = $this->packerFactory->create();
+        $this->getPacker();
 
         /**
          * @var int $productIdx
@@ -110,7 +110,7 @@ class Boxpacker
             $lengthProduct = (int)ceil($productModel->getProductLength() / 10);
             $heightProduct = (int)ceil($productModel->getProductHeight() / 10);
             $weightProduct = (int)ceil($productModel->getWeight() * 1000);
-            $this->packer->addBox($this->limitedSupplyBoxFactory->create([
+            $this->getPacker()->addBox($this->limitedSupplyBoxFactory->create([
                 'reference' => 'product_size_box_' . uniqid(),
                 'outerWidth' => $widthProduct,
                 'outerLength' => $lengthProduct,
@@ -128,7 +128,7 @@ class Boxpacker
                 : $productVal->getQty();
 
             /** $allowedRotation <---- Rotation::KeepFlat == 2*/
-            $this->packer->addItem($this->itemFactory->create([
+            $this->getPacker()->addItem($this->itemFactory->create([
                 'description' => $productIdx,
                 'width' => $widthProduct,
                 'length' => $lengthProduct,
@@ -139,7 +139,7 @@ class Boxpacker
         }
         $this->boxVisualisationLinksArray = [];
         /** @var PackedBox $box */
-        foreach ($this->packer->pack() as $box) {
+        foreach ($this->getPacker()->pack() as $box) {
             $boxWidth = $box->getUsedWidth() / 10;
             $boxHeight = $box->getUsedDepth() / 10;
             $boxLength = $box->getUsedLength() / 10;
@@ -179,7 +179,7 @@ class Boxpacker
      * @see overallWeight
      * @return void
      */
-    protected function setAvailableBoxes(): void
+    public function setAvailableBoxes(): void
     {
         // от 0 до 500 кг - 408
         if ($this->overallWeight >= 0 && $this->overallWeight < 500) {
@@ -218,11 +218,11 @@ class Boxpacker
     /**
      * @param string $reference
      */
-    private function addBoxesToPacker(string $reference): void
+    public function addBoxesToPacker(string $reference): void
     {
         switch ($reference) {
             case '141*141*170':
-                $this->packer->addBox($this->boxFactory->create(
+                $this->getPacker()->addBox($this->boxFactory->create(
                     [
                         'reference' => '141*141*170',
                         'outerWidth' => 141,
@@ -238,7 +238,7 @@ class Boxpacker
                 $this->addBoxesToPacker('120*120*170');
                 break;
             case '120*120*170':
-                $this->packer->addBox($this->boxFactory->create(
+                $this->getPacker()->addBox($this->boxFactory->create(
                     [
                         'reference' => '120*120*170',
                         'outerWidth' => 120,
@@ -254,7 +254,7 @@ class Boxpacker
                 $this->addBoxesToPacker('80*120*170');
                 break;
             case '80*120*170':
-                $this->packer->addBox($this->boxFactory->create(
+                $this->getPacker()->addBox($this->boxFactory->create(
                     [
                         'reference' => '80*120*170',
                         'outerWidth' => 80,
@@ -288,5 +288,17 @@ class Boxpacker
     public function getBoxVisualisationLinksArray(): array
     {
         return $this->boxVisualisationLinksArray;
+    }
+
+    /**
+     * @return  \DVDoug\BoxPacker\Packer
+     */
+    protected function getPacker()
+    {
+        if (!$this->packer) {
+            $this->packer = $this->packerFactory->create();
+        }
+        return $this->packer;
+
     }
 }
