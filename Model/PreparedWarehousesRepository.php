@@ -51,7 +51,7 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
     /**
      * @inheirtDoc
      */
-    public function filteredWarehouseArrayByCityRefAndTerm($cityRef, $term = null)
+    public function filteredWarehouseArrayByCityRefAndTerm($cityRef, $term = null, $pageSizes = null, $currentPage = null)
     {
         if (!$cityRef) {
             return $this->serializer->serialize([]);
@@ -68,6 +68,12 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
                 ['like' => "%$term%"]
             ]
         );
+        if ($pageSizes) {
+            $warehouseCollection->setPageSize($pageSizes);
+        }
+        if ($currentPage) {
+            $warehouseCollection->setCurPage($currentPage);
+        }
         /** @var \Perspective\NovaposhtaCatalog\Model\Warehouse\Warehouse $item */
         foreach ($warehouseCollection as $item) {
             if ($lang === 'ru_RU') {
@@ -75,7 +81,7 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
                     'id' => $item->getRef(),
                     'text' => $item->getDescriptionRu(),
                 ];
-            } elseif ($lang === 'uk_ua') {
+            } elseif ($lang === 'uk_UA') {
                 $result [] = [
                     'id' => $item->getRef(),
                     'text' => $item->getDescriptionUa(),
@@ -88,6 +94,10 @@ class PreparedWarehousesRepository implements PreparedWarehousesRepositoryInterf
             }
 
         }
+        $result = $result ?? [[
+            'id' => '0',
+            'text' => __('No city data found')
+        ]];
         return $this->serializer->serialize($result);
     }
 

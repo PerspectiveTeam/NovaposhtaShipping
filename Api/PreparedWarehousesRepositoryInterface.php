@@ -17,8 +17,10 @@ interface PreparedWarehousesRepositoryInterface
      *
      * @param string $term | null
      * @param string $cityRef
+     * @param string $pageSizes
+     * @param string $currentPage
      * @return string | null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function filteredWarehouseArrayByCityRefAndTerm($cityRef, $term = null);
+    public function filteredWarehouseArrayByCityRefAndTerm($cityRef, $term = null, $pageSizes = null, $currentPage = null);
 }
