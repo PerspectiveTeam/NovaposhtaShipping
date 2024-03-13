@@ -2,7 +2,9 @@
 
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
+use Magento\Directory\Model\CurrencyFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -11,6 +13,7 @@ use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\ResultFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
@@ -99,6 +102,16 @@ class NovaposhtaShipping extends AbstractCarrier implements
     protected OperationsCache $cache;
 
     /**
+     * @var \Magento\Directory\Model\CurrencyFactory
+     */
+    private CurrencyFactory $currencyFactory;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private StoreManagerInterface $storeManager;
+
+    /**
      * Constructor
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -130,6 +143,8 @@ class NovaposhtaShipping extends AbstractCarrier implements
         QuoteObject $sessionQuote,
         OperationsCache $cache,
         ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel,
+        CurrencyFactory $currencyFactory,
+        StoreManagerInterface $storeManager,
         array $data = []
     ) {
         $this->_rateResultFactory = $rateResultFactory;
@@ -143,6 +158,8 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $this->checkoutOnestepPriceCacheResourceModel = $checkoutOnestepPriceCacheResourceModel;
         $this->carrierMapping = $carrierMapping;
         $this->cache = $cache;
+        $this->currencyFactory = $currencyFactory;
+        $this->storeManager = $storeManager;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
@@ -298,11 +315,12 @@ class NovaposhtaShipping extends AbstractCarrier implements
         /** @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $priceCache */
         $tempModelPriceCache = $this->loadCachedData();
         if (isset($shippingData['price'])) {
-            $this->method->setPrice($shippingData['price']);
-            $this->method->setCost($shippingData['price']);
+            $convertedPrice = $this->convertPriceFromBaseToAnotherCurrency($shippingData['price']);
+            $this->method->setPrice($convertedPrice);
+            $this->method->setCost($convertedPrice);
             if ($tempModelPriceCache->getShippingMethod() === $allowedMethod) {
                 $tempModelPriceCache->setCartId($this->getQuoteId());
-                $tempModelPriceCache->setCachePrice($shippingData['price']);
+                $tempModelPriceCache->setCachePrice($convertedPrice);
                 $tempModelPriceCache->setShippingMethod($allowedMethod);
                 $this->checkoutOnestepPriceCacheResourceModel->save($tempModelPriceCache);
             }
@@ -418,4 +436,13 @@ class NovaposhtaShipping extends AbstractCarrier implements
         )->loadAddressInfo($this->getQuoteId());
         return $data;
     }
+
+    protected function convertPriceFromBaseToAnotherCurrency($price)
+    {
+        $currencyCodeTo = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
+        $currencyCodeFrom = $this->storeManager->getStore()->getBaseCurrency()->getCode();
+        $rate = $this->currencyFactory->create()->load($currencyCodeTo)->getAnyRate($currencyCodeFrom);
+        return $price * $rate;
+    }
+
 }
