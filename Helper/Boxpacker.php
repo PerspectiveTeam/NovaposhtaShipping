@@ -8,12 +8,14 @@ use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer;
 use DVDoug\BoxPacker\PackerFactory;
 use DVDoug\BoxPacker\Rotation;
+use Perspective\NovaposhtaCatalog\Model\ResourceModel\Package\Package\CollectionFactory;
 use Perspective\NovaposhtaShipping\Model\Box\LimitedSupplyTestBoxFactory;
 use Perspective\NovaposhtaShipping\Model\Box\TestBoxFactory;
 use Perspective\NovaposhtaShipping\Model\Box\TestItemFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Sales\Model\Order\Item as OrderItem;
+use Throwable;
 
 class Boxpacker
 {
@@ -57,6 +59,11 @@ class Boxpacker
     private array $boxVisualisationLinksArray;
 
     /**
+     * @var \Perspective\NovaposhtaCatalog\Model\ResourceModel\Package\Package\CollectionFactory
+     */
+    private CollectionFactory $packageTypesResourceModelCollectionFactory;
+
+    /**
      * Boxpacker constructor.
      *
      * @param PackerFactory $packerFactory
@@ -70,18 +77,21 @@ class Boxpacker
         TestBoxFactory $BoxFactory,
         TestItemFactory $ItemFactory,
         ProductRepositoryInterface $productRepositoryInterface,
-        LimitedSupplyTestBoxFactory $limitedSupplyBoxFactory
+        LimitedSupplyTestBoxFactory $limitedSupplyBoxFactory,
+        CollectionFactory $packageTypesResourceModelCollectionFactory
     ) {
         $this->packerFactory = $packerFactory;
         $this->boxFactory = $BoxFactory;
         $this->itemFactory = $ItemFactory;
         $this->productRepositoryInterface = $productRepositoryInterface;
         $this->limitedSupplyBoxFactory = $limitedSupplyBoxFactory;
+        $this->packageTypesResourceModelCollectionFactory = $packageTypesResourceModelCollectionFactory;
     }
 
     /**
      * @param array $products
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function calcSeats(array $products): array
     {
@@ -110,6 +120,7 @@ class Boxpacker
             $lengthProduct = (int)ceil($productModel->getProductLength() / 10);
             $heightProduct = (int)ceil($productModel->getProductHeight() / 10);
             $weightProduct = (int)ceil($productModel->getWeight() * 1000);
+            //коробка самого товара
             $this->getPacker()->addBox($this->limitedSupplyBoxFactory->create([
                 'reference' => 'product_size_box_' . uniqid(),
                 'outerWidth' => $widthProduct,
@@ -128,18 +139,21 @@ class Boxpacker
                 : $productVal->getQty();
 
             /** $allowedRotation <---- Rotation::KeepFlat == 2*/
+            /** $allowedRotation <---- Rotation::BestFit == 6*/
+            $productSku = $productVal->getProduct()->getSku();
             $this->getPacker()->addItem($this->itemFactory->create([
-                'description' => $productIdx,
+                'description' => $productSku,
                 'width' => $widthProduct,
                 'length' => $lengthProduct,
                 'depth' => $heightProduct,
                 'weight' => $weightProduct,
-                'allowedRotation' => 2,
+                'allowedRotation' => 6, //6 - BestFit
             ]), (int) ceil($productValQty));
         }
         $this->boxVisualisationLinksArray = [];
+        $packedBoxes = $this->getPacker()->packAllPermutations();
         /** @var PackedBox $box */
-        foreach ($this->getPacker()->pack() as $box) {
+        foreach ($packedBoxes as $box) {
             $boxWidth = $box->getUsedWidth() / 10;
             $boxHeight = $box->getUsedDepth() / 10;
             $boxLength = $box->getUsedLength() / 10;
@@ -165,8 +179,10 @@ class Boxpacker
                 'weight' => $weight,
             ];
             try {
-                $this->boxVisualisationLinksArray[] = $box->generateVisualisationURL();
-            } catch (\Exception $e) {
+                if (method_exists($box, 'generateVisualisationURL')) {
+                    $this->boxVisualisationLinksArray[] = $box->generateVisualisationURL();
+                }
+            } catch (Throwable $e) {
                 $this->boxVisualisationLinksArray[] = '';
             }
         }
@@ -181,6 +197,7 @@ class Boxpacker
      */
     public function setAvailableBoxes(): void
     {
+        //Палети НП
         // от 0 до 500 кг - 408
         if ($this->overallWeight >= 0 && $this->overallWeight < 500) {
             $this->addBoxesToPacker('80*120*170');
@@ -202,6 +219,28 @@ class Boxpacker
 
             $this->addBoxesToPacker('141*141*170');
         }
+        //Дрібне пакування НП
+        $packageCollection = $this->packageTypesResourceModelCollectionFactory->create();
+        $packageCollection->addFieldToFilter('volumetric_weight', ['gt' => 0]);
+        $packageCollection->addFieldToFilter('length', ['gt' => 0]);
+        $packageCollection->addFieldToFilter('width', ['gt' => 0]);
+        $packageCollection->addFieldToFilter('height', ['gt' => 0]);
+        /** @var \Perspective\NovaposhtaCatalog\Api\Data\PackageInterface $package */
+        foreach ($packageCollection as $package) {
+            $this->getPacker()->addBox($this->boxFactory->create(
+                [
+                    'reference' => sprintf('%s - %s', $package->getDescriptionUa(), $package->getRef()),
+                    'outerWidth' => $package->getWidth(),
+                    'outerLength' => $package->getLength(),
+                    'outerDepth' => $package->getHeight(),
+                    'emptyWeight' => 0,
+                    'innerWidth' => $package->getWidth(),
+                    'innerLength' => $package->getLength(),
+                    'innerDepth' => $package->getHeight(),
+                    'maxWeight' => $package->getVolumetricWeight() * 1000 // НП повертає вагу в КГ - переводимо в грами
+                ]
+            ));
+        }
     }
 
     /**
@@ -216,6 +255,7 @@ class Boxpacker
     }
 
     /**
+     * 1000000 - 1 тонна
      * @param string $reference
      */
     public function addBoxesToPacker(string $reference): void
