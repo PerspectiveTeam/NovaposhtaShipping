@@ -165,9 +165,12 @@ class Boxpacker
                 'weight' => $weight,
             ];
             try {
-                $this->boxVisualisationLinksArray[] = $box->generateVisualisationURL();
-            } catch (\Exception $e) {
-                $this->boxVisualisationLinksArray[] = '';
+                if (method_exists($box, 'generateVisualisationURL')){
+                    $this->boxVisualisationLinksArray[] = $box->generateVisualisationURL();
+                }
+            } catch (\Throwable $e) {
+                //old version of boxpacker
+                continue;
             }
         }
 
