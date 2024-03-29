@@ -84,12 +84,11 @@ class TestItem implements Item, JsonSerializable
 
     public function getKeepFlat(): bool
     {
-        return $this->keepFlat;
+        return (bool)$this->keepFlat;
     }
     public function getAllowedRotation(): Rotation
     {
         return match ($this->allowedRotation) {
-            Rotation::Never => Rotation::Never,
             Rotation::KeepFlat => Rotation::KeepFlat,
             Rotation::BestFit => Rotation::BestFit,
             default => Rotation::KeepFlat,
