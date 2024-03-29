@@ -67,7 +67,6 @@ class OperationsCache
      * @param string $cacheId
      * @param int $cacheLifetime
      * @return bool
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function save($data, $cacheId = self::TYPE_IDENTIFIER, $cacheLifetime = self::CACHE_LIFETIME): bool
     {

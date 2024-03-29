@@ -188,6 +188,7 @@ class NovaposhtaHelper
     /**
      * @param array $data
      * @return array
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getShippingPriceByData(array $data)
@@ -332,7 +333,7 @@ class NovaposhtaHelper
      * @param $optionsSeat
      * @return array
      */
-    private function calculateShippingSales(array $result, string $cargoType, float $subtotal, $optionsSeat): array
+    public function calculateShippingSales(array $result, string $cargoType, float $subtotal, $optionsSeat): array
     {
         return $this->shippingSales->calculateShippingSales($result, $cargoType, $subtotal, $optionsSeat);
     }
@@ -343,10 +344,9 @@ class NovaposhtaHelper
      * @param string $service_type
      * @param $data1
      * @param $lowerShippingPrice
-     * @param $datum
      * @return array
      */
-    private function calculateDeliveryDate($city, $destinationCityRef, string $service_type, $data1, $lowerShippingPrice): array
+    public function calculateDeliveryDate($city, $destinationCityRef, string $service_type, $data1, $lowerShippingPrice): array
     {
         return $this->deliveryDate->calculateDeliveryDate($city, $destinationCityRef, $service_type, $data1, $lowerShippingPrice);
     }
@@ -356,7 +356,7 @@ class NovaposhtaHelper
      * @param array $result
      * @return array
      */
-    private function getLowestShippingPriceAmongWarehouses(array $lowerShippingPriceArr, array $result): array
+    public function getLowestShippingPriceAmongWarehouses(array $lowerShippingPriceArr, array $result): array
     {
         $comparedLowerPrice = INF;
         $comparedLowerDate = $this->timezone->date()->format('d-m-Y');
@@ -377,7 +377,7 @@ class NovaposhtaHelper
      * @param \Magento\Framework\DataObject $object
      * @return string
      */
-    private function getServiceType(DataObject $object): string
+    public function getServiceType(DataObject $object): string
     {
         return $this->serviceType->getServiceType($object);
     }
@@ -385,8 +385,9 @@ class NovaposhtaHelper
     /**
      * @param $item
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function markProductWithSpecialPrice($item): array
+    public function markProductWithSpecialPrice($item): array
     {
         $productModel = $this->productRepositoryInterfaceFactory->create()->get($item->getProduct()->getSku());
         $specialprice = $productModel->getSpecialPrice();
