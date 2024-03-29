@@ -45,7 +45,7 @@ class Sender
     {
         $senderCityArr = explode(',', $this->config->getShippingConfigByCode('novaposhtashipping', 'sender_city') ?? '');
         if (count($senderCityArr) === 0 || !$senderCityArr[0]) {
-            //ситиИд 4 - Киев
+            //сітіІд 4 - Київ
             $senderCityArr[] = '4';
         }
         foreach ($senderCityArr as $idx => $value) {

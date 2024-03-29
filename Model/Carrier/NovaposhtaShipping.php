@@ -2,15 +2,18 @@
 
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
+use Magento\Directory\Model\CurrencyFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory;
-use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
+use Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\ResultFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
@@ -36,12 +39,12 @@ class NovaposhtaShipping extends AbstractCarrier implements
     /**
      * @var \Magento\Shipping\Model\Rate\ResultFactory
      */
-    protected $_rateResultFactory;
+    protected $rateResultFactory;
 
     /**
-     * @var \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory
+     * @var \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\MethodFactory
      */
-    protected $_rateMethodFactory;
+    protected $rateMethodFactory;
 
     /**
      * @var \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory
@@ -54,7 +57,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
     protected $result;
 
     /**
-     * @var \Magento\Quote\Model\Quote\Address\RateResult\Method
+     * @var \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\Method
      */
     protected $method;
 
@@ -99,13 +102,23 @@ class NovaposhtaShipping extends AbstractCarrier implements
     protected OperationsCache $cache;
 
     /**
+     * @var \Magento\Directory\Model\CurrencyFactory
+     */
+    private CurrencyFactory $currencyFactory;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private StoreManagerInterface $storeManager;
+
+    /**
      * Constructor
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory
-     * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory
+     * @param \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
@@ -114,6 +127,8 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param \Perspective\NovaposhtaShipping\Model\Quote\Info\Session\QuoteObject $sessionQuote
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel
+     * @param \Magento\Directory\Model\CurrencyFactory $currencyFactory
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
@@ -130,10 +145,12 @@ class NovaposhtaShipping extends AbstractCarrier implements
         QuoteObject $sessionQuote,
         OperationsCache $cache,
         ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel,
+        CurrencyFactory $currencyFactory,
+        StoreManagerInterface $storeManager,
         array $data = []
     ) {
-        $this->_rateResultFactory = $rateResultFactory;
-        $this->_rateMethodFactory = $rateMethodFactory;
+        $this->rateResultFactory = $rateResultFactory;
+        $this->rateMethodFactory = $rateMethodFactory;
         $this->rateErrorFactory = $rateErrorFactory;
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->timezone = $timezone;
@@ -143,6 +160,8 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $this->checkoutOnestepPriceCacheResourceModel = $checkoutOnestepPriceCacheResourceModel;
         $this->carrierMapping = $carrierMapping;
         $this->cache = $cache;
+        $this->currencyFactory = $currencyFactory;
+        $this->storeManager = $storeManager;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
@@ -158,7 +177,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
         if (!$this->getConfigFlag('active')) {
             return false;
         }
-        $this->result = $this->_rateResultFactory->create();
+        $this->result = $this->rateResultFactory->create();
         $data = $this->prepareData();
         $deliveryText = __('Delivery via Nova Poshta');
         $allowedMethods = $this->getNovaposhtaAllowedMethods();
@@ -177,14 +196,13 @@ class NovaposhtaShipping extends AbstractCarrier implements
                 $shippingData = unserialize($this->cache->load($cacheId));
             } else {
                 $shippingData = $this->novaposhtaHelper->getShippingPriceByData($data);
-                $this->cache->save(serialize($shippingData), $cacheId);
                 $shippingData = $this->prepareCachedData($tempModelPriceCache, $allowedMethods[$i], $shippingData);
                 //на разных этапах onestep checkout от версии к версии может наблюдаться разное поведение
                 if (isset($shippingData['price']) && $shippingData['price'] > 0 && $shippingData['price'] !== INF) {
                     $this->cache->save(serialize($shippingData), $cacheId);
                 }
             }
-            $this->method = $this->_rateMethodFactory->create();
+            $this->method = $this->rateMethodFactory->create();
             if (!isset($shippingData['price'])) {
                 $this->makeCarrierWithError($allowedMethods[$i]);
                 continue;
@@ -298,11 +316,16 @@ class NovaposhtaShipping extends AbstractCarrier implements
         /** @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $priceCache */
         $tempModelPriceCache = $this->loadCachedData();
         if (isset($shippingData['price'])) {
-            $this->method->setPrice($shippingData['price']);
-            $this->method->setCost($shippingData['price']);
+            /** але насправді конвертація відбуваєтся до base валюти
+             * $this->method->setCost або setPrice мають приймати валюту(еквівалент) що є у
+             * Stores - Configuration - General - Currency Setup - Currency Options - Base Currency
+             */
+            $convertedPrice = $this->convertPriceFromBaseToAnotherCurrency($shippingData['price']);
+            $this->method->setPrice($convertedPrice);
+            $this->method->setCost($convertedPrice);
             if ($tempModelPriceCache->getShippingMethod() === $allowedMethod) {
                 $tempModelPriceCache->setCartId($this->getQuoteId());
-                $tempModelPriceCache->setCachePrice($shippingData['price']);
+                $tempModelPriceCache->setCachePrice($convertedPrice);
                 $tempModelPriceCache->setShippingMethod($allowedMethod);
                 $this->checkoutOnestepPriceCacheResourceModel->save($tempModelPriceCache);
             }
@@ -418,4 +441,21 @@ class NovaposhtaShipping extends AbstractCarrier implements
         )->loadAddressInfo($this->getQuoteId());
         return $data;
     }
+
+    /**
+     * Щодо інформації по заокругленню
+     * @see \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\Method
+     * @param $price
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function convertPriceFromBaseToAnotherCurrency($price)
+    {
+        $currencyCodeTo = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
+        $currencyCodeFrom = $this->storeManager->getStore()->getBaseCurrency()->getCode();
+        $rate = $this->currencyFactory->create()->load($currencyCodeTo)->getAnyRate($currencyCodeFrom);
+        return number_format($price * $rate, 2);
+    }
+
 }
