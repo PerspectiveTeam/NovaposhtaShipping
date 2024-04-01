@@ -202,6 +202,12 @@ class NovaposhtaShipping extends AbstractCarrier implements
                     $this->cache->save(serialize($shippingData), $cacheId);
                 }
             }
+            if(!isset($shippingData['visualisation'])){
+                $visualisationCacheIdentifier ='np_vis__boxes_'. implode('-', $hashmapOfItemsOfProducts);
+                if (!empty(unserialize($this->cache->load($visualisationCacheIdentifier))) ?? null){
+                    $shippingData['visualisation'] = unserialize($this->cache->load($visualisationCacheIdentifier));
+                }
+            }
             $this->method = $this->rateMethodFactory->create();
             if (!isset($shippingData['price'])) {
                 $this->makeCarrierWithError($allowedMethods[$i]);

@@ -101,8 +101,9 @@ define([
                 },
                 success: function (data) {
                     let currentStreet = vm.value();
-                    vm.clear();
+                    window.perspective_novaposhta.street.react = false;
                     vm.setOptions(data);
+                    window.perspective_novaposhta.street.react = true;
                     if (currentStreet && currentStreet !== 'none') {
                         vm.value(currentStreet);
                     }

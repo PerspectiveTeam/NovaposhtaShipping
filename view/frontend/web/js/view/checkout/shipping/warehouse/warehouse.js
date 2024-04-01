@@ -84,9 +84,10 @@ define([
                     },
                     success: function (data) {
                         let currentWarehouse = vm.value();
-                        vm.clear();
                         var items = JSON.parse(data);
+                        window.perspective_novaposhta.warehouse.react = false;
                         vm.setOptions(items);
+                        window.perspective_novaposhta.warehouse.react = true;
                         if (currentWarehouse && currentWarehouse !== 'none') {
                             vm.value(currentWarehouse);
                         }

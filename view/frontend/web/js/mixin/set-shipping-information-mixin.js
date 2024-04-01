@@ -13,6 +13,14 @@ define([
     var perspective_novaposhta_shipping_street_val = '';
     var perspective_novaposhta_shipping_building_val = '';
     var perspective_novaposhta_shipping_flat_val = '';
+    window.perspective_novaposhta = window.perspective_novaposhta || {
+        warehouse: {
+            react: true
+        },
+        street: {
+            react: true
+        }
+    };
     postbox.subscribe("selectedCityPost", function (value) {
         perspective_novaposhta_shipping_city_val = value;
     });
@@ -39,10 +47,14 @@ define([
             }
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
                 perspective_novaposhta_shipping_city_val;
-            shippingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
-                perspective_novaposhta_shipping_warehouse_val;
-            shippingAddress['extension_attributes']['perspective_novaposhta_shipping_street'] =
-                perspective_novaposhta_shipping_street_val;
+            if (window.perspective_novaposhta.warehouse.react) {
+                shippingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
+                    perspective_novaposhta_shipping_warehouse_val;
+            }
+            if (window.perspective_novaposhta.street.react) {
+                shippingAddress['extension_attributes']['perspective_novaposhta_shipping_street'] =
+                    perspective_novaposhta_shipping_street_val;
+            }
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_building'] =
                 perspective_novaposhta_shipping_building_val;
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_flat'] =
@@ -66,10 +78,14 @@ define([
             }
             billingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
                 perspective_novaposhta_shipping_city_val;
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
-                perspective_novaposhta_shipping_warehouse_val;
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_street'] =
-                perspective_novaposhta_shipping_street_val;
+            if (window.perspective_novaposhta.warehouse.react) {
+                billingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
+                    perspective_novaposhta_shipping_warehouse_val;
+            }
+            if (window.perspective_novaposhta.street.react) {
+                billingAddress['extension_attributes']['perspective_novaposhta_shipping_street'] =
+                    perspective_novaposhta_shipping_street_val;
+            }
             billingAddress['extension_attributes']['perspective_novaposhta_shipping_building'] =
                 perspective_novaposhta_shipping_building_val;
             billingAddress['extension_attributes']['perspective_novaposhta_shipping_flat'] =

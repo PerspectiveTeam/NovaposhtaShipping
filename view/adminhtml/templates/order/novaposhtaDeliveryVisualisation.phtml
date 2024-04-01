@@ -14,7 +14,7 @@
                         <div class="admin__page-section-item-title">
                             <span class="title"><?= $escaper->escapeHtml(__($block->decorateLabel($key))) ?></span>
                             <div class="admin__page-section-item-content">
-                                <a href="<?= $escaper->escapeUrl($block->decorateValue($key, $value)) ?>"><?= __('Visualise Box #%1', $block->getBoxNumber($key)) ?></a>
+                                <a href="<?= $escaper->escapeUrl($block->decorateValue($key, $value)) ?>" target=”_blank”><?= __('Visualise Box #%1', $block->getBoxNumber($key)) ?></a>
                             </div>
                         </div>
                     </div>
