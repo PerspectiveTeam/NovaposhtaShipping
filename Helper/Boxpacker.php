@@ -151,7 +151,7 @@ class Boxpacker
             ]), (int) ceil($productValQty));
         }
         $this->boxVisualisationLinksArray = [];
-        $packedBoxes = $this->getPacker()->packAllPermutations();
+        $packedBoxes = $this->getPacker()->pack();
         /** @var PackedBox $box */
         foreach ($packedBoxes as $box) {
             $boxWidth = $box->getUsedWidth() / 10;
