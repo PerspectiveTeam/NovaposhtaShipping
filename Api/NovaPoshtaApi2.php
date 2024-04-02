@@ -33,7 +33,7 @@ class NovaPoshtaApi2
     /**
      * @var string Language of response
      */
-    protected $language = 'ru';
+    protected $language = 'ua';
 
     /**
      * @var string Connection type (curl | file_get_contents)
@@ -70,7 +70,7 @@ class NovaPoshtaApi2
      *
      * @return NovaPoshtaApi2
      */
-    public function __construct($key, $language = 'ru', $throwErrors = false, $connectionType = 'curl')
+    public function __construct($key, $language = 'ua', $throwErrors = false, $connectionType = 'curl')
     {
         $this->throwErrors = $throwErrors;
         return $this

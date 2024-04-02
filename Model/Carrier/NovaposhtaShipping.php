@@ -188,10 +188,10 @@ class NovaposhtaShipping extends AbstractCarrier implements
             $hashmapOfItemsOfProducts = [];
             $allVisibleItems = $this->session->getQuote()->getAllVisibleItems();
             foreach ($allVisibleItems as $item) {
-                $hashmapOfItemsOfProducts [] = $item->getProductId() . '_' . $item->getQty();
+                $hashmapOfItemsOfProducts [] = 'prod_id_'.$item->getProductId() . '_qty_' . $item->getQty();
             }
-            $requestDataHash = 'product_' . implode('-', $hashmapOfItemsOfProducts);
-            $cacheId = "np_price__city_{$data['current_user_address']->getCity()}_method_{$data['current_method']}_quoteId_{$data['quote_id']}_hash_{$requestDataHash}";
+            $requestDataHash = implode('-', $hashmapOfItemsOfProducts);
+            $cacheId = "np_price_city_{$data['current_user_address']->getCity()}_method_{$data['current_method']}_hash_{$requestDataHash}";
             if (!empty(unserialize($this->cache->load($cacheId)))) {
                 $shippingData = unserialize($this->cache->load($cacheId));
             } else {

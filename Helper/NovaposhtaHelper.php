@@ -209,7 +209,7 @@ class NovaposhtaHelper
         foreach ($items as $item) {
             $weight += ($item->getWeight() * $item->getQty());
             $result = $this->markProductWithSpecialPrice($item);
-            $hashmapOfItemsOfProducts[] = $item->getProductId() . '_' . $item->getQty();
+            $hashmapOfItemsOfProducts[] = 'prod_id_'.$item->getProductId() . '_qty_' . $item->getQty();
         }
         natsort($hashmapOfItemsOfProducts);
         $boxPacker = $this->boxpackerFactory->create();
