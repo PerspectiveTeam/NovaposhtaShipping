@@ -43,9 +43,9 @@ define([
                 //такое нужно чтобы не пропадал name после изменения инпута
                 this.inputName = element.name = this.inputCustomName();
             }
-            var lang = "ru";
-            if ($('html').attr('lang') == "uk") {
-                lang = "uk";
+            var lang = "uk";
+            if ($('html').attr('lang') == "ru") {
+                lang = "ru";
             }
             let initialData = [];
             if (this.backendCityValue() != '' && this.backendCityName() != '') {
