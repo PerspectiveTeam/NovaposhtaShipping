@@ -5,6 +5,7 @@ namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping;
 use Magento\Backend\Block\Template\Context;
 use Magento\Catalog\Api\ProductRepositoryInterfaceFactory;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Framework\DataObject;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
@@ -26,69 +27,9 @@ use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPr
 
 /**
  * Class Npc2cshipment
- * @package Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping
  */
 class Npc2cshipment extends AbstractShipment
 {
-
-
-//
-//    public function __construct(
-//        Context $context,
-//        Registry $registry,
-//        Admin $adminHelper,
-//        LoggerInterface $logger,
-//        ProductRepositoryInterfaceFactory $productRepositoryInterfaceFactory,
-//        BoxpackerFactory $boxpackerFactory,
-//        NovaposhtaHelper $novaposhtaHelper,
-//        Collection $shippingCheckoutAddressResourceModelCollection,
-//        CityRepositoryInterface $cityRepository,
-//        Config $config,
-//        DateTime $dateTime,
-//        OrderRepositoryInterface $orderRepository,
-//        CollectionFactory $counterpartyAddressIndexCollectionFactory,
-//        CounterpartyIndexCollectionFactoryAlias $counterpartyIndexCollectionFactory,
-//        CounterpartyOrgThirdpartyCollectionFactory $counterpartyOrgThirdpartyCollectionFactory,
-//        TimezoneInterface $timezone,
-//        ProductMetadataInterface $productMetadata,
-//        array $data = [],
-//        ShippingHelper $shippingHelper = null,
-//        TaxHelper $taxHelper = null
-//    ) {
-//        $this->context = $context;
-//        $this->request = $context->getRequest();
-//        $this->shippingCheckoutAddressResourceModelCollection = $shippingCheckoutAddressResourceModelCollection;
-//        $this->logger = $logger;
-//        $this->productRepositoryInterfaceFactory = $productRepositoryInterfaceFactory;
-//        $this->boxpackerFactory = $boxpackerFactory;
-//        $this->novaposhtaHelper = $novaposhtaHelper;
-//        $this->cityRepository = $cityRepository;
-//        $this->dateTime = $dateTime;
-//        $this->config = $config;
-//        $this->orderRepository = $orderRepository;
-//        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
-//        $this->counterpartyIndexCollectionFactory = $counterpartyIndexCollectionFactory;
-//        $this->counterpartyOrgThirdpartyCollectionFactory = $counterpartyOrgThirdpartyCollectionFactory;
-//        $this->timezone = $timezone;
-//        try {
-//            $this->npAddressData = $this->getQuoteAddressClient();
-//        } catch (Exception $exception) {
-//            $this->logger->critical($exception->getTraceAsString());
-//            $this->logger->debug($exception->getTraceAsString());
-//        }
-//        // если текущая версии выше 2.3 то выполняем это
-//        if (version_compare($productMetadata->getVersion(), '2.3') === 1) {
-//            parent::__construct($context, $registry, $adminHelper, $data, $shippingHelper, $taxHelper);
-//        } else {
-//            //иначе это
-//            parent::__construct(
-//                $context,
-//                $registry,
-//                $adminHelper,
-//                $data
-//            );
-//        }
-//    }
     /**
      * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingAddress\Collection
      */
@@ -100,14 +41,9 @@ class Npc2cshipment extends AbstractShipment
     private StreetRepositoryInterface $streetRepository;
 
     /**
-     * @var string
+     * @var \Magento\Framework\DataObject|\Perspective\NovaposhtaShipping\Model\ShippingAddress
      */
-    protected $code = 'c2c';
-
-    /**
-     * @var null
-     */
-    protected $npAddressData = null;
+    protected $npAddressData;
 
     /**
      * @var array|mixed|null
@@ -189,7 +125,8 @@ class Npc2cshipment extends AbstractShipment
             $select2SmallFactory,
             $data,
             $jsonHelper,
-            $directoryHelper);
+            $directoryHelper
+        );
         $this->shippingCheckoutAddressResourceModelCollection = $shippingCheckoutAddressResourceModelCollection;
         $this->streetRepository = $streetRepository;
     }
@@ -317,10 +254,12 @@ class Npc2cshipment extends AbstractShipment
 
     /**
      * @return void
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getRecalculatedPrice()
+    public function recalculatePrice()
     {
-        $this->npAddressData = $this->getQuoteAddressClient();
+        $this->setNpAddressData($this->getQuoteAddressClient());
         $data = $this->addCurrentMethodToData(['quote_id' => $this->getQuoteId()]);
         $tempModelPriceCache = $this->loadCachedData();
         $data = $this->appendCurrentUserAddress($tempModelPriceCache, $data);
@@ -359,9 +298,7 @@ class Npc2cshipment extends AbstractShipment
      */
     public function getCityData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getCity();
-        }
+        return $this->getNpAddressData()->getCity();
     }
 
     /**
@@ -369,19 +306,16 @@ class Npc2cshipment extends AbstractShipment
      */
     public function getCityLabel()
     {
-        if ($this->npAddressData) {
-            return $this->cityRepository->getCityByCityRef($this->npAddressData->getCity())->getDescriptionUa();
-        }
+        return $this->cityRepository->getCityByCityRef($this->getNpAddressData()->getCity())->getDescriptionUa();
     }
 
     /**
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getStreetLabel()
     {
-        if ($this->npAddressData) {
-            return $this->streetRepository->getObjectByRef($this->npAddressData->getStreet())->getDescription();
-        }
+        return $this->streetRepository->getObjectByRef($this->getNpAddressData()->getStreet())->getDescription();
     }
 
     /**
@@ -389,9 +323,7 @@ class Npc2cshipment extends AbstractShipment
      */
     public function getStreetData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getStreet();
-        }
+        return $this->getNpAddressData()->getStreet();
     }
 
     /**
@@ -399,9 +331,7 @@ class Npc2cshipment extends AbstractShipment
      */
     public function getBuildNumData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getBuilding();
-        }
+        return $this->getNpAddressData()->getBuilding();
     }
 
     /**
@@ -409,9 +339,7 @@ class Npc2cshipment extends AbstractShipment
      */
     public function getFlat()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getFlat();
-        }
+        return $this->getNpAddressData()->getFlat();
     }
 
     /**
@@ -473,5 +401,25 @@ class Npc2cshipment extends AbstractShipment
     public function getCounterpartyAddress()
     {
         return $this->counterpartyAddress;
+    }
+
+    /**
+     * @param $npAddressData
+     * @return void
+     */
+    public function setNpAddressData($npAddressData)
+    {
+        $this->npAddressData = $npAddressData;
+    }
+
+    /**
+     * @return \Magento\Framework\DataObject|\Perspective\NovaposhtaShipping\Model\ShippingAddress
+     */
+    public function getNpAddressData()
+    {
+        if (empty($this->npAddressData)) {
+            return new DataObject();
+        }
+        return $this->npAddressData;
     }
 }

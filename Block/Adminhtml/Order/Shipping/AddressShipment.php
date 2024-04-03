@@ -4,6 +4,7 @@ namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping;
 
 use Magento\Backend\Block\Template\Context;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Framework\DataObject;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -79,9 +80,9 @@ class AddressShipment extends AbstractShipment
     }
 
     /**
-     * @var null
+     * @var \Magento\Framework\DataObject|\Perspective\NovaposhtaShipping\Model\ShippingAddress
      */
-    protected $npAddressData = null;
+    protected $npAddressData;
 
     /**
      * @var array|mixed|null
@@ -244,9 +245,9 @@ class AddressShipment extends AbstractShipment
     /**
      * @return void
      */
-    public function getRecalculatedPrice()
+    public function recalculatePrice()
     {
-        $this->npAddressData = $this->getQuoteAddressClient();
+        $this->setNpAddressData($this->getQuoteAddressClient());
         $data = $this->addCurrentMethodToData(['quote_id' => $this->getQuoteId()]);
         $tempModelPriceCache = $this->loadCachedData();
         $data = $this->appendCurrentUserAddress($tempModelPriceCache, $data);
@@ -285,9 +286,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getCityData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getCity();
-        }
+        return $this->getNpAddressData()->getCity();
     }
 
     /**
@@ -295,9 +294,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getCityLabel()
     {
-        if ($this->npAddressData) {
-            return $this->cityRepository->getCityByCityRef($this->npAddressData->getCity())->getDescriptionUa();
-        }
+        return $this->cityRepository->getCityByCityRef($this->getNpAddressData()->getCity())->getDescriptionUa();
     }
 
     /**
@@ -305,9 +302,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getStreetLabel()
     {
-        if ($this->npAddressData) {
-            return $this->streetRepository->getObjectByRef($this->npAddressData->getStreet())->getDescription();
-        }
+        return $this->streetRepository->getObjectByRef($this->getNpAddressData()->getStreet())->getDescription();
     }
 
     /**
@@ -315,9 +310,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getStreetData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getStreet();
-        }
+        return $this->getNpAddressData()->getStreet();
     }
 
     /**
@@ -325,9 +318,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getBuildNumData()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getBuilding();
-        }
+        return $this->getNpAddressData()->getBuilding();
     }
 
     /**
@@ -335,9 +326,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getFlat()
     {
-        if ($this->npAddressData) {
-            return $this->npAddressData->getFlat();
-        }
+        return $this->getNpAddressData()->getFlat();
     }
 
     /**
@@ -399,5 +388,25 @@ class AddressShipment extends AbstractShipment
     public function getCounterpartyAddress()
     {
         return $this->counterpartyAddress;
+    }
+
+    /**
+     * @param $npAddressData
+     * @return void
+     */
+    public function setNpAddressData($npAddressData)
+    {
+        $this->npAddressData = $npAddressData;
+    }
+
+    /**
+     * @return \Magento\Framework\DataObject|\Perspective\NovaposhtaShipping\Model\ShippingAddress
+     */
+    public function getNpAddressData()
+    {
+        if (empty($this->npAddressData)) {
+            return new DataObject();
+        }
+        return $this->npAddressData;
     }
 }

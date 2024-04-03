@@ -45,17 +45,11 @@
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\Sale</source_model>
                     <backend_model>Perspective\NovaposhtaShipping\Model\Config\Backend\Sender\Sale</backend_model>
                     <can_be_empty>1</can_be_empty>
-                    <depends>
-                        <field id="is_organization">1</field>
-                    </depends>
                 </field>
                 <field id="sale_sender_contact" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Contact Sender with sale</label>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContact</source_model>
                     <can_be_empty>1</can_be_empty>
-                    <depends>
-                        <field id="is_organization">1</field>
-                    </depends>
                 </field>
                 <field id="sale_sender_contact_address" translate="label" type="select" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Contact Counterparty Sender Address with sale</label>

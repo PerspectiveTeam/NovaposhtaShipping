@@ -22,6 +22,7 @@ use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPr
 
 class AbstractShipment extends Template
 {
+    const NOVAPOSHTA_CITY_SENDER_INPUT_AUTOCOMPLETE = 'novaposhtashipping_city_sender';
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
@@ -188,5 +189,25 @@ class AbstractShipment extends Template
             $this->getType()
         )->loadAddressInfo($this->getQuoteId());
         return $data;
+    }
+
+    public function getCitySenderAutocompleteHtml()
+    {
+        /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
+        $element = $this->select2->create();
+        $element->setData('name', self::NOVAPOSHTA_CITY_SENDER_INPUT_AUTOCOMPLETE);
+        $dataBindArray['scope'] = '\'citySenderInputAutocompleteShipping\'';
+        $element->addClass('citySenderInputAutocompleteShippingClass');
+        $element->setDataBind($dataBindArray);
+        return $element->toHtml();
+    }
+    /**
+     * @param string $path
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getRestUrl(string $path)
+    {
+        return $this->storeManager->getStore(1)->getBaseUrl() . $path;
     }
 }
