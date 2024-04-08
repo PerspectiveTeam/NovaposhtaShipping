@@ -4,7 +4,7 @@
 <?php if (!$block->getIsActive()) {
     return;
 } ?>
-<?php $block->getRecalculatedPrice() ?>
+<?php $block->recalculatePrice() ?>
 <section data-bind="scope: 'npc2cShippingForm'" class="admin__page-section order-npShippingForm">
 
     <div class="admin__page-section-title">
@@ -72,9 +72,9 @@
                                     $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $cost . '</td>' . '</tr>';
                                 } else {
                                     if (isset($val['data'][0]['Cost'])) {
-                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
+                                        $table [] = '<tr>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
                                     } else {
-                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . '0' . '</td>' . '</tr>';
+                                        $table [] = '<tr>' . '<td>' . '0' . '</td>' . '</tr>';
                                     }
                                 }
                             }

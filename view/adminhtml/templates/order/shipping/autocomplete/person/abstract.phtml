@@ -20,3 +20,18 @@ switch ($block->getRenderBlock()) {
         break;
 }
 ?>
+<script type="text/x-magento-init">
+    {
+    "*":{
+         "Magento_Ui/js/core/app":{
+            "components":{
+                "citySenderInputAutocompleteShipping":{
+                    "component": "Perspective_NovaposhtaShipping/js/order/shipping/citySender",
+                    "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                "inputName":"np_c2c_citySenderValue"
+                }
+            }
+        }
+    }
+}
+</script>

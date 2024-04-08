@@ -60,7 +60,7 @@ define([
                 width: '100%',
                 minimumInputLength: 2,
                 language: lang,
-                data: initialData,
+                // data: initialData,
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",
