@@ -6,7 +6,7 @@ namespace Perspective\NovaposhtaShipping\Api\Data;
 
 interface CounterpartyOrgThirdpartyDoorsInterface
 {
-    const DATABASE_TABLE_NAME = 'perspective_novaposhta_counterparty_addresses_doors';
+    const DATABASE_TABLE_NAME = 'perspective_novaposhta_counterparty_c_prsn_addr_doors';
     const ID = "id";
     const CONTACTPERSONREF = 'ContactPersonRef';
     const REF = 'Ref';

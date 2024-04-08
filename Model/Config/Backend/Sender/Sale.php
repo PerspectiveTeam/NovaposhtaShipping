@@ -88,24 +88,25 @@ class Sale extends Value
      * @var \Magento\Framework\Message\ManagerInterface
      */
     private $messageManager;
-    /**
-     * @var \Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterface
-     */
-    private $counterpartyAddressIndexInterface;
-    /**
-     * @var \Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterfaceFactory
-     */
-    private $counterpartyAddressIndexRepositoryFactory;
 
     /**
      * Sale constructor.
+     *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyIndexFactory $counterpartyIndexFactory
-     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyIndex $counterpartyIndexModel
+     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyIndexFactory $counterpartyIndexResourceModelFactory
+     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyIndexFactory $counterpartyIndexModelFactory
+     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyOrgThirdpartyFactory $counterpartyOrgThirdpartyModelFactory
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdpartyFactory $counterpartyOrgThirdpartyResourceModelFactory
+     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyorgthirdpartyDoorsAddressesFactory $counterpartyorgthirdpartyDoorsAddressesFactory
+     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyorgthirdpartyWarehouseAddressesFactory $counterpartyorgthirdpartyWarehouseAddressesFactory
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdpartyDoorsAddressFactory $counterpartyOrgThirdpartyDoorsAddressResourceFactory
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdpartyWarehouseAddressFactory $counterpartyOrgThirdpartyWarehouseAddressResourceFactory
+     * @param \Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterfaceFactory $counterpartyAddressIndexRepositoryFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -125,7 +126,6 @@ class Sale extends Value
         \Perspective\NovaposhtaShipping\Model\CounterpartyorgthirdpartyWarehouseAddressesFactory $counterpartyorgthirdpartyWarehouseAddressesFactory,
         \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdpartyDoorsAddressFactory $counterpartyOrgThirdpartyDoorsAddressResourceFactory,
         \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdpartyWarehouseAddressFactory $counterpartyOrgThirdpartyWarehouseAddressResourceFactory,
-        \Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterfaceFactory $counterpartyAddressIndexRepositoryFactory,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -147,7 +147,6 @@ class Sale extends Value
         $this->counterpartyOrgThirdpartyDoorsAddressResourceFactory = $counterpartyOrgThirdpartyDoorsAddressResourceFactory;
         $this->counterpartyOrgThirdpartyWarehouseAddressResourceFactory = $counterpartyOrgThirdpartyWarehouseAddressResourceFactory;
         $this->messageManager = $messageManager;
-        $this->counterpartyAddressIndexRepositoryFactory = $counterpartyAddressIndexRepositoryFactory;
         parent::__construct(
             $context,
             $registry,
@@ -199,40 +198,6 @@ class Sale extends Value
                             'Page' => 1
                         ]
                     );
-                    $parentCounterpartyAddress = $this->novaposhtaHelper->getApi()->request(
-                        'Counterparty',
-                        'getCounterpartyAddresses',
-                        [
-                            'Ref' => $counterpartyIndexModel->getCounterpartyRef(),
-                            'CounterpartyProperty' => $counterpartyIndexModel->getContactProperty(),
-                        ]
-                    );
-                    if (array_key_exists('success', $parentCounterpartyAddress)) {
-                        if ($parentCounterpartyAddress['success'] === true) {
-                            foreach ($parentCounterpartyAddress['data'] as $counterpartyAddressIdx => $counterpartyAddressValue) {
-                                /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex $addressIndexModel */
-                                $addressIndexModel = $this->counterpartyAddressIndexRepositoryFactory->create();// Mage::getModel('novaposhtattn/counterpartyaddressindex');
-                                /** @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex $addressIndexModelResource */
-                                $addressIndexModelResource = $addressIndexModel->getThisResourceModel();
-                                $addressIndexModelResource->load($addressIndexModel, $counterpartyAddressValue['Ref'], 'Ref');
-                                $addressIndexModelExisting = $addressIndexModel;
-                                if ($addressIndexModelExisting->getCounterpartyRef()) {
-                                    $addressIndexModel = $addressIndexModelExisting;
-                                    foreach ($this->counterpartyAddressIndexMap as $arrIndex => $method) {
-                                        $addressIndexModel->setCounterpartyRef($counterpartyIndexModel->getCounterpartyRef());
-                                        $addressIndexModel->{$method}($counterpartyAddressValue[$arrIndex]);
-                                        $addressIndexModelResource->save($addressIndexModel);
-                                    }
-                                } else {
-                                    foreach ($this->counterpartyAddressIndexMap as $arrIndex => $method) {
-                                        $addressIndexModel->setCounterpartyRef($counterpartyIndexModel->getCounterpartyRef());
-                                        $addressIndexModel->{$method}($counterpartyAddressValue[$arrIndex]);
-                                        $addressIndexModelResource->save($addressIndexModel);
-                                    }
-                                }
-                            }
-                        }
-                    }
                     if (array_key_exists('success', $parentCounterpartyContacts)) {
                         if ($parentCounterpartyContacts['success'] === true) {
                             $counterpartyContactsDataArr = $parentCounterpartyContacts['data'];  //контактные лица контрагента
