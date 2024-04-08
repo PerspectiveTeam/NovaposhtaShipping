@@ -53,8 +53,7 @@
                 type="Perspective\NovaposhtaShipping\Plugin\Controller\Adminhtml\SaveAddressInformationPlugin" sortOrder="1"
                 disabled="false"/>
     </type>
-    <preference for="Perspective\NovaposhtaShipping\Api\Data\CounterpartyAddressIndexInterface"
-                type="Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex" />
+
     <preference for="Perspective\NovaposhtaShipping\Api\Data\CounterpartyIndexInterface"
                 type="Perspective\NovaposhtaShipping\Model\CounterpartyIndex" />
     <preference for="Perspective\NovaposhtaShipping\Api\Data\ShippingWarehouseInterface"

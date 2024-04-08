@@ -52,7 +52,7 @@
         </constraint>
     </table>
     <table name="perspective_novaposhta_counterparty_index" resource="default" engine="innodb"
-           comment="Index of counterparty">
+           comment="Index of counterparty. Main above all. 1">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Entity Id"/>
         <column xsi:type="text" name="counterpartyRef" nullable="true" comment="Counterparty Ref"/>
@@ -64,29 +64,8 @@
             <column name="id"/>
         </constraint>
     </table>
-    <table name="perspective_novaposhta_counterparty_address_index" resource="default" engine="innodb"
-           comment="Warehouse types">
-        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
-                comment="Entity Id"/>
-        <column xsi:type="text" name="CounterpartyRef" nullable="true" comment="Counterparty Ref"/>
-        <column xsi:type="text" name="CityRef" nullable="true" comment="CityRef"/>
-        <column xsi:type="text" name="Ref" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="Description" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="CityDescription" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="StreetRef" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="StreetDescription" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="BuildingRef" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="BuildingDescription" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="Note" nullable="true" comment="Ref"/>
-        <column xsi:type="text" name="AddressName" nullable="true" comment="Ref"/>
-        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
-                comment="Update Time"/>
-        <constraint xsi:type="primary" referenceId="PRIMARY">
-            <column name="id"/>
-        </constraint>
-    </table>
-    <table name="perspective_novaposhta_counterparty_org_thirdparty" resource="default" engine="innodb"
-           comment="Counterparty third party affiliate senders dictionary">
+    <table name="perspective_novaposhta_counterparty_contact_person" onCreate="migrateDataFromAnotherTable(perspective_novaposhta_counterparty_org_thirdparty)" resource="default" engine="innodb"
+           comment="Counterparty of the sender. Also points to perspective_novaposhta_counterparty_index. 2">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Entity Id"/>
         <column xsi:type="text" name="description" nullable="true" comment="description"/>
@@ -107,8 +86,8 @@
             <column name="id"/>
         </constraint>
     </table>
-    <table name="perspective_novaposhta_counterparty_addresses_doors" resource="default" engine="innodb"
-           comment="Counterparty address doors allowed points dictionary">
+    <table name="perspective_novaposhta_counterparty_c_prsn_addr_doors" onCreate="migrateDataFromAnotherTable(perspective_novaposhta_counterparty_addresses_doors)" resource="default" engine="innodb"
+           comment="Counterparty s sender place. Address. 3.1">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Entity Id"/>
         <column xsi:type="text" name="ContactPersonRef" nullable="true" comment="ContactPersonRef"/>
@@ -135,8 +114,8 @@
             <column name="id"/>
         </constraint>
     </table>
-    <table name="perspective_novaposhta_counterparty_addresses_warehouses" resource="default" engine="innodb"
-           comment="Counterparty address doors allowed points dictionary">
+    <table name="perspective_novaposhta_counterparty_c_prsn_addr_wh" onCreate="migrateDataFromAnotherTable(perspective_novaposhta_counterparty_addresses_warehouse)" resource="default" engine="innodb"
+           comment="Counterparty s sender place. Warehouse. 3.2">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Entity Id"/>
         <column xsi:type="text" name="ContactPersonRef" nullable="true" comment="ContactPersonRef"/>
@@ -156,7 +135,7 @@
         </constraint>
     </table>
     <table name="perspective_novaposhta_shipping_visualisation" resource="default" engine="innodb"
-           comment="Client\'s shipping boxes visualisation">
+           comment="Client s shipping boxes visualisation">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Entity Id"/>
         <column xsi:type="int" name="cart_id" padding="10" unsigned="true" nullable="false" identity="false"
