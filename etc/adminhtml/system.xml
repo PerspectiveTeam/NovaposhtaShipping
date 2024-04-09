@@ -41,18 +41,21 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="sale_sender" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Sender with sale</label>
+                    <label>Main Sender</label>
+                    <comment>Counterparty. Sender with ability to apply sales or another features.</comment>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\Sale</source_model>
                     <backend_model>Perspective\NovaposhtaShipping\Model\Config\Backend\Sender\Sale</backend_model>
                     <can_be_empty>1</can_be_empty>
                 </field>
                 <field id="sale_sender_contact" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Contact Sender with sale</label>
+                    <label>Contact Person of the Sender</label>
+                    <comment>Counterparty Contact Person</comment>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContact</source_model>
                     <can_be_empty>1</can_be_empty>
                 </field>
                 <field id="sale_sender_contact_address" translate="label" type="select" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Contact Counterparty Sender Address with sale</label>
+                    <label>Contact Person Address</label>
+                    <comment>Counterparty Contact Person Sender Address</comment>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContactAddress</source_model>
                     <can_be_empty>1</can_be_empty>
                     <depends>

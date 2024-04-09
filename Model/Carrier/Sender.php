@@ -3,6 +3,7 @@
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
+use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory;
 
 class Sender
 {
@@ -23,9 +24,9 @@ class Sender
     private $cityRepository;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory
+     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory
      */
-    private $counterpartyAddressIndexCollectionFactory;
+    private CollectionFactory $counterpartyContactPersonCollectionFactory;
 
     /**
      * @param \Perspective\NovaposhtaShipping\Helper\Config $config
@@ -34,13 +35,17 @@ class Sender
     public function __construct(
         \Perspective\NovaposhtaShipping\Helper\Config $config,
         \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository,
-        \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
+        CollectionFactory $counterpartyContactPersonCollectionFactory
+
     ) {
         $this->config = $config;
         $this->cityRepository = $cityRepository;
-        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
+        $this->counterpartyContactPersonCollectionFactory = $counterpartyContactPersonCollectionFactory;
     }
 
+    /**
+     * @return void
+     */
     public function prepareSenderCity()
     {
         $senderCityArr = explode(',', $this->config->getShippingConfigByCode('novaposhtashipping', 'sender_city') ?? '');
@@ -89,11 +94,17 @@ class Sender
         return $this->senderCityListObject;
     }
 
+    /**
+     * @param $counterparty
+     * @param $citySender
+     * @return array
+     */
     public function searchCounterpartyAddress($counterparty, $citySender)
     {
-        /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex $value */
-        $counterpartyIndexCollection = $this->counterpartyAddressIndexCollectionFactory->create()
-            ->addFieldToFilter('CounterpartyRef', ['like' => $counterparty])
+        //todo recheck this collection
+        /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyOrgThirdparty $value */
+        $counterpartyIndexCollection = $this->counterpartyContactPersonCollectionFactory->create()
+            ->addFieldToFilter('counterpartyRef', ['like' => $counterparty])
             ->getItems();
         $result = [];
         foreach ($counterpartyIndexCollection as $index => $value) {

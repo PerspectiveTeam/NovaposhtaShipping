@@ -14,9 +14,7 @@ use Perspective\NovaposhtaShipping\Model\Carrier\NovaposhtaApi;
 use Perspective\NovaposhtaShipping\Model\Carrier\Sender;
 use Perspective\NovaposhtaShipping\Model\Carrier\ServiceType;
 use Perspective\NovaposhtaShipping\Model\Carrier\ShippingSales;
-use Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndexFactory;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation;
-use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory;
 use Perspective\NovaposhtaShipping\Service\Cache\OperationsCache;
 
 class NovaposhtaHelper
@@ -148,8 +146,6 @@ class NovaposhtaHelper
     public function __construct(
         Config $config,
         NovaPoshtaApi2Factory $novaPoshtaApi2Factory,
-        CounterpartyAddressIndexFactory $counterpartyAddressIndexFactory,
-        CollectionFactory $counterpartyAddressIndexCollectionFactory,
         ProductRepositoryInterfaceFactory $productRepositoryInterfaceFactory,
         TimezoneInterface $timezone,
         BoxpackerFactory $boxpackerFactory,
@@ -167,8 +163,6 @@ class NovaposhtaHelper
     ) {
         $this->config = $config;
         $this->novaPoshtaApi2Factory = $novaPoshtaApi2Factory;
-        $this->counterpartyAddressIndexFactory = $counterpartyAddressIndexFactory;
-        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
         $this->productRepositoryInterfaceFactory = $productRepositoryInterfaceFactory;
         $this->timezone = $timezone;
         $this->boxpackerFactory = $boxpackerFactory;
