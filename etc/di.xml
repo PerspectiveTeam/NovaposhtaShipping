@@ -72,6 +72,8 @@
     </virtualType>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedCitiesRepositoryInterface"
                 type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepositoryInterface"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\SenderRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface"
                 type="Perspective\NovaposhtaShipping\Model\PreparedWarehousesRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedStreetsRepositoryInterface"

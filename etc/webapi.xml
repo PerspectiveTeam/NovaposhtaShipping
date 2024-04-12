@@ -26,12 +26,24 @@
             <resource ref="anonymous"/>
         </resources>
     </route>
-<!--    <route url="/V1/novaposhtashipping/sender-cities" method="POST">-->
-<!--        <service class="Perspective\NovaposhtaShipping\Api\StreetRepositoryInterface" method="getSenderCities"/>-->
-<!--        <resources>-->
-<!--            <resource ref="anonymous"/>-->
-<!--        </resources>-->
-<!--    </route>-->
+    <route url="/V1/novaposhtashipping/sender-cities" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface" method="getSenderCities"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/sender-contact-person" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface" method="getSenderContactPerson"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/novaposhtashipping/sender-contact-person-address" method="POST">
+        <service class="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface" method="getSenderContactPersonAddress"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
     <route url="/V1/novaposhtashipping/streets-formatted" method="POST">
         <service class="Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface" method="getFormattedByCityRef"/>
         <resources>
