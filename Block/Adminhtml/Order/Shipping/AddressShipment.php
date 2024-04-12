@@ -18,7 +18,7 @@ use Perspective\NovaposhtaShipping\Helper\Config;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
 use Perspective\NovaposhtaShipping\Model\Carrier\Mapping;
 use Perspective\NovaposhtaShipping\Model\Carrier\Sender;
-use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory;
+
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingAddress\Collection;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache;
 
@@ -40,6 +40,24 @@ class AddressShipment extends AbstractShipment
      */
     private SerializerInterface $serializer;
 
+    /**
+     * @param \Magento\Backend\Block\Template\Context $context
+     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+     * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory $checkoutOnestepPriceCacheFactory
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel
+     * @param \Perspective\NovaposhtaShipping\Model\Carrier\Sender $sender
+     * @param \Perspective\NovaposhtaShipping\Helper\Config $config
+     * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
+     * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
+     * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
+     * @param \Perspective\NovaposhtaCatalog\Api\StreetRepositoryInterface $streetRepository
+     * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2SmallFactory
+     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingAddress\Collection $shippingCheckoutAddressResourceModelCollection
+     * @param \Magento\Framework\Serialize\SerializerInterface $serializer
+     * @param array $data
+     * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
+     * @param \Magento\Directory\Helper\Data|null $directoryHelper
+     */
     public function __construct(
         Context $context,
         OrderRepositoryInterface $orderRepository,
@@ -51,7 +69,6 @@ class AddressShipment extends AbstractShipment
         Mapping $carrierMapping,
         CityRepositoryInterface $cityRepository,
         StreetRepositoryInterface $streetRepository,
-        CollectionFactory $counterpartyAddressIndexCollectionFactory,
         Select2SmallFactory $select2SmallFactory,
         Collection $shippingCheckoutAddressResourceModelCollection,
         SerializerInterface $serializer,
@@ -69,7 +86,6 @@ class AddressShipment extends AbstractShipment
             $novaposhtaHelper,
             $carrierMapping,
             $cityRepository,
-            $counterpartyAddressIndexCollectionFactory,
             $select2SmallFactory,
             $data,
             $jsonHelper,
@@ -203,6 +219,7 @@ class AddressShipment extends AbstractShipment
      */
     public function getCitiesDataForSelect()
     {
+        return [];
         $counterpartyAddressIndexCollection = $this->counterpartyAddressIndexCollectionFactory->create()->getItems();
         /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex $value */
         $alrearyPushed = [];
@@ -244,6 +261,8 @@ class AddressShipment extends AbstractShipment
 
     /**
      * @return void
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function recalculatePrice()
     {

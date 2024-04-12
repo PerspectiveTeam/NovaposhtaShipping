@@ -16,7 +16,6 @@ use Perspective\NovaposhtaShipping\Helper\Config;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
 use Perspective\NovaposhtaShipping\Model\Carrier\Mapping;
 use Perspective\NovaposhtaShipping\Model\Carrier\Sender;
-use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingWarehouse\Collection;
 
@@ -48,7 +47,6 @@ class WarehouseShipment extends AbstractShipment
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingWarehouse\Collection $shippingCheckoutWarehouseResourceModelCollection
      * @param \Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface $warehouseRepository
      * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2Factory
@@ -66,7 +64,6 @@ class WarehouseShipment extends AbstractShipment
         NovaposhtaHelper $novaposhtaHelper,
         Mapping $carrierMapping,
         CityRepositoryInterface $cityRepository,
-        CollectionFactory $counterpartyAddressIndexCollectionFactory,
         Collection $shippingCheckoutWarehouseResourceModelCollection,
         WarehouseRepositoryInterface $warehouseRepository,
         Select2SmallFactory $select2Factory,
@@ -84,7 +81,6 @@ class WarehouseShipment extends AbstractShipment
             $novaposhtaHelper,
             $carrierMapping,
             $cityRepository,
-            $counterpartyAddressIndexCollectionFactory,
             $select2Factory,
             $data,
             $jsonHelper,
@@ -197,6 +193,7 @@ class WarehouseShipment extends AbstractShipment
      */
     public function getCitiesDataForSelect()
     {
+        return [];
         $counterpartyAddressIndexCollection = $this->counterpartyAddressIndexCollectionFactory->create()->getItems();
         /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex $value */
         $alrearyPushed = [];
@@ -217,8 +214,10 @@ class WarehouseShipment extends AbstractShipment
 
     /**
      * @return void
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getRecalculatedPrice()
+    public function recalculatePrice()
     {
         $this->npAddressData = $this->getQuoteWarehouseClient();
         $data = $this->addCurrentMethodToData(['quote_id' => $this->getQuoteId()]);

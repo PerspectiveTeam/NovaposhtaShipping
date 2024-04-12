@@ -23,6 +23,8 @@ use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPr
 class AbstractShipment extends Template
 {
     const NOVAPOSHTA_CITY_SENDER_INPUT_AUTOCOMPLETE = 'novaposhtashipping_city_sender';
+    const NOVAPOSHTA_CONTACT_PERSON_INPUT_AUTOCOMPLETE = 'novaposhtashipping_contact_person';
+    const NOVAPOSHTA_CONTACT_PERSON_ADDRESS_INPUT_AUTOCOMPLETE = 'novaposhtashipping_contact_person_address';
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
@@ -54,8 +56,6 @@ class AbstractShipment extends Template
 
     protected CityRepositoryInterface $cityRepository;
 
-    protected CollectionFactory $counterpartyAddressIndexCollectionFactory;
-
     protected StoreManagerInterface $storeManager;
 
     protected Select2SmallFactory $select2;
@@ -71,7 +71,6 @@ class AbstractShipment extends Template
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
      * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2SmallFactory
      * @param array $data
      * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
@@ -87,7 +86,6 @@ class AbstractShipment extends Template
         NovaposhtaHelper $novaposhtaHelper,
         Mapping $carrierMapping,
         CityRepositoryInterface $cityRepository,
-        CollectionFactory $counterpartyAddressIndexCollectionFactory,
         Select2SmallFactory $select2SmallFactory,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
@@ -104,7 +102,6 @@ class AbstractShipment extends Template
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->carrierMapping = $carrierMapping;
         $this->cityRepository = $cityRepository;
-        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
         $this->select2 = $select2SmallFactory;
         parent::__construct($context, $data, $jsonHelper, $directoryHelper);
     }
@@ -198,6 +195,27 @@ class AbstractShipment extends Template
         $element->setData('name', self::NOVAPOSHTA_CITY_SENDER_INPUT_AUTOCOMPLETE);
         $dataBindArray['scope'] = '\'citySenderInputAutocompleteShipping\'';
         $element->addClass('citySenderInputAutocompleteShippingClass');
+        $element->setDataBind($dataBindArray);
+        return $element->toHtml();
+    }
+
+    public function getContactPersonAutocompleteHtml()
+    {
+        /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
+        $element = $this->select2->create();
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_INPUT_AUTOCOMPLETE);
+        $dataBindArray['scope'] = '\'contactPersonSenderInputAutocompleteShipping\'';
+        $element->addClass('contactPersonSenderInputAutocompleteShippingClass');
+        $element->setDataBind($dataBindArray);
+        return $element->toHtml();
+    }
+    public function getContactPersonAddressAutocompleteHtml()
+    {
+        /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
+        $element = $this->select2->create();
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_INPUT_AUTOCOMPLETE);
+        $dataBindArray['scope'] = '\'contactPersonSenderAddressInputAutocompleteShipping\'';
+        $element->addClass('contactPersonSenderAddressInputAutocompleteShippingClass');
         $element->setDataBind($dataBindArray);
         return $element->toHtml();
     }
