@@ -60,6 +60,6 @@ class SaleContactAddress
                 return [['label' => __('Firstly you need to specify sale sender contact'), 'value' => -1]];
             }
         }
-
+        return [['label' => __('Error occurs(sale sender contact)'), 'value' => -1]];
     }
 }

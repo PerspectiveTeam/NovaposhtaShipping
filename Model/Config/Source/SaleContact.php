@@ -35,5 +35,6 @@ class SaleContact
                 return ['label' => __('Firstly you need to specify sale sender'), 'value' => -1];
             }
         }
+        return [['label' => __('Error occurs(sale sender)'), 'value' => -1]];
     }
 }
