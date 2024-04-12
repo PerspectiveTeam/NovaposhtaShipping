@@ -108,7 +108,7 @@
                 </div>
 
                 <div style="display: flow-root;">
-                    <label for="np_c2c_street"><?= __('Choose city') ?></label>
+                    <label for="np_sender_city"><?= __('Choose city') ?></label>
                     <div class="input-to-right">
                         <!--                        citySenderInputAutocompleteShipping-->
                         <?= $block->getCitySenderAutocompleteHtml() ?>
@@ -116,40 +116,21 @@
                     </div>
                 </div>
                 <br/>
-
-                <div style="display: flow-root;" class="row-gray" >
-                    <label for="np_c2c_choosen_city_address"><?= __('Choose city') ?></label>
+                <div style="display: flow-root;">
+                    <label for="np_sender_contact_person"><?= __('Choose contact person') ?></label>
                     <div class="input-to-right">
-                    <select id="np_c2c_choosen_city_address" name="np_c2c_choosen_city_address">
-                        <option value="-1"><?= __("Select city") ?></option>
-                        <?php $cityData = $block->getCitiesDataForSelect() ?>
-                        <?php foreach ($cityData as $indexAddress => $dataAddress): ?>
-                            <?php if ($dataAddress['CityRef'] && $dataAddress['CounterpartyRef'] && $dataAddress['CityDescription']): ?>
-                                <option
-                                    value="<?= $dataAddress['CityRef'] . ',' . $dataAddress['CounterpartyRef'] ?>"><?= $dataAddress['CityDescription'] ?></option>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </select>
+                        <!--                    contactPersonSenderInputAutocompleteShipping -->
+                        <?= $block->getContactPersonAutocompleteHtml() ?>
+
                     </div>
                 </div>
                 <br/>
                 <div style="display: flow-root;">
-                    <label for="np_c2c_choosen_contact_person_address"><?= __('Choose contact person') ?></label>
+                    <label for="np_sender_contact_person"><?= __('Choose contact person') ?></label>
                     <div class="input-to-right">
-                        <select id="np_c2c_choosen_contact_person_address" name="np_c2c_choosen_contact_person_address">
-                            <option value="-1"><?= __("Select city then contact person") ?></option>
-                        </select>
-                    </div>
-                </div>
-                <br/>
-                <div style="display: flow-root;" class="row-gray">
-                    <label
-                        for="np_c2c_choosen_contact_person_address_place"><?= __('Choose address of contact person') ?></label>
-                    <div class="input-to-right">
-                        <select id="np_c2c_choosen_contact_person_address_place"
-                                name="np_c2c_choosen_contact_person_address_place">
-                            <option value="-1"><?= __("Select address of contact person") ?></option>
-                        </select>
+                        <!--                    contactPersonSenderAddressInputAutocompleteShipping -->
+                        <?= $block->getContactPersonAddressAutocompleteHtml() ?>
+
                     </div>
                 </div>
                 <br/>

@@ -27,11 +27,20 @@ switch ($block->getRenderBlock()) {
             "components":{
                 "citySenderInputAutocompleteShipping":{
                     "component": "Perspective_NovaposhtaShipping/js/order/shipping/citySender",
-                    "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/city') ?>",
+                    "backendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/sender-cities') ?>",
                 "inputName":"np_c2c_citySenderValue"
+                },
+                "contactPersonSenderInputAutocompleteShipping":{
+                      "component": "Perspective_NovaposhtaShipping/js/order/shipping/contactPersonSender",
+                      "backendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/sender-contact-person') ?>"
+                },
+                "contactPersonSenderAddressInputAutocompleteShipping":{
+                      "component": "Perspective_NovaposhtaShipping/js/order/shipping/contactPersonSenderAddress",
+                      "backendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/sender-contact-person-address') ?>"
                 }
             }
         }
     }
 }
+
 </script>
