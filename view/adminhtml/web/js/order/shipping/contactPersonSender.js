@@ -11,7 +11,7 @@ define([
     return Select.extend({
 
         defaults: {
-            template: 'Perspective_NovaposhtaShipping/order/create/city',
+            template: 'Perspective_NovaposhtaShipping/order/create/sender/contactPersonSender',
             backendRestURL: '',
             inputCustomName: '',
             classCustomName: '',
@@ -51,7 +51,7 @@ define([
             if (this.backendCityValue() != '' && this.backendCityName() != '') {
                 initialData = [{id: this.backendCityValue(), text: this.backendCityName()}];
             } else {
-                initialData = [{id: 0, text: $.mage.__('Choose city')}];
+                initialData = [{id: 0, text: $.mage.__('Choose Contact Person')}];
             }
             $(element).select2({
                 name: this.inputCustomName(),
