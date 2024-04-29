@@ -7,7 +7,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\Data\CityInterface;
 
-class SenderCities
+class SenderCounterparty
 {
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface

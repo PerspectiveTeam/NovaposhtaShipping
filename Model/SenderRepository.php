@@ -3,9 +3,8 @@
 namespace Perspective\NovaposhtaShipping\Model;
 
 use Magento\Framework\Serialize\SerializerInterface;
-use Perspective\NovaposhtaCatalog\Api\Data\CityInterface;
 use Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface;
-use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCities;
+use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty;
 use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPerson;
 use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPersonAddress;
 
@@ -17,9 +16,9 @@ class SenderRepository implements SenderRepositoryInterface
     private SerializerInterface $serializer;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCities
+     * @var \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty
      */
-    private SenderRepository\SenderCities $senderCities;
+    private SenderRepository\SenderCounterparty $senderCounterparty;
 
     /**
      * @var \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPerson
@@ -34,24 +33,24 @@ class SenderRepository implements SenderRepositoryInterface
 
     /**
      * @param \Magento\Framework\Serialize\SerializerInterface $serializer
-     * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCities $senderCities
+     * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty $senderCounterparty
      * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPerson $senderContactPerson
      */
     public function __construct(
         SerializerInterface $serializer,
-        SenderCities $senderCities,
+        SenderCounterparty $senderCounterparty,
         SenderContactPerson $senderContactPerson,
         SenderContactPersonAddress $senderContactPersonAddress
     ) {
         $this->serializer = $serializer;
-        $this->senderCities = $senderCities;
+        $this->senderCounterparty = $senderCounterparty;
         $this->senderContactPerson = $senderContactPerson;
         $this->senderContactPersonAddress = $senderContactPersonAddress;
     }
 
-    public function getSenderCities($term = null)
+    public function getSenderCounterparty($term = null)
     {
-        $result = $this->senderCities->get($term);
+        $result = $this->senderCounterparty->get($term);
         return $this->serializer->serialize($result);
     }
 

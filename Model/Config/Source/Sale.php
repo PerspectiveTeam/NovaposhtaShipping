@@ -24,14 +24,14 @@ class Sale
                     $options[] =
                         [
                             'label' => $counterpartyFromApiValue['Description'] . ' ' . $counterpartyFromApiValue['CityDescription'],
-                            'value' => $counterpartyFromApiValue['Ref'] . ',' . $counterpartyFromApiValue['City']
+                            'value' => $counterpartyFromApiValue['Ref']
                         ];
                 }
                 return $options;
             } else {
                 return ['label' => __('Firstly you need to specify API key'), 'value' => -1];
             }
-
         }
+        return [];
     }
 }

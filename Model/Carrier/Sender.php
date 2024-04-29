@@ -68,10 +68,11 @@ class Sender
     {
         $saleSender = $this->config->getShippingConfigByCode('novaposhtashipping', 'sale_sender');
         $defaultSaleSenderCounterparty = '';
-        if ($saleSender) {
+        if ($saleSender && strpos($saleSender, ',') !== false) {
             $saleSenderData = explode(',', $saleSender);
             $defaultSaleSenderCounterparty = $saleSenderData[0];
-            $defaultSaleCitySenderCounterparty = $saleSenderData[1];
+        } else {
+            $defaultSaleSenderCounterparty = $saleSender;
         }
         $defaultSaleContactSenderData = '';
         $saleContactSender = $this->config->getShippingConfigByCode('novaposhtashipping', 'sale_sender_contact');

@@ -27,7 +27,7 @@
         </resources>
     </route>
     <route url="/V1/novaposhtashipping/sender-cities" method="POST">
-        <service class="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface" method="getSenderCities"/>
+        <service class="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface" method="getSenderCounterparty"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

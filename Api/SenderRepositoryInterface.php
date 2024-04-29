@@ -8,7 +8,7 @@ interface SenderRepositoryInterface
      * @param string $term
      * @return string| null
      */
-    public function getSenderCities($term = null);
+    public function getSenderCounterparty($term = null);
     /**
      * @param string $term
      * @return string| null

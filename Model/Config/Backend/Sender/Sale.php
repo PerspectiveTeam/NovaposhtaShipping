@@ -205,9 +205,8 @@ class Sale extends Value
                      */
                     $data = explode(',', $this->getValue());
                     $counterpartyIndexModel = $this->counterpartyIndexModelFactory->create();
-                    $counterpartyIndexModel->setCityRef($data[1]);
-                    $counterpartyIndexModel->setContactProperty('Sender');
                     $counterpartyIndexModel->setCounterpartyRef($data[0]);
+                    $counterpartyIndexModel->setContactProperty('Sender');
                     $counterpartyIndexModelResource->save($counterpartyIndexModel);
                     /**
                      * Где-то, в этом классе, происходит дублирование @see $counterpartyIndexModel
