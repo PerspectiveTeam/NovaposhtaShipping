@@ -15,6 +15,7 @@ use Perspective\NovaposhtaShipping\Model\Carrier\Sender;
 use Perspective\NovaposhtaShipping\Model\Carrier\ServiceType;
 use Perspective\NovaposhtaShipping\Model\Carrier\ShippingSales;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation;
+use Perspective\NovaposhtaShipping\Model\VisualisatorRepository;
 use Perspective\NovaposhtaShipping\Service\Cache\OperationsCache;
 
 class NovaposhtaHelper
@@ -92,42 +93,17 @@ class NovaposhtaHelper
     protected NovaPoshtaApi2Factory $novaPoshtaApi2Factory;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndexFactory
-     */
-    protected CounterpartyAddressIndexFactory $counterpartyAddressIndexFactory;
-
-    /**
-     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory
-     */
-    protected CollectionFactory $counterpartyAddressIndexCollectionFactory;
-
-    /**
-     * @var \Perspective\NovaposhtaShipping\Model\BoxShippingVisualisationFactory
-     */
-    private BoxShippingVisualisationFactory $boxShippingVisualisationFactory;
-
-    /**
-     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation
-     */
-    private BoxShippingVisualisation $boxShippingVisualisationResourceModel;
-
-    /**
-     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation\CollectionFactory
-     */
-    private BoxShippingVisualisation\CollectionFactory $boxShippingVisualisationCollectionFactory;
-
-    /**
      * @var \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache
      */
     private OperationsCache $cache;
+
+    private VisualisatorRepository $visualisatorRepository;
 
     /**
      * NovaposhtaHelper constructor.
      *
      * @param \Perspective\NovaposhtaShipping\Helper\Config $config
      * @param \Perspective\NovaposhtaShipping\Api\NovaPoshtaApi2Factory $novaPoshtaApi2Factory
-     * @param \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndexFactory $counterpartyAddressIndexFactory
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
      * @param \Magento\Catalog\Api\ProductRepositoryInterfaceFactory $productRepositoryInterfaceFactory
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
      * @param \Perspective\NovaposhtaShipping\Helper\BoxpackerFactory $boxpackerFactory
@@ -142,6 +118,7 @@ class NovaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation $boxShippingVisualisationResourceModel
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation\CollectionFactory $boxShippingVisualisationCollectionFactory
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
+     * @param \Perspective\NovaposhtaShipping\Model\VisualisatorRepository $visualisatorRepository
      */
     public function __construct(
         Config $config,
@@ -156,10 +133,8 @@ class NovaposhtaHelper
         ShippingSales $shippingSales,
         Sender $sender,
         AbstractChain $shippingCartProcessor,
-        BoxShippingVisualisationFactory $boxShippingVisualisationFactory,
-        BoxShippingVisualisation $boxShippingVisualisationResourceModel,
-        BoxShippingVisualisation\CollectionFactory $boxShippingVisualisationCollectionFactory,
         OperationsCache $cache,
+        VisualisatorRepository $visualisatorRepository
     ) {
         $this->config = $config;
         $this->novaPoshtaApi2Factory = $novaPoshtaApi2Factory;
@@ -173,10 +148,8 @@ class NovaposhtaHelper
         $this->novaposhtaApi = $novaposhtaApi;
         $this->sender = $sender;
         $this->shippingCartProcessor = $shippingCartProcessor;
-        $this->boxShippingVisualisationFactory = $boxShippingVisualisationFactory;
-        $this->boxShippingVisualisationResourceModel = $boxShippingVisualisationResourceModel;
-        $this->boxShippingVisualisationCollectionFactory = $boxShippingVisualisationCollectionFactory;
         $this->cache = $cache;
+        $this->visualisatorRepository = $visualisatorRepository;
     }
 
     /**
@@ -211,21 +184,7 @@ class NovaposhtaHelper
         $visualisationCacheIdentifier ='np_vis__boxes_'. implode('-', $hashmapOfItemsOfProducts);
         $visualisationArray = $boxPacker->getBoxVisualisationLinksArray();
         if (empty(unserialize($this->cache->load($visualisationCacheIdentifier))) ?? null) {
-            $boxShippingVisualisationCollection = $this->boxShippingVisualisationCollectionFactory->create();
-            $boxShippingVisualisationCollection->addFieldToFilter('cart_id', $object->getQuoteId());
-            foreach ($boxShippingVisualisationCollection->getIterator() as $item) {
-                $this->boxShippingVisualisationResourceModel->delete($item);
-            }
-            foreach ($visualisationArray as $urlOfBoxVisualisation) {
-                $urlOfBoxVisualisationModel = $this->boxShippingVisualisationFactory->create()->setData(
-                    [
-                        'cart_id' => $object->getQuoteId(),
-                        'box_url' => base64_encode($urlOfBoxVisualisation),
-                        'created_at' => $this->timezone->date()->format('Y-m-d H:i:s'),
-                    ]
-                );
-                $this->boxShippingVisualisationResourceModel->save($urlOfBoxVisualisationModel);
-            }
+            $this->visualisatorRepository->process($object->getQuoteId(), $visualisationArray);
             $this->cache->save(serialize($visualisationArray), $visualisationCacheIdentifier);
         }
         $result['visualisation'] = $visualisationArray ?? [];
