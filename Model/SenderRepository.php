@@ -2,6 +2,7 @@
 
 namespace Perspective\NovaposhtaShipping\Model;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface;
 use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty;
@@ -10,11 +11,6 @@ use Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPersonAdd
 
 class SenderRepository implements SenderRepositoryInterface
 {
-    /**
-     * @var \Magento\Framework\Serialize\SerializerInterface
-     */
-    private SerializerInterface $serializer;
-
     /**
      * @var \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty
      */
@@ -30,39 +26,58 @@ class SenderRepository implements SenderRepositoryInterface
      */
     private SenderRepository\SenderContactPersonAddress $senderContactPersonAddress;
 
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    private ScopeConfigInterface $scopeConfig;
+
 
     /**
-     * @param \Magento\Framework\Serialize\SerializerInterface $serializer
      * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderCounterparty $senderCounterparty
      * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPerson $senderContactPerson
+     * @param \Perspective\NovaposhtaShipping\Model\SenderRepository\SenderContactPersonAddress $senderContactPersonAddress
      */
     public function __construct(
-        SerializerInterface $serializer,
         SenderCounterparty $senderCounterparty,
         SenderContactPerson $senderContactPerson,
-        SenderContactPersonAddress $senderContactPersonAddress
+        SenderContactPersonAddress $senderContactPersonAddress,
+        ScopeConfigInterface $scopeConfig
     ) {
-        $this->serializer = $serializer;
         $this->senderCounterparty = $senderCounterparty;
         $this->senderContactPerson = $senderContactPerson;
         $this->senderContactPersonAddress = $senderContactPersonAddress;
+        $this->scopeConfig = $scopeConfig;
     }
 
-    public function getSenderCounterparty($term = null)
+    /**
+     * @inheritDoc
+     */
+    public function getSenderCounterparty()
     {
-        $result = $this->senderCounterparty->get($term);
-        return $this->serializer->serialize($result);
+        $result = $this->senderCounterparty->get();
+        return $result;
     }
 
-    public function getSenderContactPerson($term = null)
+    /**
+     * @inheritDoc
+     */
+    public function getSenderContactPerson()
     {
-        $result = $this->senderContactPerson->get($term);
-        return $this->serializer->serialize($result);
+        $result = $this->senderContactPerson->get();
+        return $result;
     }
 
-    public function getSenderContactPersonAddress($term = null)
+    /**
+     * @inheritDoc
+     */
+    public function getSenderContactPersonAddress()
     {
-        $result = $this->senderContactPersonAddress->get($term);
-        return $this->serializer->serialize($result);
+        $result = $this->senderContactPersonAddress->get();
+        return $result;
+    }
+
+    public function isOrganization()
+    {
+        return $this->scopeConfig->getValue('carriers/novaposhtashipping/is_organization');
     }
 }

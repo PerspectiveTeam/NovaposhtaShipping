@@ -4,43 +4,46 @@ namespace Perspective\NovaposhtaShipping\Model\SenderRepository;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Perspective\NovaposhtaShipping\Model\Config\Source\SaleContact;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory;
 
 class SenderContactPerson
 {
-    private CollectionFactory $collectionFactory;
-
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     private ScopeConfigInterface $scopeConfig;
 
-    /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
-     */
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
+    private SaleContact $saleContactPerson;
 
     /**
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory $collectionFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
-        CollectionFactory $collectionFactory,
         ScopeConfigInterface $scopeConfig,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        SaleContact $saleContactPerson
     ) {
-        $this->collectionFactory = $collectionFactory;
         $this->scopeConfig = $scopeConfig;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->saleContactPerson = $saleContactPerson;
     }
 
-    public function get($term = null)
+    public function get()
     {
-        $result [] = [
-            'id' => 'TODO ref',
-            'text' => 'TODO name',
-        ];
-        return $result;
+        $senderCounterpartyValue = $this->scopeConfig->getValue('carriers/novaposhtashipping/sale_sender_contact');
+        $allSenders = $this->saleContactPerson->toOptionArray();
+        foreach ($allSenders as $key => $value) {
+            if ($value['value'] === $senderCounterpartyValue) {
+                return
+                    [
+                        'value' => $senderCounterpartyValue,
+                        'label' => trim($value['label'])
+                    ];
+            }
+        }
+        return
+            [
+                'value' => '-1',
+                'label' => 'Contact Person of the Sender is not specified in the module settings. Please, specify it in the module settings.'
+            ];
     }
 }

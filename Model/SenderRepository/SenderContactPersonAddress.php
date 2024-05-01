@@ -4,6 +4,7 @@ namespace Perspective\NovaposhtaShipping\Model\SenderRepository;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Perspective\NovaposhtaShipping\Model\Config\Source\SaleContactAddress;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory;
 
 class SenderContactPersonAddress
@@ -20,27 +21,36 @@ class SenderContactPersonAddress
      */
     private SearchCriteriaBuilder $searchCriteriaBuilder;
 
+    private SaleContactAddress $saleContactAddress;
+
     /**
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory $collectionFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
-        CollectionFactory $collectionFactory,
         ScopeConfigInterface $scopeConfig,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        SaleContactAddress $saleContactAddress
     ) {
-        $this->collectionFactory = $collectionFactory;
         $this->scopeConfig = $scopeConfig;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->saleContactAddress = $saleContactAddress;
     }
 
-    public function get($term = null)
+    public function get()
     {
-        $result [] = [
-            'id' => 'TODO ref',
-            'text' => 'TODO name',
-        ];
-        return $result;
+        $senderCounterpartyValue = $this->scopeConfig->getValue('carriers/novaposhtashipping/sale_sender_contact_address');
+        $allSenders = $this->saleContactAddress->toOptionArray();
+        foreach ($allSenders as $key => $value) {
+            if ($value['value'] === $senderCounterpartyValue) {
+                return
+                    [
+                        'value' => $senderCounterpartyValue,
+                        'label' => trim($value['label'])
+                    ];
+            }
+        }
+        return
+            [
+                'value' => '-1',
+                'label' => 'Contact Person Address is not specified in the module settings, or you use the Physical Person Account. Please, check it out in the module settings.'
+            ];
     }
 }

@@ -33,7 +33,7 @@
                 <field id="sender_city" translate="label" type="multiselect" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Cities with Warehouse </label>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleCity</source_model>
-                    <comment>aka Available cities or Sender City. Choose cities where you have the warehouses. Method will calculate shipping price among the cities. Kyiv is default city.</comment>
+                    <comment>aka Available cities or Sender City. Choose cities where you have the warehouses. Method will calculate shipping price among the cities. Kyiv is default city. Applied only for calculation process. The TTN creation process uses it own params.</comment>
                     <can_be_empty>1</can_be_empty>
                 </field>
                 <field id="is_organization" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">

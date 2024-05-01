@@ -6,6 +6,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\Data\CityInterface;
+use Perspective\NovaposhtaShipping\Model\Config\Source\Sale;
 
 class SenderCounterparty
 {
@@ -14,46 +15,42 @@ class SenderCounterparty
      */
     private ScopeConfigInterface $scopeConfig;
 
-    /**
-     * @var \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface
-     */
-    private CityRepositoryInterface $cityRepository;
+    private Sale $sale;
+
 
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Perspective\NovaposhtaShipping\Model\Config\Source\Sale $sale
      */
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        CityRepositoryInterface $cityRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        Sale $sale
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->cityRepository = $cityRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->sale = $sale;
     }
 
     /**
-     * @param string|null $term
      * @return array
      */
-    public function get($term = null)
+    public function get()
     {
-        $listOfWarehouses = $this->scopeConfig->getValue('carriers/novaposhtashipping/sender_city');
-        $this->searchCriteriaBuilder->addFilter(CityInterface::CITYID, $listOfWarehouses, 'in');
-        $this->searchCriteriaBuilder->addFilter(CityInterface::DESCRIPTION_UA, '%' . $term . '%', 'like');
-        $criteria = $this->searchCriteriaBuilder->create();
-        $list = $this->cityRepository->getList($criteria);
-        $result = [];
-        /** @var \Perspective\NovaposhtaCatalog\Api\Data\CityInterface $item */
-        foreach ($list->getItems() as $item) {
-            $result [] = [
-                'id' => $item->getRef(),
-                'text' => $item->getDescriptionUa(),
-            ];
+        $senderCounterpartyValue = $this->scopeConfig->getValue('carriers/novaposhtashipping/sale_sender');
+        $allSenders = $this->sale->toOptionArray();
+        foreach ($allSenders as $key => $value) {
+            if ($value['value'] === $senderCounterpartyValue) {
+                return
+                    [
+                        'value' => $senderCounterpartyValue,
+                        'label' => trim($value['label'])
+                    ];
+            }
         }
-        return $result;
+        return
+            [
+                'value' => '-1',
+                'label' => 'Main Sender is not specified in the module settings. Please, specify it in the module settings.'
+            ];
     }
 
 }
