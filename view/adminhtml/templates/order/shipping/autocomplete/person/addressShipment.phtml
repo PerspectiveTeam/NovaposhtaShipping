@@ -108,32 +108,32 @@
                 </div>
 
                 <div style="display: flow-root;">
-                    <label for="np_sender_city"><?= __('Choose city') ?></label>
+                    <label for="np_sender_city"><?= __('Current Sender') ?></label>
                     <div class="input-to-right">
-                        <!--                        citySenderInputAutocompleteShipping-->
-                        <?= $block->getCitySenderAutocompleteHtml() ?>
+                        <?= $block->getSenderHtml() ?>
+                        <?= $block->getSenderHiddenHtml() ?>
 
                     </div>
                 </div>
                 <br/>
-                <div style="display: flow-root;">
+                <div class="row-gray" style="display: flow-root;">
                     <label for="np_sender_contact_person"><?= __('Choose contact person') ?></label>
                     <div class="input-to-right">
-                        <!--                    contactPersonSenderInputAutocompleteShipping -->
-                        <?= $block->getContactPersonAutocompleteHtml() ?>
-
+                        <?= $block->getContactPersonHtml() ?>
+                        <?= $block->getContactPersonHiddenHtml() ?>
                     </div>
                 </div>
                 <br/>
-                <div style="display: flow-root;">
-                    <label for="np_sender_contact_person"><?= __('Choose contact person') ?></label>
-                    <div class="input-to-right">
-                        <!--                    contactPersonSenderAddressInputAutocompleteShipping -->
-                        <?= $block->getContactPersonAddressAutocompleteHtml() ?>
-
+                <?php if ($block->isOrganisation()): ?>
+                    <div style="display: flow-root;">
+                        <label for="np_sender_contact_person"><?= __('Choose contact person address') ?></label>
+                        <div class="input-to-right">
+                            <?= $block->getContactPersonAddressHtml() ?>
+                            <?= $block->getContactPersonAddressHiddenHtml() ?>
+                        </div>
                     </div>
-                </div>
-                <br/>
+                    <br/>
+                <?php endif; ?>
                 <div style="display: flow-root;">
                     <button type="button" id="create_ttn_c2c" class="scalable save">
                         <span><?php echo __('Send to Novaposhta server the parcel parameters') ?></span>
