@@ -5,18 +5,21 @@ namespace Perspective\NovaposhtaShipping\Api;
 interface SenderRepositoryInterface
 {
     /**
-     * @param string $term
-     * @return string| null
+     * @return bool
      */
-    public function getSenderCounterparty($term = null);
+    public function isOrganization();
     /**
-     * @param string $term
-     * @return string| null
+     * @return array
      */
-    public function getSenderContactPerson($term = null);
+    public function getSenderCounterparty();
+
     /**
-     * @param string $term
      * @return string| null
      */
-    public function getSenderContactPersonAddress($term = null);
+    public function getSenderContactPerson();
+
+    /**
+     * @return string| null
+     */
+    public function getSenderContactPersonAddress();
 }
