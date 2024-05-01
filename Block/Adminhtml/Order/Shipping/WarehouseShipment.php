@@ -4,11 +4,15 @@ namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping;
 
 use Magento\Backend\Block\Template\Context;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Framework\Data\Form\Element\LabelFactory;
+use Magento\Framework\Data\Form\ElementFactory;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
+use Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface;
+use Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\City;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Warehouse;
@@ -37,6 +41,10 @@ class WarehouseShipment extends AbstractShipment
      */
     private WarehouseRepositoryInterface $warehouseRepository;
 
+    private array $deliveryDate;
+
+    private array $deiveryPrice;
+
     /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
@@ -49,7 +57,8 @@ class WarehouseShipment extends AbstractShipment
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingWarehouse\Collection $shippingCheckoutWarehouseResourceModelCollection
      * @param \Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface $warehouseRepository
-     * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2Factory
+     * @param \Magento\Framework\Data\Form\ElementFactory $elementFactory
+     * @param \Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface $senderRepository
      * @param array $data
      * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
      * @param \Magento\Directory\Helper\Data|null $directoryHelper
@@ -66,7 +75,8 @@ class WarehouseShipment extends AbstractShipment
         CityRepositoryInterface $cityRepository,
         Collection $shippingCheckoutWarehouseResourceModelCollection,
         WarehouseRepositoryInterface $warehouseRepository,
-        Select2SmallFactory $select2Factory,
+        ElementFactory $elementFactory,
+        SenderRepositoryInterface $senderRepository,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -81,7 +91,8 @@ class WarehouseShipment extends AbstractShipment
             $novaposhtaHelper,
             $carrierMapping,
             $cityRepository,
-            $select2Factory,
+            $elementFactory,
+            $senderRepository,
             $data,
             $jsonHelper,
             $directoryHelper
@@ -89,10 +100,6 @@ class WarehouseShipment extends AbstractShipment
         $this->shippingCheckoutWarehouseResourceModelCollection = $shippingCheckoutWarehouseResourceModelCollection;
         $this->warehouseRepository = $warehouseRepository;
     }
-
-    private array $deliveryDate;
-
-    private array $deiveryPrice;
 
 
     public function getJsLayout()
@@ -113,7 +120,7 @@ class WarehouseShipment extends AbstractShipment
     public function getCityAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2->create();
+        $element = $this->elementFactory->create(Select2Small::class);
         $element->setData('name', City::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'cityInputAutocompleteShipping\'';
         $element->addClass('cityInputAutocompleteShippingClass');
@@ -123,7 +130,7 @@ class WarehouseShipment extends AbstractShipment
     public function getWarehouseAutocompleteHtml()
     {
         /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
-        $element = $this->select2->create();
+        $element = $this->elementFactory->create(Select2Small::class);
         $element->setData('name', Warehouse::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $dataBindArray['scope'] = '\'warehouseInputAutocompleteShipping\'';
         $element->addClass('warehouseInputAutocompleteShippingClass');
@@ -131,62 +138,6 @@ class WarehouseShipment extends AbstractShipment
         return $element->toHtml();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getCounterPartyToSend()
-    {
-        $allThirdpartyCounterparties = $this->counterpartyOrgThirdpartyCollectionFactory->create()
-            ->getItems();
-        foreach ($allThirdpartyCounterparties as $idx => $value) {
-            $counterpartyCityRef = $value->getCityRef();
-            $counterpartyRef = $value->getRef();
-            $allThirdpartyCounterpartiesArr[$counterpartyRef] = $this->cityRepository->getCityByCityRef($counterpartyCityRef)->getDescriptionUa();
-        }
-        $this->allThirdpartyCounterparties = $allThirdpartyCounterparties;
-        return $allThirdpartyCounterpartiesArr;
-    }
-
-    /**
-     * @return array|mixed|null
-     */
-    public function getCounterPartyAddressToSend()
-    {
-        $counterpartyAddress = [];
-        $parentCounterparties = $this->counterpartyIndexCollectionFactory->create()->getItems();
-        /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyIndex $value */
-        foreach ($parentCounterparties as $index => $value) {
-            /** @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\Collection $counterparty */
-            $counterparty = $this->counterpartyOrgThirdpartyCollectionFactory->create()
-                ->addFieldToSelect('*')
-                ->addFieldToFilter('counterpartyRef', ['like' => $value->getCounterpartyRef()]);
-            /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyOrgThirdparty $valueCounterP */
-            foreach ($counterparty as $indexCounterP => $valueCounterP) {
-                $this->counterpartyAddress[$indexCounterP]['counterpartyRef'] = $valueCounterP->getCounterpartyRef();
-                $this->counterpartyAddress[$indexCounterP]['Ref'] = $valueCounterP->getRef();
-//                $counterpartyAddress[$indexCounterP]['Addresses'] = $valueCounterP->getAddresses();
-                $addresses = $valueCounterP->getAddresses();
-                if (isset($addresses['DoorsAddresses'])) {
-                    foreach ($addresses['DoorsAddresses'] as $addressIndex => $addressValue) {
-                        $this->counterpartyAddress[$indexCounterP]['Addresses'][$addressValue['Ref']] =
-                            $addressValue['Type']
-                            . ' ' .
-                            $addressValue['SettlementDescription']
-                            . ' ' .
-                            $addressValue['StreetsType']
-                            . ' ' .
-                            $addressValue['StreetDescription']
-                            . ' ' .
-                            $addressValue['BuildingNumber']
-                            . '. ';
-                    }
-                }
-                $this->counterpartyAddress[$indexCounterP]['Description'] = $valueCounterP->getDescription();
-            }
-        }
-
-        return $this->counterpartyAddress;
-    }
 
     /**
      * @return mixed
