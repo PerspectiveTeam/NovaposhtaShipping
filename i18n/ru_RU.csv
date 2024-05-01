@@ -104,6 +104,7 @@
 "Nova Poshta is unable to calculate shipping to your city. You still can to make order with your cart and our manager will contact with you","Мы не можем рассчитать цену доставки в ваш город. Вы можете сделать заказ и наш консультант свяжется с вами"
 "Select city then contact person","Выберите город, затем контактное лицо"
 "Choose city","Выберите город"
+"Choose Sender","Оберіть відправника"
 "Choose contact person","Выберите контактное лицо"
 "Select city","Выберие город из списка"
 "Choose address of contact person","Выберите адрес контрагента"
@@ -135,3 +136,5 @@
 "Preselected by the customer values:","Выбранные пользователем значения:"
 "Data prediction from NovaPost:","Прогноз данных от Новой Почти:"
 "Sender params:","Параметры отправителя:"
+"Current Sender:","Текущий отправитель:"
+"Choose contact person address","Выберите адрес контактного лица"
