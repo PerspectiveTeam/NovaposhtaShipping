@@ -11,7 +11,7 @@ define([
     return Select.extend({
 
         defaults: {
-            template: 'Perspective_NovaposhtaShipping/order/create/city',
+            template: 'Perspective_NovaposhtaShipping/order/create/sender/sender',
             backendRestURL: '',
             inputCustomName: '',
             classCustomName: '',
