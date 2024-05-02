@@ -124,16 +124,14 @@
                     </div>
                 </div>
                 <br/>
-                <?php if ($block->isOrganisation()): ?>
-                    <div style="display: flow-root;">
-                        <label for="np_sender_contact_person"><?= __('Choose contact person address') ?></label>
-                        <div class="input-to-right">
-                            <?= $block->getContactPersonAddressHtml() ?>
-                            <?= $block->getContactPersonAddressHiddenHtml() ?>
-                        </div>
+                <div style="display: flow-root;">
+                    <label for="np_sender_contact_person"><?= __('Choose contact person address') ?></label>
+                    <div class="input-to-right">
+                        <?= $block->getContactPersonAddressHtml() ?>
+                        <?= $block->getContactPersonAddressHiddenHtml() ?>
                     </div>
-                    <br/>
-                <?php endif; ?>
+                </div>
+                <br/>
                 <div style="display: flow-root;">
                     <button type="button" id="create_ttn_c2c" class="scalable save">
                         <span><?php echo __('Send to Novaposhta server the parcel parameters') ?></span>
