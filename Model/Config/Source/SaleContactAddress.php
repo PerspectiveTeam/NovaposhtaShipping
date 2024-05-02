@@ -37,16 +37,13 @@ class SaleContactAddress
     {
         $senderInAdmin = $this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'sale_sender') ?? '';
         $options[] = ['value' => '-3', 'label' => __('Select default contact person address')];
-        $cityData = explode(',', $senderInAdmin);
-        if (isset($cityData[0]) && isset($cityData[1])) {
-            $citySender = $cityData[1];
-            $counterpartyRef = $cityData[0];
+        if (!empty($senderInAdmin)) {
+            $counterpartyRef = $senderInAdmin;
             $this->allowProceed = true;
         }
 
         if ($senderInAdmin && $this->allowProceed) {
-            // $data = explode(',', $senderInAdmin);
-            $result = $this->sender->searchCounterpartyAddress($counterpartyRef, $citySender);
+            $result = $this->sender->searchCounterpartyAddress($counterpartyRef);
             if ($result) {
                 foreach ($result as $counterpartyAddressIndex => $counterpartyAddressValue) {
                     $options[] =

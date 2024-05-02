@@ -2,6 +2,9 @@
 
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
+use Magento\Framework\DataObject;
+use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
+use Perspective\NovaposhtaShipping\Helper\Config;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory;
 
@@ -33,8 +36,8 @@ class Sender
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      */
     public function __construct(
-        \Perspective\NovaposhtaShipping\Helper\Config $config,
-        \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository,
+        Config $config,
+        CityRepositoryInterface $cityRepository,
         CollectionFactory $counterpartyContactPersonCollectionFactory
 
     ) {
@@ -97,10 +100,9 @@ class Sender
 
     /**
      * @param $counterparty
-     * @param $citySender
      * @return array
      */
-    public function searchCounterpartyAddress($counterparty, $citySender)
+    public function searchCounterpartyAddress($counterparty)
     {
         //todo recheck this collection
         /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyOrgThirdparty $value */
@@ -108,27 +110,37 @@ class Sender
             ->addFieldToFilter('counterpartyRef', ['like' => $counterparty])
             ->getItems();
         $result = [];
+        $counter = 0;
         foreach ($counterpartyIndexCollection as $index => $value) {
-            if ($value->getDescription()
-                && $value->getCityDescription()
-                && $value->getStreetDescription()
-                && $value->getBuildingDescription()
-                && $value->getCounterpartyRef()
-                && $value->getCityRef() === $citySender
-            ) {
-                $result[$index]['description'] =
-                    $value->getDescription()
-                    . ', ' .
-                    $value->getCityDescription()
-                    . ' ' .
-                    $value->getAddressName()
-                    . ', ' .
-                    $value->getStreetDescription()
-                    . ', ' .
-                    $value->getBuildingDescription()/*. ', ' .
-                    $value->getCounterpartyRef()*/
-                ;
-                $result[$index]['ref'] = $value->getRef();
+            $addressesArr = is_string($value->getAddresses()) ? json_decode($value->getAddresses()) : $value->getAddresses();
+            if (is_array($addressesArr)) {
+                foreach ($addressesArr as $addressTypeName => $addressType) {
+                    foreach ($addressType as $address) {
+                        $counter++;
+                        $addressObj = new DataObject($address);
+                        if ($addressTypeName == 'DoorsAddresses') {
+                            $result[$counter]['description'] = sprintf(
+                                "%s. %s %s %s %s %s %s ",
+                                $addressObj->getData('SettlementDescription'),
+                                $addressObj->getData('StreetsType'),
+                                $addressObj->getData('StreetsDescription'),
+                                __('building number'),
+                                $addressObj->getData('BuildingNumber'),
+                                __('flat number'),
+                                $addressObj->getData('Flat'),
+                            );
+                        }
+                        if ($addressTypeName == 'WarehouseAddresses') {
+                            $result[$counter]['description'] = sprintf(
+                                "%s. %s",
+                                $addressObj->getData('CityDescription'),
+                                $addressObj->getData('AddressDescription'),
+
+                            );
+                        }
+                        $result[$counter]['ref'] = $addressObj->getData('Ref');
+                    }
+                }
             }
         }
         return $result;

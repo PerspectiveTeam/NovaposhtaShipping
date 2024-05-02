@@ -38,6 +38,7 @@
                 </field>
                 <field id="is_organization" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
                     <label>Is Organization</label>
+                    <comment>Also, please set "Yes" if you want to address gathering.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="sale_sender" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -58,9 +59,6 @@
                     <comment>Counterparty Contact Person Sender Address</comment>
                     <source_model>Perspective\NovaposhtaShipping\Model\Config\Source\SaleContactAddress</source_model>
                     <can_be_empty>1</can_be_empty>
-                    <depends>
-                        <field id="is_organization">1</field>
-                    </depends>
                 </field>
 
                 <field id="allowed_methods" translate="label" type="multiselect" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
