@@ -123,7 +123,7 @@ class Sender
                                 "%s. %s %s %s %s %s %s ",
                                 $addressObj->getData('SettlementDescription'),
                                 $addressObj->getData('StreetsType'),
-                                $addressObj->getData('StreetsDescription'),
+                                $addressObj->getData('StreetDescription'),
                                 __('building number'),
                                 $addressObj->getData('BuildingNumber'),
                                 __('flat number'),
