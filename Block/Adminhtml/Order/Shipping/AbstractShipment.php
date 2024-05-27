@@ -222,6 +222,7 @@ class AbstractShipment extends Template
             $this->_form = $form;
         })->call($element);
         $element->setData('name', self::NOVAPOSHTA_SENDER_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_SENDER_HIDDEN_INPUT);
         ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderCounterparty();
         $valueToRender = $senderValue;
         $element->setData('value', $valueToRender);
@@ -248,6 +249,7 @@ class AbstractShipment extends Template
             $this->_form = $form;
         })->call($element);
         $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_CONTACT_PERSON_HIDDEN_INPUT);
         ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPerson();
         $valueToRender = $senderValue;
         $element->setData('value', $valueToRender);
@@ -274,6 +276,7 @@ class AbstractShipment extends Template
             $this->_form = $form;
         })->call($element);
         $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_HIDDEN_INPUT);
         ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPersonAddress();
         $valueToRender = $senderValue;
         $element->setData('value', $valueToRender);

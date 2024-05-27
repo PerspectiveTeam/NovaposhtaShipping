@@ -113,13 +113,12 @@ class AddressShipment extends AbstractShipment
 
     public function getJsLayout()
     {
-        $JsComponent['components']['AddressShippingForm']['component'] = 'Perspective_NovaposhtaShipping/js/order/shipping/delivery/addressDelivery';
-        $JsComponent['components']['AddressShippingForm']['contactPersonSearchUrl'] = $this->getUrl('novaposhtashipping/order_shipment/searchContactPersonAction');
-        $JsComponent['components']['AddressShippingForm']['contactPersonAddressSearchUrl'] = $this->getUrl('novaposhtashipping/order_shipment/searchCounterpartyAddressAction');
+        $JsComponent['components']['AddressShippingForm']['component'] = 'Perspective_NovaposhtaShipping/js/order/shipping/addressShippingFormComponent';
         $JsComponent['components']['AddressShippingForm']['form_key'] = $this->getFormKey();
         $JsComponent['components']['AddressShippingForm']['quote_id'] = $this->getQuoteId();
         $JsComponent['components']['AddressShippingForm']['npUrl'] = $this->getUrl('novaposhtashipping/order_shipment/produceTtnAddressAction');
         $this->jsLayout = $JsComponent;
+//        return json_encode($this->jsLayout, JSON_UNESCAPED_SLASHES);
         return parent::getJsLayout();
     }
 
@@ -250,18 +249,9 @@ class AddressShipment extends AbstractShipment
     /**
      * @return mixed
      */
-    public function getFlat()
+    public function getFlatNumData()
     {
         return $this->getNpAddressData()->getFlat();
-    }
-
-    /**
-     * @param $ref
-     * @return mixed
-     */
-    public function getCityNameByRef($ref)
-    {
-        return $this->cityRepository->getCityByCityRef($ref)->getDescriptionUa();
     }
 
     /**

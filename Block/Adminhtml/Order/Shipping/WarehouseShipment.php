@@ -104,15 +104,10 @@ class WarehouseShipment extends AbstractShipment
 
     public function getJsLayout()
     {
-        $JsComponent['components']['WarehouseShippingForm']['component'] = 'Perspective_NovaposhtaShipping/js/order/shipping/delivery/warehouseDelivery';
-        $JsComponent['components']['WarehouseShippingForm']['contactPersonSearchUrl'] = $this->getUrl('novaposhtashipping/order_shipment/searchContactPersonAction');
-        $JsComponent['components']['WarehouseShippingForm']['contactPersonAddressSearchUrl'] = $this->getUrl('novaposhtashipping/order_shipment/searchCounterpartyAddressAction');
+        $JsComponent['components']['WarehouseShippingForm']['component'] = 'Perspective_NovaposhtaShipping/js/order/shipping/warehouseShippingFormComponent';
         $JsComponent['components']['WarehouseShippingForm']['form_key'] = $this->getFormKey();
         $JsComponent['components']['WarehouseShippingForm']['quote_id'] = $this->getQuoteId();
         $JsComponent['components']['WarehouseShippingForm']['npUrl'] = $this->getUrl('novaposhtashipping/order_shipment/produceTtnWarehouseAction');
-        $JsComponent['components']['WarehouseShippingForm']['warehouseUrl'] = $this->getWarehouseControllerEndpoint();
-        $JsComponent['components']['WarehouseShippingForm']['warehouseInCity'] = json_encode($this->getWarehouseList() ?? []);
-        $JsComponent['components']['WarehouseShippingForm']['selectedWarehouseByUser'] = json_encode(['value' => $this->getWarehouse(), 'label' => $this->getWarehouseLabel()]);
         $this->jsLayout = $JsComponent;
         return parent::getJsLayout();
     }

@@ -38,6 +38,18 @@
             </argument>
         </arguments>
     </type>
+    <type name="Perspective\NovaposhtaShipping\Model\Shipment\ShipmentCreator" >
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="address_delivery" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Shipment\AddressDelivery
+                </item>
+                <item name="warehouse_delivery" xsi:type="object">
+                    Perspective\NovaposhtaShipping\Model\Shipment\WarehouseDelivery
+                </item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Magento\Checkout\Model\ShippingInformationManagement">
         <plugin name="perspective_novaposhta_shipping_address"
                 type="Perspective\NovaposhtaShipping\Model\Quote\SaveAddressInformationPlugin" sortOrder="1"
