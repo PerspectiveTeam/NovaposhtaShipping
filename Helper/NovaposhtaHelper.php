@@ -2,10 +2,12 @@
 
 namespace Perspective\NovaposhtaShipping\Helper;
 
-use Magento\Catalog\Api\ProductRepositoryInterfaceFactory;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Sales\Model\Order\Item as OrderItem;
 use Perspective\NovaposhtaShipping\Api\NovaPoshtaApi2Factory;
 use Perspective\NovaposhtaShipping\Model\BoxShippingVisualisationFactory;
 use Perspective\NovaposhtaShipping\Model\Carrier\DeliveryDate;
@@ -35,7 +37,7 @@ class NovaposhtaHelper
     /**
      * @var \Magento\Catalog\Api\ProductRepositoryInterfaceFactory
      */
-    protected $productRepositoryInterfaceFactory;
+    protected $productRepositoryInterface;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
@@ -104,7 +106,7 @@ class NovaposhtaHelper
      *
      * @param \Perspective\NovaposhtaShipping\Helper\Config $config
      * @param \Perspective\NovaposhtaShipping\Api\NovaPoshtaApi2Factory $novaPoshtaApi2Factory
-     * @param \Magento\Catalog\Api\ProductRepositoryInterfaceFactory $productRepositoryInterfaceFactory
+     * @param \Magento\Catalog\Api\ProductRepositoryInterface $productRepositoryInterface
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
      * @param \Perspective\NovaposhtaShipping\Helper\BoxpackerFactory $boxpackerFactory
      * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
@@ -114,16 +116,13 @@ class NovaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\ShippingSales $shippingSales
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Sender $sender
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Method\AbstractChain $shippingCartProcessor
-     * @param \Perspective\NovaposhtaShipping\Model\BoxShippingVisualisationFactory $boxShippingVisualisationFactory
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation $boxShippingVisualisationResourceModel
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\BoxShippingVisualisation\CollectionFactory $boxShippingVisualisationCollectionFactory
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
      * @param \Perspective\NovaposhtaShipping\Model\VisualisatorRepository $visualisatorRepository
      */
     public function __construct(
         Config $config,
         NovaPoshtaApi2Factory $novaPoshtaApi2Factory,
-        ProductRepositoryInterfaceFactory $productRepositoryInterfaceFactory,
+        ProductRepositoryInterface $productRepositoryInterface,
         TimezoneInterface $timezone,
         BoxpackerFactory $boxpackerFactory,
         CartRepositoryInterface $cartRepository,
@@ -138,7 +137,7 @@ class NovaposhtaHelper
     ) {
         $this->config = $config;
         $this->novaPoshtaApi2Factory = $novaPoshtaApi2Factory;
-        $this->productRepositoryInterfaceFactory = $productRepositoryInterfaceFactory;
+        $this->productRepositoryInterface = $productRepositoryInterface;
         $this->timezone = $timezone;
         $this->boxpackerFactory = $boxpackerFactory;
         $this->cartRepository = $cartRepository;
@@ -336,13 +335,13 @@ class NovaposhtaHelper
     }
 
     /**
-     * @param $item
+     * @param QuoteItem|OrderItem $item
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function markProductWithSpecialPrice($item): array
     {
-        $productModel = $this->productRepositoryInterfaceFactory->create()->get($item->getProduct()->getSku());
+        $productModel = $this->productRepositoryInterface->create()->get($item->getProduct()->getSku());
         $specialprice = $productModel->getSpecialPrice();
         $specialPriceFromDate = $productModel->getSpecialFromDate();
         $specialPriceToDate = $productModel->getSpecialToDate();
@@ -351,7 +350,7 @@ class NovaposhtaHelper
         if ($specialprice && ($productModel->getPrice() > $productModel->getFinalPrice())) {
             if ($today >= strtotime($specialPriceFromDate ?? '') && $today <= strtotime($specialPriceToDate ?? '') ||
                 $today >= strtotime($specialPriceFromDate ?? '') && is_null($specialPriceToDate)) {
-                $result['sale'] = [$item->getSku()];
+                $result['sale'] = [$item->getProduct()->getId()];
             }
         }
         return $result;

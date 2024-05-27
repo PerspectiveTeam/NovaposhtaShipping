@@ -115,7 +115,7 @@ class Boxpacker
          * @var QuoteItem|OrderItem $productVal
          */
         foreach ($products as $productIdx => $productVal) {
-            $productModel = $this->productRepositoryInterface->get($productVal->getProduct()->getSku());
+            $productModel = $this->productRepositoryInterface->getById($productVal->getProduct()->getId());
             $widthProduct = (int)ceil($productModel->getProductWidth() / 10);
             $lengthProduct = (int)ceil($productModel->getProductLength() / 10);
             $heightProduct = (int)ceil($productModel->getProductHeight() / 10);
