@@ -47,7 +47,7 @@
                     <label for="np_c2c_flat"><?= __('Flat number that has been chosen by the customer') ?></label>
                     <div class="input-to-right">
                         <input type="text" name="np_c2c_flat" id="np_c2c_flat"
-                               value="<?php echo $block->getFlat(); ?>"/>
+                               value="<?php echo $block->getFlatNumData(); ?>"/>
                     </div>
                 </div>
                 <br/>
@@ -133,7 +133,7 @@
                 </div>
                 <br/>
                 <div style="display: flow-root;">
-                    <button type="button" id="create_ttn_c2c" class="scalable save">
+                    <button data-bind="click: createTTN" type="button" id="create_ttn_c2c" class="scalable save">
                         <span><?php echo __('Send to Novaposhta server the parcel parameters') ?></span>
                     </button>
                 </div>
@@ -142,6 +142,7 @@
             </form>
         </div>
     </div>
+    <span><?= __('TEEEEEEEEEST1:') ?></span>
     <script type="text/x-magento-init">
         {
             "*": {
@@ -149,6 +150,7 @@
             }
         }
     </script>
+    <span><?= __('TEEEEEEEEEST2:') ?></span>
     <?php $childrenBlock = $block->getChildBlock('perspective_autocomplete_address_city_input_js_person');
     $childrenBlock->setData('city_value', $block->getCityData());
     $childrenBlock->setData('city_label', $block->getCityLabel());
@@ -156,3 +158,4 @@
     $childrenBlock->setData('street_label', $block->getStreetLabel());
     ?>
     <?= $childrenBlock->toHtml(); ?>
+    <span><?= __('TEEEEEEEEEST3:') ?></span>

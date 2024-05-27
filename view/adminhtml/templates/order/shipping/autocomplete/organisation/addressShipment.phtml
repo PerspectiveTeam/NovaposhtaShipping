@@ -38,7 +38,7 @@
                     <label
                         for="np_c2c_street_num"><?= __('Building number that has been chosen by the customer') ?></label>
                     <div class="input-to-right">
-                        <input type="text" name="np_c2c_street_num" id="np_c2c_street_num"
+                        <input type="text" name="np_c2c_street_num" id="np_c2c_street_num" data-bind="value: streetNum"
                                value="<?php echo $block->getBuildNumData(); ?>"/>
                     </div>
                 </div>
@@ -46,8 +46,8 @@
                 <div style="display: flow-root;">
                     <label for="np_c2c_flat"><?= __('Flat number that has been chosen by the customer') ?></label>
                     <div class="input-to-right">
-                        <input type="text" name="np_c2c_flat" id="np_c2c_flat"
-                               value="<?php echo $block->getFlat(); ?>"/>
+                        <input type="text" name="np_c2c_flat" id="np_c2c_flat" data-bind="value: flatNum"
+                               value="<?php echo $block->getFlatNumData(); ?>"/>
                     </div>
                 </div>
                 <br/>
