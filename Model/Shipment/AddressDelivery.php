@@ -44,6 +44,11 @@ class AddressDelivery implements OrderShippmentProcessorInterface
     private DateTime $dateTime;
 
     /**
+     * @var \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer
+     */
+    private SenderCityDeterminer $senderCityDeterminer;
+
+    /**
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Helper\Boxpacker $boxpacker
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
@@ -51,6 +56,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer $senderCityDeterminer
      */
     public function __construct(
         NovaposhtaHelper $novaposhtaHelper,
@@ -59,7 +65,8 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         OperationsCache $cache,
         OrderRepositoryInterface $orderRepository,
         ScopeConfigInterface $scopeConfig,
-        DateTime $dateTime
+        DateTime $dateTime,
+        SenderCityDeterminer $senderCityDeterminer
     ) {
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->boxpacker = $boxpacker;
@@ -68,6 +75,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $this->orderRepository = $orderRepository;
         $this->scopeConfig = $scopeConfig;
         $this->dateTime = $dateTime;
+        $this->senderCityDeterminer = $senderCityDeterminer;
     }
 
     /**
@@ -95,7 +103,9 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $Firstname = $order->getShippingAddress()->getFirstname() ?? $order->getBillingAddress()->getFirstname() ?? 'Кастомер';
         $LastName = $order->getShippingAddress()->getLastname() ?? $order->getBillingAddress()->getLastname() ?? 'Покупенко';
         $MiddleName = $order->getShippingAddress()->getMiddlename() ?? $order->getBillingAddress()->getMiddlename() ?? 'Батькович';
+        $recipientFullName = $this->getRecipientFullName($Firstname, $MiddleName, $LastName);
 
+        $internetDocumentDescription = __('Order Num: %1', $order->getIncrementId())->render();
         /*
          * Чел-пон вид для поиска нужного района
          */
@@ -106,7 +116,8 @@ class AddressDelivery implements OrderShippmentProcessorInterface
 
         list($areaRecipient, $regionRecipient) = $this->getAreaAndRegion($AreaAndRegionData, $cityRecipient);
         $recipientType = 'PrivatePerson';
-
+        $method = $order->getShippingMethod(true)->getData('method');
+        $citySender = $this->senderCityDeterminer->getCityByDeliveryTechnologyAndContactPersonAddress($method, $contactPersonAddress);
         if ($order->getPayment()->getMethod() == 'cashondelivery') {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
                 'NewAddress' => 1,
@@ -115,7 +126,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'CargoType' => $cargoType,
                 'OptionsSeat' => $optionsSeat,
                 'Weight' => $weight,
-                'Description' => 'плитка (керамічна, гранітна, мозаїка)',
+                'Description' => $internetDocumentDescription,
                 'Cost' => round($order->getSubtotalInclTax()),
                 'ServiceType' => 'DoorsDoors',
                 'CitySender' => $citySender,
@@ -141,8 +152,8 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'RecipientAddressName' => $streetRecipient,
                 'RecipientHouse' => $buildingRecipient,
                 'RecipientFlat' => $flatRecipient,
-                'RecipientName' => $Firstname . ' ' . $MiddleName . ' ' . $LastName,
-                'RecipientType' => $recipientType, //PrivatePerson для всех
+                'RecipientName' => $recipientFullName,
+                'RecipientType' => $recipientType, //PrivatePerson для всіх
                 'RecipientsPhone' => $recipientPhone,
                 'DateTime' => $this->dateTime->date('d.m.Y'),
             ]);
@@ -154,7 +165,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'CargoType' => $cargoType,
                 'OptionsSeat' => $optionsSeat,
                 'Weight' => $weight,
-                'Description' => 'плитка (керамічна, гранітна, мозаїка)',
+                'Description' => $internetDocumentDescription,
                 'Cost' => round($order->getSubtotalInclTax()),
                 'ServiceType' => 'DoorsDoors',
                 'CitySender' => $citySender,
@@ -258,9 +269,23 @@ class AddressDelivery implements OrderShippmentProcessorInterface
     public function isApplicable($object)
     {
         $order = $this->orderRepository->get($object->getData('order_id'));
-        $carrierCode = $order->getShippingMethod()->getData('carrier_code');
-        $method = $order->getShippingMethod()->getData('method');
+        $carrierCode = $order->getShippingMethod(true)->getData('carrier_code');
+        $method = $order->getShippingMethod(true)->getData('method');
         $currentShippingName = sprintf('%s_%s', $carrierCode, $method);
         return ($currentShippingName === 'novaposhtashipping_w2c') || ($currentShippingName === 'novaposhtashipping_c2c');
+    }
+
+    /**
+     * Можно плагнути цей метод, бо не у всіх є по батькові в документах
+     *
+     * @param string $Firstname
+     * @param string $MiddleName
+     * @param string $LastName
+     * @return string
+     */
+    public function getRecipientFullName(string $Firstname, string $MiddleName, string $LastName): string
+    {
+        $recipientFullName = sprintf('%s %s', $Firstname, $LastName);
+        return $recipientFullName;
     }
 }

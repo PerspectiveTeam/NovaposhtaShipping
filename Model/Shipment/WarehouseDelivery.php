@@ -55,6 +55,22 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
      */
     private WarehouseRepositoryInterface $warehouseRepository;
 
+    /**
+     * @var \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer
+     */
+    private SenderCityDeterminer $senderCityDeterminer;
+
+    /**
+     * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
+     * @param \Perspective\NovaposhtaShipping\Helper\Boxpacker $boxpacker
+     * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
+     * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
+     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface $warehouseRepository
+     * @param \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer $senderCityDeterminer
+     */
     public function __construct(
         NovaposhtaHelper $novaposhtaHelper,
         Boxpacker $boxpacker,
@@ -64,6 +80,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
         ScopeConfigInterface $scopeConfig,
         DateTime $dateTime,
         WarehouseRepositoryInterface $warehouseRepository,
+        SenderCityDeterminer $senderCityDeterminer
     ) {
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->boxpacker = $boxpacker;
@@ -73,6 +90,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
         $this->scopeConfig = $scopeConfig;
         $this->dateTime = $dateTime;
         $this->warehouseRepository = $warehouseRepository;
+        $this->senderCityDeterminer = $senderCityDeterminer;
     }
 
     /**
@@ -102,14 +120,17 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
         $Firstname = $order->getShippingAddress()->getFirstname() ?? $order->getBillingAddress()->getFirstname() ?? 'Кастомер';
         $LastName = $order->getShippingAddress()->getLastname() ?? $order->getBillingAddress()->getLastname() ?? 'Покупенко';
         $MiddleName = $order->getShippingAddress()->getMiddlename() ?? $order->getBillingAddress()->getMiddlename() ?? 'Батькович';
+        $recipientFullName = $this->getRecipientFullName($Firstname, $MiddleName, $LastName);
 
+        $internetDocumentDescription = __('Order Num: %1', $order->getIncrementId())->render();
 
 
         $AreaAndRegionData = $this->getAreaAndRegionData($cityRecipientString);
         list($areaRecipient, $regionRecipient) = $this->getAreaAndRegion($AreaAndRegionData, $cityRecipient);
 
         $recipientType = 'PrivatePerson';
-
+        $method = $order->getShippingMethod(true)->getData('method');
+        $citySender = $this->senderCityDeterminer->getCityByDeliveryTechnologyAndContactPersonAddress($method, $contactPersonAddress);
         if ($order->getPayment()->getMethod() == 'cashondelivery') {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
                 'NewAddress' => 1,
@@ -118,7 +139,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'CargoType' => $cargoType,
                 'OptionsSeat' => $optionsSeat,
                 'Weight' => $weight,
-                'Description' => 'плитка (керамічна, гранітна, мозаїка)',
+                'Description' => $internetDocumentDescription,
                 'Cost' => round($order->getSubtotalInclTax()),
                 'ServiceType' => 'DoorsWarehouse',
                 'CitySender' => $citySender,
@@ -144,7 +165,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'RecipientAddressName' => $warehouseNum,
                 'RecipientHouse' => '',
                 'RecipientFlat' => '',
-                'RecipientName' => $Firstname . ' ' . $MiddleName . ' ' . $LastName,
+                'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всех
                 'RecipientsPhone' => $recipientPhone,
                 'DateTime' => $this->dateTime->date('d.m.Y'),
@@ -157,7 +178,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'CargoType' => $cargoType,
                 'OptionsSeat' => $optionsSeat,
                 'Weight' => $weight,
-                'Description' => 'плитка (керамічна, гранітна, мозаїка)',
+                'Description' => $internetDocumentDescription,
                 'Cost' => round($order->getSubtotalInclTax()),
                 'ServiceType' => 'DoorsWarehouse',
                 'CitySender' => $citySender,
@@ -178,7 +199,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'RecipientAddressName' => $warehouseNum, // только это поле участвует в генерации
                 'RecipientHouse' => '',
                 'RecipientFlat' => '',
-                'RecipientName' => $Firstname . ' ' . $MiddleName . ' ' . $LastName,
+                'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всех
                 'RecipientsPhone' => $recipientPhone,
                 'DateTime' => $this->dateTime->date('d.m.Y'),
@@ -212,8 +233,8 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
     public function isApplicable($object)
     {
         $order = $this->orderRepository->get($object->getData('order_id'));
-        $carrierCode = $order->getShippingMethod()->getData('carrier_code');
-        $method = $order->getShippingMethod()->getData('method');
+        $carrierCode = $order->getShippingMethod(true)->getData('carrier_code');
+        $method = $order->getShippingMethod(true)->getData('method');
         $currentShippingName = sprintf('%s_%s', $carrierCode, $method);
         return ($currentShippingName === 'novaposhtashipping_w2w') || ($currentShippingName === 'novaposhtashipping_c2w');
     }
@@ -265,5 +286,19 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
             }
         }
         return array($areaRecipient, $regionRecipient);
+    }
+
+    /**
+     * Можно плагнути цей метод, бо не у всіх є по батькові в документах
+     *
+     * @param string $Firstname
+     * @param string $MiddleName
+     * @param string $LastName
+     * @return string
+     */
+    public function getRecipientFullName(string $Firstname, string $MiddleName, string $LastName): string
+    {
+        $recipientFullName = sprintf('%s %s %s', $Firstname, $MiddleName, $LastName);
+        return $recipientFullName;
     }
 }
