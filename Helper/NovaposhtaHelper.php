@@ -341,7 +341,7 @@ class NovaposhtaHelper
      */
     public function markProductWithSpecialPrice($item): array
     {
-        $productModel = $this->productRepositoryInterface->create()->get($item->getProduct()->getSku());
+        $productModel = $this->productRepositoryInterface->get($item->getProduct()->getSku());
         $specialprice = $productModel->getSpecialPrice();
         $specialPriceFromDate = $productModel->getSpecialFromDate();
         $specialPriceToDate = $productModel->getSpecialToDate();

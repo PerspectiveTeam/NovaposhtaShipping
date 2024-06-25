@@ -42,7 +42,7 @@ class SaleContact
             }
 
 
-            if (array_key_exists('success', $response)) {
+            if (array_key_exists('success', $response ?? [])) {
                 if ($response['success'] === true) {
                     foreach ($response['data'] as $counterpartyFromApiIndex => $counterpartyFromApiValue) {
                         $options[] =
