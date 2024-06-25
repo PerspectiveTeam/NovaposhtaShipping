@@ -108,7 +108,7 @@
                 </div>
 
                 <div style="display: flow-root;">
-                    <label for="np_sender_city"><?= __('Current Sender') ?></label>
+                    <label for="np_sender_city"><?= __('Sender') ?></label>
                     <div class="input-to-right">
                         <?= $block->getSenderHtml() ?>
                         <?= $block->getSenderHiddenHtml() ?>
@@ -117,7 +117,7 @@
                 </div>
                 <br/>
                 <div class="row-gray" style="display: flow-root;">
-                    <label for="np_sender_contact_person"><?= __('Choose contact person') ?></label>
+                    <label for="np_sender_contact_person"><?= __('Contact person') ?></label>
                     <div class="input-to-right">
                         <?= $block->getContactPersonHtml() ?>
                         <?= $block->getContactPersonHiddenHtml() ?>
@@ -125,7 +125,7 @@
                 </div>
                 <br/>
                 <div style="display: flow-root;">
-                    <label for="np_sender_contact_person"><?= __('Choose contact person address') ?></label>
+                    <label for="np_sender_contact_person"><?= __('Contact person address') ?></label>
                     <div class="input-to-right">
                         <?= $block->getContactPersonAddressHtml() ?>
                         <?= $block->getContactPersonAddressHiddenHtml() ?>
@@ -142,7 +142,6 @@
             </form>
         </div>
     </div>
-    <span><?= __('TEEEEEEEEEST1:') ?></span>
     <script type="text/x-magento-init">
         {
             "*": {
@@ -150,7 +149,6 @@
             }
         }
     </script>
-    <span><?= __('TEEEEEEEEEST2:') ?></span>
     <?php $childrenBlock = $block->getChildBlock('perspective_autocomplete_address_city_input_js_person');
     $childrenBlock->setData('city_value', $block->getCityData());
     $childrenBlock->setData('city_label', $block->getCityLabel());
@@ -158,4 +156,3 @@
     $childrenBlock->setData('street_label', $block->getStreetLabel());
     ?>
     <?= $childrenBlock->toHtml(); ?>
-    <span><?= __('TEEEEEEEEEST3:') ?></span>
