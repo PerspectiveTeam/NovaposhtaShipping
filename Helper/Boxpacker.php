@@ -120,6 +120,9 @@ class Boxpacker
             $lengthProduct = (int)ceil($productModel->getProductLength() / 10);
             $heightProduct = (int)ceil($productModel->getProductHeight() / 10);
             $weightProduct = (int)ceil($productModel->getWeight() * 1000);
+            $productValQty = $productVal instanceof OrderItem
+                ? $productVal->getQtyToShip()
+                : $productVal->getQty();
             //коробка самого товара
             $this->getPacker()->addBox($this->limitedSupplyBoxFactory->create([
                 'reference' => 'product_size_box_' . uniqid(),
@@ -131,12 +134,8 @@ class Boxpacker
                 'innerLength' => $lengthProduct,
                 'innerDepth' => $heightProduct,
                 'maxWeight' => $weightProduct,
-                'quantity' => $productVal->getQty()
+                'quantity' => $productValQty
             ]));
-
-            $productValQty = $productVal instanceof OrderItem
-                ? $productVal->getQtyToShip()
-                : $productVal->getQty();
 
             /** $allowedRotation <---- Rotation::KeepFlat == 2*/
             /** $allowedRotation <---- Rotation::BestFit == 6*/
