@@ -3,7 +3,7 @@
 namespace Perspective\NovaposhtaShipping\Model\Shipment;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\ScopeInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
@@ -41,11 +41,6 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
     private ScopeConfigInterface $scopeConfig;
 
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    private DateTime $dateTime;
-
-    /**
      * @var \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface
      */
     private CityRepositoryInterface $cityRepository;
@@ -61,13 +56,18 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
     private SenderCityDeterminer $senderCityDeterminer;
 
     /**
+     * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
+     */
+    private TimezoneInterface $timezone;
+
+    /**
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Helper\Boxpacker $boxpacker
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
      * @param \Perspective\NovaposhtaCatalog\Api\WarehouseRepositoryInterface $warehouseRepository
      * @param \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer $senderCityDeterminer
      */
@@ -78,7 +78,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
         OperationsCache $cache,
         OrderRepositoryInterface $orderRepository,
         ScopeConfigInterface $scopeConfig,
-        DateTime $dateTime,
+        TimezoneInterface $timezone,
         WarehouseRepositoryInterface $warehouseRepository,
         SenderCityDeterminer $senderCityDeterminer
     ) {
@@ -88,9 +88,9 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
         $this->cache = $cache;
         $this->orderRepository = $orderRepository;
         $this->scopeConfig = $scopeConfig;
-        $this->dateTime = $dateTime;
         $this->warehouseRepository = $warehouseRepository;
         $this->senderCityDeterminer = $senderCityDeterminer;
+        $this->timezone = $timezone;
     }
 
     /**
@@ -168,7 +168,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всех
                 'RecipientsPhone' => $recipientPhone,
-                'DateTime' => $this->dateTime->date('d.m.Y'),
+                'DateTime' => $this->timezone->date()->format('d.m.Y'),
             ]);
         } else {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
@@ -202,7 +202,7 @@ class WarehouseDelivery implements OrderShippmentProcessorInterface
                 'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всех
                 'RecipientsPhone' => $recipientPhone,
-                'DateTime' => $this->dateTime->date('d.m.Y'),
+                'DateTime' => $this->timezone->date()->format('d.m.Y'),
             ]);
         }
         return $response;

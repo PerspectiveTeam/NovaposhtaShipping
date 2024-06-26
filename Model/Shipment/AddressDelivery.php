@@ -3,7 +3,7 @@
 namespace Perspective\NovaposhtaShipping\Model\Shipment;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\ScopeInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
@@ -41,12 +41,15 @@ class AddressDelivery implements OrderShippmentProcessorInterface
      */
     private ScopeConfigInterface $scopeConfig;
 
-    private DateTime $dateTime;
-
     /**
      * @var \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer
      */
     private SenderCityDeterminer $senderCityDeterminer;
+
+    /**
+     * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
+     */
+    private TimezoneInterface $timezone;
 
     /**
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
@@ -55,7 +58,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
      * @param \Perspective\NovaposhtaShipping\Service\Cache\OperationsCache $cache
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
      * @param \Perspective\NovaposhtaShipping\Model\Shipment\SenderCityDeterminer $senderCityDeterminer
      */
     public function __construct(
@@ -65,7 +68,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         OperationsCache $cache,
         OrderRepositoryInterface $orderRepository,
         ScopeConfigInterface $scopeConfig,
-        DateTime $dateTime,
+        TimezoneInterface $timezone,
         SenderCityDeterminer $senderCityDeterminer
     ) {
         $this->novaposhtaHelper = $novaposhtaHelper;
@@ -74,8 +77,8 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $this->cache = $cache;
         $this->orderRepository = $orderRepository;
         $this->scopeConfig = $scopeConfig;
-        $this->dateTime = $dateTime;
         $this->senderCityDeterminer = $senderCityDeterminer;
+        $this->timezone = $timezone;
     }
 
     /**
@@ -155,7 +158,7 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всіх
                 'RecipientsPhone' => $recipientPhone,
-                'DateTime' => $this->dateTime->date('d.m.Y'),
+                'DateTime' => $this->timezone->date()->format('d.m.Y'),
             ]);
         } else {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
@@ -186,10 +189,10 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'RecipientAddressName' => $streetRecipient,
                 'RecipientHouse' => $buildingRecipient,
                 'RecipientFlat' => $flatRecipient,
-                'RecipientName' => $Firstname . ' ' . $MiddleName . ' ' . $LastName,
+                'RecipientName' => $recipientFullName,
                 'RecipientType' => $recipientType, //PrivatePerson для всех
                 'RecipientsPhone' => $recipientPhone,
-                'DateTime' => $this->dateTime->date('d.m.Y'),
+                'DateTime' => $this->timezone->date()->format('d.m.Y'),
             ]);
         }
         return $response;
