@@ -113,10 +113,41 @@ define([
         },
 
         select2: function (element) {
+            var ko = require('ko');
+            $(element).on('select2:select', function (e) {
+                let data = e.params.data;
+                quote.shippingAddress().street[0] = data.text;
+                ko.dataFor(e.currentTarget).address(data.text);
+            });
             $(element).select2({
                 placeholder: $.mage.__('Enter address'),
                 dropdownAutoWidth: true,
-                width: $(element).parent().parent().width().toString() + 'px'
+                width: $(element).parent().parent().width().toString() + 'px',
+                ajax: {
+                    url: url.build('rest/V1/novaposhtashipping/streets-formatted'),
+                    type: "POST",
+                    dataType: 'json',
+                    contentType: "application/json",
+                    delay: 1000,
+                    data: function (params) {
+
+                        var query = JSON.stringify({
+                            term: params.term,
+                            cityRef: ko.dataFor(this.get(0)).cityValue()
+                        })
+                        return query;
+                    },
+                    processResults: function (data) {
+                        // ko.dataFor(this.$element.get(0)).setOptions(data);
+                        let processedData = [];
+                        for (let i = 0; i < data.length; i++) {
+                            processedData.push({id: data[i].value, text: data[i].label});
+                        }
+                        return {
+                            results: processedData
+                        };
+                    }
+                }
             });
         },
 
