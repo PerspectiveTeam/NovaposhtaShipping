@@ -103,10 +103,10 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $recipientPhone = $order->getShippingAddress()->getTelephone();
 
         //В НП є перевірка на слово "ТЕСТ" в імені клієнта, якщо воно є, то відправка не відбудеться, тому використовуємо "Кастомер Покупенко Батькович"
-        $Firstname = $order->getShippingAddress()->getFirstname() ?? $order->getBillingAddress()->getFirstname() ?? 'Кастомер';
-        $LastName = $order->getShippingAddress()->getLastname() ?? $order->getBillingAddress()->getLastname() ?? 'Покупенко';
-        $MiddleName = $order->getShippingAddress()->getMiddlename() ?? $order->getBillingAddress()->getMiddlename() ?? 'Батькович';
-        $recipientFullName = $this->getRecipientFullName($Firstname, $MiddleName, $LastName);
+        $recipientFirstname = $order->getShippingAddress()->getFirstname() ?? $order->getBillingAddress()->getFirstname() ?? 'Кастомер';
+        $recipientLastName = $order->getShippingAddress()->getLastname() ?? $order->getBillingAddress()->getLastname() ?? 'Покупенко';
+        $recipientMiddleName = $order->getShippingAddress()->getMiddlename() ?? $order->getBillingAddress()->getMiddlename() ?? 'Батькович';
+        $recipientFullName = $this->getRecipientFullName($recipientFirstname, $recipientMiddleName, $recipientLastName);
 
         $internetDocumentDescription = __('Order Num: %1', $order->getIncrementId())->render();
         /*
@@ -116,6 +116,19 @@ class AddressDelivery implements OrderShippmentProcessorInterface
 
         $AreaAndRegionData = $this->getAreaAndRegionData($cityRecipientString);
 
+        $recipientCounterparty = $this->getRecipientCounterpartyRef($recipientFirstname, $recipientLastName);
+        [
+            'contact_person' => $recipientContactPerson,
+            'contact_person_address' => $recipientContactPersonsAddress
+        ] = $this->getRecipientContactPersonsAddress(
+            $recipientCounterparty,
+            $recipientFirstname,
+            $recipientLastName,
+            $cityRecipient,
+            $streetRecipient,
+            $buildingRecipient,
+            $flatRecipient
+        );
 
         list($areaRecipient, $regionRecipient) = $this->getAreaAndRegion($AreaAndRegionData, $cityRecipient);
         $recipientType = 'PrivatePerson';
@@ -123,7 +136,6 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $citySender = $this->senderCityDeterminer->getCityByDeliveryTechnologyAndContactPersonAddress($method, $contactPersonAddress);
         if ($order->getPayment()->getMethod() == 'cashondelivery') {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
-                'NewAddress' => 1,
                 'PayerType' => 'Sender',
                 'PaymentMethod' => $paymentMethod,
                 'CargoType' => $cargoType,
@@ -138,6 +150,10 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'ContactSender' => $contactPerson,
                 'SendersPhone' => $storePhone,
                 'RecipientCityName' => $cityRecipientString,
+                'NewAddress' => 0,
+                'Recipient'=> $recipientCounterparty,
+                'RecipientAddress' => $recipientContactPersonsAddress,
+                'ContactRecipient' => $recipientContactPerson,
                 'BackwardDeliveryData' => [
                     'PayerType' => 'Sender',
                     'CargoType' => 'Money',
@@ -175,11 +191,10 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'SenderAddress' => $contactPersonAddress,
                 'ContactSender' => $contactPerson,
                 'SendersPhone' => $storePhone,
-                'NewAddress' => 0, // TODO !!!!!!!!!! необхідно забезпечити вибір адреси зі списку НП
-                //modelName: "Counterparty", calledMethod: "getCounterparties"
-                //modelName: "ContactPersonGeneral", calledMethod: "save"
-                //modelName: "AddressContactPersonGeneral", calledMethod: "save"
-                //modelName: "ContactPersonGeneral", calledMethod: "getContactPersonsList"
+                'NewAddress' => 0,
+                'Recipient'=> $recipientCounterparty,
+                'RecipientAddress' => $recipientContactPersonsAddress,
+                'ContactRecipient' => $recipientContactPerson,
                 'RecipientCityName' => $cityRecipientString,
                 /*
                  * следующие поля требуют дополнительной работы с импортом городов. нужно по имени населенного пункта найти область, район и т.д.
@@ -262,6 +277,75 @@ class AddressDelivery implements OrderShippmentProcessorInterface
             $AreaAndRegionData = $response;
         }
         return $AreaAndRegionData;
+    }
+
+    /**
+     * @param string $recipientFirstname
+     * @param string $recipientLastName
+     * @param mixed $recipientCounterparty
+     * @return string
+     */
+    protected function getRecipientCounterpartyRef(string $recipientFirstname, string $recipientLastName): string
+    {
+        $recipientCounterparty = null;
+        $existedRecipientCounterparties = $this->novaposhtaHelper->getApi()->getCounterparties('Recipient');
+        if ($existedRecipientCounterparties && $existedRecipientCounterparties['success'] == true) {
+            foreach ($existedRecipientCounterparties['data'] as $counterpartyFromApiValue) {
+                if ($counterpartyFromApiValue['FirstName'] == $recipientFirstname && $counterpartyFromApiValue['LastName'] == $recipientLastName) {
+                    $recipientCounterparty = $counterpartyFromApiValue['Ref'];
+                }
+            }
+            //якщо не знайдено повної відповідності(більше потрібно для компаній, але можливий баг через "&&" в foreach)
+            if (!$recipientCounterparty && count($existedRecipientCounterparties['data']) > 0) {
+                $recipientCounterparty = reset($existedRecipientCounterparties['data'])['Ref'];
+            }
+        }
+        return $recipientCounterparty;
+    }
+
+    /**
+     * @param string $recipientCounterparty
+     * @return array
+     * @throws \Exception
+     */
+    protected function getRecipientContactPersonsAddress(
+        $recipientCounterparty,
+        $recipientFirstname,
+        $recipientLastName,
+        $cityRecipient,
+        $streetRecipient,
+        $buildingRecipient,
+        $flatRecipient
+    ) {
+        $recipientContactPerson = null;
+        $recipientContactPersonsAddress = null;
+        $recipientAddressArray = $this->novaposhtaHelper->getApi()->request(
+            'ContactPersonGeneral',
+            'getContactPersonsList',
+            [
+                'CounterpartyRef' => $recipientCounterparty,
+                'ContactProperty' => 'Recipient',
+                'getContactPersonAddress' => 1,
+
+            ]
+        );
+        if ($recipientAddressArray && $recipientAddressArray['success'] == true) {
+            foreach ($recipientAddressArray['data'] as $recipientContactPersonArray) {
+                if ($recipientContactPersonArray['FirstName'] == $recipientFirstname && $recipientContactPersonArray['LastName'] == $recipientLastName) {
+                    $recipientContactPerson = $recipientContactPersonArray['Ref'];
+                    foreach ($recipientContactPersonArray['Addresses']['DoorsAddresses'] ?? [] as $recipientAddress) {
+                        if (
+                            $recipientAddress['CityRef'] == $cityRecipient &&
+                            $recipientAddress['StreetRef'] == $streetRecipient &&
+                            $recipientAddress['BuildingNumber'] == $buildingRecipient &&
+                            $recipientAddress['Flat'] == $flatRecipient
+                        )
+                            $recipientContactPersonsAddress = $recipientAddress['Ref'];
+                    }
+                }
+            }
+        }
+        return ['contact_person' => $recipientContactPerson, 'contact_person_address' => $recipientContactPersonsAddress];
     }
 
     /**
