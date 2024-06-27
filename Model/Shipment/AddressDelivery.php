@@ -162,9 +162,8 @@ class AddressDelivery implements OrderShippmentProcessorInterface
             ]);
         } else {
             $response = $this->novaposhtaHelper->getApi()->request('InternetDocument', 'save', [
-                'NewAddress' => 1,
                 'PayerType' => 'Sender',
-                'PaymentMethod' => $paymentMethod,
+                'PaymentMethod' => 'Cash', //todo settings in admin
                 'CargoType' => $cargoType,
                 'OptionsSeat' => $optionsSeat,
                 'Weight' => $weight,
@@ -176,6 +175,11 @@ class AddressDelivery implements OrderShippmentProcessorInterface
                 'SenderAddress' => $contactPersonAddress,
                 'ContactSender' => $contactPerson,
                 'SendersPhone' => $storePhone,
+                'NewAddress' => 0, // TODO !!!!!!!!!! необхідно забезпечити вибір адреси зі списку НП
+                //modelName: "Counterparty", calledMethod: "getCounterparties"
+                //modelName: "ContactPersonGeneral", calledMethod: "save"
+                //modelName: "AddressContactPersonGeneral", calledMethod: "save"
+                //modelName: "ContactPersonGeneral", calledMethod: "getContactPersonsList"
                 'RecipientCityName' => $cityRecipientString,
                 /*
                  * следующие поля требуют дополнительной работы с импортом городов. нужно по имени населенного пункта найти область, район и т.д.
@@ -215,6 +219,20 @@ class AddressDelivery implements OrderShippmentProcessorInterface
             $cargoType = 'Pallet';
         }
         return array($weight, $cargoType);
+    }
+
+    /**
+     * Можно плагнути цей метод, бо не у всіх є по батькові в документах
+     *
+     * @param string $Firstname
+     * @param string $MiddleName
+     * @param string $LastName
+     * @return string
+     */
+    public function getRecipientFullName(string $Firstname, string $MiddleName, string $LastName): string
+    {
+        $recipientFullName = sprintf('%s %s', $Firstname, $LastName);
+        return $recipientFullName;
     }
 
     /**
@@ -276,19 +294,5 @@ class AddressDelivery implements OrderShippmentProcessorInterface
         $method = $order->getShippingMethod(true)->getData('method');
         $currentShippingName = sprintf('%s_%s', $carrierCode, $method);
         return ($currentShippingName === 'novaposhtashipping_w2c') || ($currentShippingName === 'novaposhtashipping_c2c');
-    }
-
-    /**
-     * Можно плагнути цей метод, бо не у всіх є по батькові в документах
-     *
-     * @param string $Firstname
-     * @param string $MiddleName
-     * @param string $LastName
-     * @return string
-     */
-    public function getRecipientFullName(string $Firstname, string $MiddleName, string $LastName): string
-    {
-        $recipientFullName = sprintf('%s %s', $Firstname, $LastName);
-        return $recipientFullName;
     }
 }
