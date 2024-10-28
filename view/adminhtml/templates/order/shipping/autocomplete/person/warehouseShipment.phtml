@@ -4,14 +4,14 @@
 <?php if (!$block->getIsActive()) {
     return;
 } ?>
-<?php $block->getRecalculatedPrice() ?>
-<section data-bind="scope: 'npw2cShippingForm'" class="admin__page-section order-npShippingForm">
+<?php $block->recalculatePrice() ?>
+<section data-bind="scope: 'WarehouseShippingForm'" class="admin__page-section order-npShippingForm">
 
     <div class="admin__page-section-title">
         <span class="title"><?php echo __('Create Address to Warehouse Novaposhta delivery') ?></span>
     </div>
     <div class="admin__page-section-content">
-        <div class="admin__page-section-item order-npw2cShippingForm">
+        <div class="admin__page-section-item order-WarehouseShippingForm">
             <form id="npw2c_shipping_form" name="npw2c_shipping_form" method="post">
                 <div class="row-gray" style="display: flow-root;">
                     <label for="np_w2c_city"><?= __('City that has been chosen by the customer') ?></label>
@@ -38,17 +38,17 @@
                             foreach ($block->getDeiveryPrice() as $ind => $val) {
                                 if (isset($val['data'][0]['CostRedelivery'])) {
                                     $cost = $val['data'][0]['Cost'] + $val['data'][0]['CostRedelivery'] . ' (' . $val['data'][0]['Cost'] . '+' . +$val['data'][0]['CostRedelivery'] . ')';
-                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $cost . '</td>' . '</tr>';
+                                    $table [] = '<tr>' . '<td>' . $cost . '</td>' . '</tr>';
                                 } else {
                                     if (isset($val['data'][0]['Cost'])) {
-                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
+                                        $table [] = '<tr>' . '<td>' . $val['data'][0]['Cost'] . '</td>' . '</tr>';
                                     } else {
-                                        $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . '0' . '</td>' . '</tr>';
+                                        $table [] = '<tr>' . '<td>' . '0' . '</td>' . '</tr>';
                                     }
                                 }
                             }
                             $tableStr = join('', $table);
-                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery price') . '</th></tr>' . $tableStr . '</table>';
+                            echo '<table><tr><th>' . __('Delivery price') . '</th></tr>' . $tableStr . '</table>';
                             ?>
                         </label>
                     </div>
@@ -62,13 +62,13 @@
                             $table = [];
                             foreach ($block->getDeliveryDate() as $ind => $val) {
                                 if (isset($val['data'][0]['DeliveryDate']['date'])) {
-                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . $val['date'] . '</td>' . '</tr>';
+                                    $table [] = '<tr>' . '<td>' . $val['data'][0]['DeliveryDate']['date'] . '</td>' . '</tr>';
                                 } else {
-                                    $table [] = '<tr>' . '<td>' . $block->getCityNameByRef($val['cityRef']) . '</td>' . '<td>' . date('d-m-Y') . '</td>' . '</tr>';
+                                    $table [] = '<tr>' . '<td>' . date('d-m-Y') . '</td>' . '</tr>';
                                 }
                             }
                             $tableStr = join('', $table);
-                            echo '<table><tr><th>' . __('Sender City') . '</th><th>' . __('Delivery date') . '</th></tr>' . $tableStr . '</table>';
+                            echo '<table><tr><th>' . __('Delivery date') . '</th></tr>' . $tableStr . '</table>';
                             ?>
                         </label>
                     </div>
@@ -77,39 +77,32 @@
                 <input type="hidden" name="order_id" id="order_id" value="<?php echo $_order->getId(); ?>"/>
                 <input type="hidden" name="form_key" value="<?php echo $block->getFormKey(); ?>"/>
                 <div id="loader"></div>
-                <div style="display: flow-root;" class="row-gray">
-                    <label for="np_w2c_choosen_city_address"><?= __('Choose city') ?></label>
+                <div class="admin__page-section-title">
+                    <span class="title"><?php echo __('Sender params:') ?></span>
+                </div>
+
+                <div style="display: flow-root;">
+                    <label for="np_sender_city"><?= __('Sender') ?></label>
                     <div class="input-to-right">
-                        <select id="np_w2c_choosen_city_address" name="np_w2c_choosen_city_address">
-                            <option value="-1"><?= __("Select city") ?></option>
-                            <?php $cityData = $block->getCitiesDataForSelect() ?>
-                            <?php foreach ($cityData as $indexAddress => $dataAddress): ?>
-                                <?php if ($dataAddress['CityRef'] && $dataAddress['CounterpartyRef'] && $dataAddress['CityDescription']): ?>
-                                    <option
-                                        value="<?= $dataAddress['CityRef'] . ',' . $dataAddress['CounterpartyRef'] ?>"><?= $dataAddress['CityDescription'] ?></option>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </select>
+                        <?= $block->getSenderHtml() ?>
+                        <?= $block->getSenderHiddenHtml() ?>
+
                     </div>
                 </div>
                 <br/>
-                <div>
-                    <label for="np_w2c_choosen_contact_person_address"><?= __('Choose contact person') ?></label>
+                <div class="row-gray" style="display: flow-root;">
+                    <label for="np_sender_contact_person"><?= __('Contact person') ?></label>
                     <div class="input-to-right">
-                        <select id="np_w2c_choosen_contact_person_address" name="np_w2c_choosen_contact_person_address">
-                            <option value="-1"><?= __("Select city then contact person") ?></option>
-                        </select>
+                        <?= $block->getContactPersonHtml() ?>
+                        <?= $block->getContactPersonHiddenHtml() ?>
                     </div>
                 </div>
                 <br/>
-                <div style="display: flow-root;" class="row-gray">
-                    <label
-                        for="np_w2c_choosen_contact_person_address_place"><?= __('Choose address of contact person') ?></label>
+                <div style="display: flow-root;">
+                    <label for="np_sender_contact_person"><?= __('Contact person\'s address') ?></label>
                     <div class="input-to-right">
-                        <select id="np_w2c_choosen_contact_person_address_place"
-                                name="np_w2c_choosen_contact_person_address_place">
-                            <option value="-1"><?= __("Select address of contact person") ?></option>
-                        </select>
+                        <?= $block->getContactPersonAddressHtml() ?>
+                        <?= $block->getContactPersonAddressHiddenHtml() ?>
                     </div>
                 </div>
                 <br/>

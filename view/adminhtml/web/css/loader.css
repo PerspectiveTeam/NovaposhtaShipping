@@ -14,9 +14,9 @@
     height: 120px;
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
-    border-top: 16px solid blue;
+    border-top: 16px solid #0057B7;
     /*border-right: 16px solid green;*/
-    border-bottom: 16px solid red;
+    border-bottom: 16px solid #FFDD00;
     /*border-left: 16px solid pink;*/
 }
 

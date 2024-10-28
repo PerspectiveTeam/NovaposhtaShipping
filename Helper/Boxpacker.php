@@ -20,7 +20,7 @@ use Throwable;
 class Boxpacker
 {
     /**
-     * Статическая константа, на которую происходит деление, диктуеться Новой Почтой
+     * Статическая константа, на которую происходит деление, диктуется Новой Почтой
      */
     protected const VOLUMETRIC_VOLUME_DIVISOR = 4000;
 
@@ -115,11 +115,14 @@ class Boxpacker
          * @var QuoteItem|OrderItem $productVal
          */
         foreach ($products as $productIdx => $productVal) {
-            $productModel = $this->productRepositoryInterface->get($productVal->getProduct()->getSku());
+            $productModel = $this->productRepositoryInterface->getById($productVal->getProduct()->getId());
             $widthProduct = (int)ceil($productModel->getProductWidth() / 10);
             $lengthProduct = (int)ceil($productModel->getProductLength() / 10);
             $heightProduct = (int)ceil($productModel->getProductHeight() / 10);
             $weightProduct = (int)ceil($productModel->getWeight() * 1000);
+            $productValQty = $productVal instanceof OrderItem
+                ? $productVal->getQtyToShip()
+                : $productVal->getQty();
             //коробка самого товара
             $this->getPacker()->addBox($this->limitedSupplyBoxFactory->create([
                 'reference' => 'product_size_box_' . uniqid(),
@@ -131,12 +134,8 @@ class Boxpacker
                 'innerLength' => $lengthProduct,
                 'innerDepth' => $heightProduct,
                 'maxWeight' => $weightProduct,
-                'quantity' => $productVal->getQty()
+                'quantity' => $productValQty
             ]));
-
-            $productValQty = $productVal instanceof OrderItem
-                ? $productVal->getQtyToShip()
-                : $productVal->getQty();
 
             /** $allowedRotation <---- Rotation::KeepFlat == 2*/
             /** $allowedRotation <---- Rotation::BestFit == 6*/
@@ -191,26 +190,29 @@ class Boxpacker
     }
 
     /**
-     * Все значения в граммах и миллиметрах, кроме `overallWeight` оно в кг
-     * @see overallWeight
+     * Всі значення в граммах та міліметрах, крім `overallWeight` воно в кг
+     *
      * @return void
+     *@see overallWeight
      */
     public function setAvailableBoxes(): void
     {
-        //Палети НП
-        // от 0 до 500 кг - 408
-        if ($this->overallWeight >= 0 && $this->overallWeight < 500) {
+        // Палети НП
+        // від 30 до 500 кг - 408
+        // змінено з 0 на 30 через причину того, що відбувається некоректна "упаковка" якщо товарів менш як 30 кг
+        // (є інші "коробки", до 30 кг, які можна використати для цього випадку)
+        if ($this->overallWeight >= 30 && $this->overallWeight < 500) {
             $this->addBoxesToPacker('80*120*170');
         }
 
-        // от 500 до 750 кг - 612, 408
+        // від 500 до 750 кг - 612, 408
         if ($this->overallWeight >= 500 && $this->overallWeight <= 750) {
             $this->addBoxesToPacker('120*120*170');
         }
 
         /*
-         * от 750 до 1000+ кг - 816, 612, 408
-         * или все доступные палеты НП, на случай если товар битый и невозможно получить вес
+         * від 750 до 1000+ кг - 816, 612, 408
+         * або всі доступные палети НП, на випадок якщо товар "битий" та неможливо отримати вагу
          */
         if ($this->overallWeight > 750 || !$this->overallWeight) {
 //            if (!$this->overallWeight) {
@@ -230,13 +232,13 @@ class Boxpacker
             $this->getPacker()->addBox($this->boxFactory->create(
                 [
                     'reference' => sprintf('%s - %s', $package->getDescriptionUa(), $package->getRef()),
-                    'outerWidth' => $package->getWidth(),
-                    'outerLength' => $package->getLength(),
-                    'outerDepth' => $package->getHeight(),
+                    'outerWidth' => ceil($package->getWidth() / 10),
+                    'outerLength' => ceil($package->getLength() / 10),
+                    'outerDepth' => ceil($package->getHeight() / 10),
                     'emptyWeight' => 0,
-                    'innerWidth' => $package->getWidth(),
-                    'innerLength' => $package->getLength(),
-                    'innerDepth' => $package->getHeight(),
+                    'innerWidth' => ceil($package->getWidth() / 10),
+                    'innerLength' => ceil($package->getLength() / 10),
+                    'innerDepth' => ceil($package->getHeight() / 10),
                     'maxWeight' => $package->getVolumetricWeight() * 1000 // НП повертає вагу в КГ - переводимо в грами
                 ]
             ));

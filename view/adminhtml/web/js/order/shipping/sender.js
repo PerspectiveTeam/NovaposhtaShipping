@@ -11,7 +11,7 @@ define([
     return Select.extend({
 
         defaults: {
-            template: 'Perspective_NovaposhtaShipping/order/create/city',
+            template: 'Perspective_NovaposhtaShipping/order/create/sender/sender',
             backendRestURL: '',
             inputCustomName: '',
             classCustomName: '',
@@ -21,7 +21,7 @@ define([
 
         initialize: function (config) {
             this._super();
-            this.backendRestURL(config.cityBackendUrl);
+            this.backendRestURL(config.backendUrl);
             this.inputCustomName(config.inputName);
             this.backendCityName(config.cityLabel);
             this.backendCityValue(config.cityValue);
@@ -58,9 +58,9 @@ define([
                 placeholder: $.mage.__(''),
                 dropdownAutoWidth: true,
                 width: '100%',
-                minimumInputLength: 2,
+                minimumInputLength: 0,
                 language: lang,
-                data: initialData,
+                // data: initialData,
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",

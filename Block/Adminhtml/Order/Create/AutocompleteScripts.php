@@ -76,4 +76,28 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
     {
         return $this->storeManager->getStore(1)->getBaseUrl() . $path;
     }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function getCityValue()
+    {
+        return parent::getData('city_value');
+    }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function getStreetValue()
+    {
+        return parent::getData('street_value');
+    }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function getWarehouseValue()
+    {
+        return parent::getData('warehouse_value');
+    }
 }

@@ -5,23 +5,35 @@ namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Shipping;
 use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Data\Form\AbstractForm;
+use Magento\Framework\Data\Form\Element\Hidden;
+use Magento\Framework\Data\Form\Element\Label;
+use Magento\Framework\Data\Form\ElementFactory;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface;
 use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterfaceFactory;
+use Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface;
+use Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory;
 use Perspective\NovaposhtaShipping\Helper\Config;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
 use Perspective\NovaposhtaShipping\Model\Carrier\Mapping;
 use Perspective\NovaposhtaShipping\Model\Carrier\Sender;
-use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache;
 
 class AbstractShipment extends Template
 {
+    const NOVAPOSHTA_SENDER_INPUT = 'novaposhtashipping_sender';
+    const NOVAPOSHTA_SENDER_HIDDEN_INPUT = 'novaposhtashipping_sender_hidden';
+    const NOVAPOSHTA_CONTACT_PERSON_INPUT = 'novaposhtashipping_contact_person';
+    const NOVAPOSHTA_CONTACT_PERSON_HIDDEN_INPUT = 'novaposhtashipping_contact_person_hidden';
+    const NOVAPOSHTA_CONTACT_PERSON_ADDRESS_INPUT = 'novaposhtashipping_contact_person_address';
+    const NOVAPOSHTA_CONTACT_PERSON_ADDRESS_HIDDEN_INPUT = 'novaposhtashipping_contact_person_address_hidden';
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
@@ -53,11 +65,11 @@ class AbstractShipment extends Template
 
     protected CityRepositoryInterface $cityRepository;
 
-    protected CollectionFactory $counterpartyAddressIndexCollectionFactory;
-
     protected StoreManagerInterface $storeManager;
 
-    protected Select2SmallFactory $select2;
+    protected SenderRepositoryInterface $senderRepository;
+
+    protected ElementFactory $elementFactory;
 
 
     /**
@@ -70,8 +82,8 @@ class AbstractShipment extends Template
      * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
      * @param \Perspective\NovaposhtaShipping\Model\Carrier\Mapping $carrierMapping
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
-     * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
-     * @param \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2SmallFactory $select2SmallFactory
+     * @param \Magento\Framework\Data\Form\ElementFactory $elementFactory
+     * @param \Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface $senderRepository
      * @param array $data
      * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
      * @param \Magento\Directory\Helper\Data|null $directoryHelper
@@ -86,8 +98,8 @@ class AbstractShipment extends Template
         NovaposhtaHelper $novaposhtaHelper,
         Mapping $carrierMapping,
         CityRepositoryInterface $cityRepository,
-        CollectionFactory $counterpartyAddressIndexCollectionFactory,
-        Select2SmallFactory $select2SmallFactory,
+        ElementFactory $elementFactory,
+        SenderRepositoryInterface $senderRepository,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -103,8 +115,8 @@ class AbstractShipment extends Template
         $this->novaposhtaHelper = $novaposhtaHelper;
         $this->carrierMapping = $carrierMapping;
         $this->cityRepository = $cityRepository;
-        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
-        $this->select2 = $select2SmallFactory;
+        $this->senderRepository = $senderRepository;
+        $this->elementFactory = $elementFactory;
         parent::__construct($context, $data, $jsonHelper, $directoryHelper);
     }
 
@@ -188,5 +200,110 @@ class AbstractShipment extends Template
             $this->getType()
         )->loadAddressInfo($this->getQuoteId());
         return $data;
+    }
+
+    public function getSenderHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Label::class);
+        $element->setData('name', self::NOVAPOSHTA_SENDER_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderCounterparty();
+        $valueToRender = sprintf("%s (%s)", $senderLabel, $senderValue);
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+
+    public function getSenderHiddenHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Hidden::class);
+        (function () {
+            $form = ObjectManager::getInstance()->get(AbstractForm::class);
+            $this->_form = $form;
+        })->call($element);
+        $element->setData('name', self::NOVAPOSHTA_SENDER_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_SENDER_HIDDEN_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderCounterparty();
+        $valueToRender = $senderValue;
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+
+    public function getContactPersonHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Label::class);
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPerson();
+        $valueToRender = sprintf("%s (%s)", $senderLabel, $senderValue);
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+
+    public function getContactPersonHiddenHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Hidden::class);
+        (function () {
+            $form = ObjectManager::getInstance()->get(AbstractForm::class);
+            $this->_form = $form;
+        })->call($element);
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_CONTACT_PERSON_HIDDEN_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPerson();
+        $valueToRender = $senderValue;
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+
+    public function getContactPersonAddressHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Label::class);
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPersonAddress();
+        $valueToRender = sprintf("%s (%s)", $senderLabel, $senderValue);
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+
+    public function getContactPersonAddressHiddenHtml()
+    {
+        /** @var \Magento\Framework\Data\Form\Element\Label $element */
+        $element = $this->elementFactory->create(Hidden::class);
+        (function () {
+            $form = ObjectManager::getInstance()->get(AbstractForm::class);
+            $this->_form = $form;
+        })->call($element);
+        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_HIDDEN_INPUT);
+        $element->setData('id', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_HIDDEN_INPUT);
+        ['value' => $senderValue, 'label' => $senderLabel] = $this->senderRepository->getSenderContactPersonAddress();
+        $valueToRender = $senderValue;
+        $element->setData('value', $valueToRender);
+        return $element->toHtml();
+    }
+    public function isOrganisation()
+    {
+        return $this->senderRepository->isOrganization();
+    }
+
+//    public function getContactPersonAddressHtml()
+//    {
+//        $element = $this->elementFactory->create(Select2Small::class);
+//        /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2Small $element */
+//        $element->setData('name', self::NOVAPOSHTA_CONTACT_PERSON_ADDRESS_INPUT);
+//        $dataBindArray['scope'] = '\'contactPersonSenderAddressInputAutocompleteShipping\'';
+//        $element->addClass('contactPersonSenderAddressInputAutocompleteShippingClass');
+//        $element->setDataBind($dataBindArray);
+//        return $element->toHtml();
+//    }
+    /**
+     * @param string $path
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getRestUrl(string $path)
+    {
+        return $this->storeManager->getStore(1)->getBaseUrl() . $path;
     }
 }

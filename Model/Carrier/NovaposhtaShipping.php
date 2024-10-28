@@ -19,6 +19,7 @@ use Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInt
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
 use Perspective\NovaposhtaShipping\Model\Quote\Info\Session\QuoteObject;
 use Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache;
+use Perspective\NovaposhtaShipping\Model\VisualisatorRepository;
 use Perspective\NovaposhtaShipping\Service\Cache\OperationsCache;
 use Psr\Log\LoggerInterface;
 
@@ -112,6 +113,11 @@ class NovaposhtaShipping extends AbstractCarrier implements
     private StoreManagerInterface $storeManager;
 
     /**
+     * @var \Perspective\NovaposhtaShipping\Model\VisualisatorRepository
+     */
+    private VisualisatorRepository $visualisatorRepository;
+
+    /**
      * Constructor
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -129,6 +135,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
      * @param \Perspective\NovaposhtaShipping\Model\ResourceModel\ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel
      * @param \Magento\Directory\Model\CurrencyFactory $currencyFactory
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Perspective\NovaposhtaShipping\Model\VisualisatorRepository $visualisatorRepository
      * @param array $data
      */
     public function __construct(
@@ -147,6 +154,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
         ShippingCheckoutOnestepPriceCache $checkoutOnestepPriceCacheResourceModel,
         CurrencyFactory $currencyFactory,
         StoreManagerInterface $storeManager,
+        VisualisatorRepository $visualisatorRepository,
         array $data = []
     ) {
         $this->rateResultFactory = $rateResultFactory;
@@ -163,6 +171,7 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $this->currencyFactory = $currencyFactory;
         $this->storeManager = $storeManager;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
+        $this->visualisatorRepository = $visualisatorRepository;
     }
 
     /**
@@ -188,12 +197,14 @@ class NovaposhtaShipping extends AbstractCarrier implements
             $hashmapOfItemsOfProducts = [];
             $allVisibleItems = $this->session->getQuote()->getAllVisibleItems();
             foreach ($allVisibleItems as $item) {
-                $hashmapOfItemsOfProducts [] = 'prod_id_'.$item->getProductId() . '_qty_' . $item->getQty();
+                $hashmapOfItemsOfProducts [] = 'prod_id_' . $item->getProductId() . '_qty_' . $item->getQty();
             }
             $requestDataHash = implode('-', $hashmapOfItemsOfProducts);
             $cacheId = "np_price_city_{$data['current_user_address']->getCity()}_method_{$data['current_method']}_hash_{$requestDataHash}";
+            $cacheHit = false;
             if (!empty(unserialize($this->cache->load($cacheId)))) {
                 $shippingData = unserialize($this->cache->load($cacheId));
+                $cacheHit = true;
             } else {
                 $shippingData = $this->novaposhtaHelper->getShippingPriceByData($data);
                 $shippingData = $this->prepareCachedData($tempModelPriceCache, $allowedMethods[$i], $shippingData);
@@ -202,11 +213,16 @@ class NovaposhtaShipping extends AbstractCarrier implements
                     $this->cache->save(serialize($shippingData), $cacheId);
                 }
             }
-            if(!isset($shippingData['visualisation'])){
-                $visualisationCacheIdentifier ='np_vis__boxes_'. implode('-', $hashmapOfItemsOfProducts);
-                if (!empty(unserialize($this->cache->load($visualisationCacheIdentifier))) ?? null){
+
+            if (!isset($shippingData['visualisation'])) {
+                $visualisationCacheIdentifier = 'np_vis__boxes_' . implode('-', $hashmapOfItemsOfProducts);
+                if (!empty(unserialize($this->cache->load($visualisationCacheIdentifier))) ?? null) {
                     $shippingData['visualisation'] = unserialize($this->cache->load($visualisationCacheIdentifier));
+                    $this->visualisatorRepository->process($data['quote_id'], unserialize($this->cache->load($visualisationCacheIdentifier)));
                 }
+            }
+            if ($cacheHit && !empty($shippingData['visualisation'])){
+                $this->visualisatorRepository->process($data['quote_id'], $shippingData['visualisation']);
             }
             $this->method = $this->rateMethodFactory->create();
             if (!isset($shippingData['price'])) {
@@ -233,156 +249,6 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $data = $this->prepareLocale($data);
         $data = $this->appendQuoteId($data);
         return $data;
-    }
-
-    /**
-     * @param $shippingData
-     * @param $allowedMethod
-     * @param $deliveryText
-     * @return void
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
-     */
-    public function createNormalCarrier($shippingData, $allowedMethod, $deliveryText)
-    {
-        $this->method->setCarrierTitle($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y') . ' - ' . $deliveryText);
-        if (isset($shippingData)) {
-            if (isset($shippingData['price'])) {
-                if ($shippingData['price'] === 0) {
-                    $deliveryText .= __(' Free');
-                }
-            }
-            if (isset($shippingData['sale'])) {
-                if (count($shippingData['sale']) > 0) {
-                    $deliveryText .= __(' Sale product included');
-                }
-            }
-            if (isset($shippingData['free_sample'])) {
-                if (count($shippingData['free_sample']) > 0) {
-                    $deliveryText .= __(' Free sample of the products included');
-                }
-            }
-        }
-        $this->method->setMethodTitle($this->getConfigData('name') . ' ' . __($allowedMethod));
-        if (isset($shippingData['date'])) {
-            $this->method->setMethodDescription($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y') . ' - ' . $shippingData['price'] . ' ' . __('UAH') . ' - ' . $deliveryText . ' - ');
-            $this->method->setExpectedDelivery($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y'));
-            $this->method->setEarliest($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y'));
-        } else {
-            $this->method->setMethodDescription($this->timezone->date()->format('d-m-Y') . ' - ' . ' 0 ' . __('UAH') . ' - ' . $deliveryText . ' - ');
-            $this->method->setExpectedDelivery($this->timezone->date()->format('d-m-Y'));
-            $this->method->setEarliest($this->timezone->date()->format('d-m-Y'));
-        }
-
-        $this->method->setCarrier($this->_code);
-        $this->method->setMethod($allowedMethod);
-        $this->cacheOrRetriveCachedData($shippingData, $allowedMethod);
-        $this->result->append($this->method);
-    }
-
-    /**
-     * @param $val
-     */
-    public function makeCarrierWithError($val)
-    {
-        $errorNPmessage = __('Shipping cost by carrier');
-        if (isset($val)) {
-            $this->method->setCarrierTitle($this->getConfigData('name') . ' ' . __($val));
-        } else {
-            $this->method->setCarrierTitle($this->getConfigData('name'));
-        }
-        $this->method->setCarrier($this->_code);
-        $this->method->setMethodTitle($errorNPmessage);
-        $this->method->setMethod($val);
-        $this->method->setMethodDescription($errorNPmessage);
-        $this->method->setPrice($this->getConfigData('default_cost') ?? 0);
-        $this->method->setCost($this->getConfigData('default_cost') ?? 0);
-        $this->result->append($this->method);
-    }
-
-
-    /**
-     * getAllowedMethods
-     *
-     * @param array
-     * @return array
-     */
-    public function getAllowedMethods()
-    {
-        return [$this->_code => $this->getConfigData('allowed_methods')];
-    }
-
-    /**
-     * @param array $shippingData
-     * @param $allowedMethod
-     * @return void
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
-     */
-    protected function cacheOrRetriveCachedData(array $shippingData, $allowedMethod)
-    {
-        /** @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $priceCache */
-        $tempModelPriceCache = $this->loadCachedData();
-        if (isset($shippingData['price'])) {
-            /** але насправді конвертація відбуваєтся до base валюти
-             * $this->method->setCost або setPrice мають приймати валюту(еквівалент) що є у
-             * Stores - Configuration - General - Currency Setup - Currency Options - Base Currency
-             */
-            $convertedPrice = $this->convertPriceFromBaseToAnotherCurrency($shippingData['price']);
-            $this->method->setPrice($convertedPrice);
-            $this->method->setCost($convertedPrice);
-            if ($tempModelPriceCache->getShippingMethod() === $allowedMethod) {
-                $tempModelPriceCache->setCartId($this->getQuoteId());
-                $tempModelPriceCache->setCachePrice($convertedPrice);
-                $tempModelPriceCache->setShippingMethod($allowedMethod);
-                $this->checkoutOnestepPriceCacheResourceModel->save($tempModelPriceCache);
-            }
-        } else {
-            //для двух-шагового чекаута
-            //пробуем загрузить кешированные данные
-            if ($tempModelPriceCache->getId()) {
-                $this->method->setPrice($tempModelPriceCache->getCachePrice());
-                $this->method->setCost($tempModelPriceCache->getCachePrice());
-            } else {
-                $this->method->setPrice(0);
-                $this->method->setCost(0);
-            }
-        }
-    }
-
-    /**
-     * @return \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface
-     */
-    protected function loadCachedData(): ShippingCheckoutOnestepPriceCacheInterface
-    {
-        $tempModelPriceCache = $this->checkoutOnestepPriceCacheFactory->create();
-        $this->checkoutOnestepPriceCacheResourceModel
-            ->load(
-                $tempModelPriceCache,
-                $this->getQuoteId(),
-                ShippingCheckoutOnestepPriceCacheInterface::CART_ID
-            );
-        return $tempModelPriceCache;
-    }
-
-    /**
-     * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache
-     * @param $allowedMethods
-     * @param $shippingData
-     * @return array
-     */
-    protected function prepareCachedData(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, $allowedMethods, $shippingData): array
-    {
-        if ($tempModelPriceCache->getId() && $tempModelPriceCache->getShippingMethod() === $allowedMethods) {
-            if (!isset($shippingData['price'])) {
-                $shippingData['price'] = floatval($tempModelPriceCache->getCachePrice());
-                $shippingData['deliveryMethod'] = $tempModelPriceCache->getShippingMethod();
-                $shippingData['date'] = $this->timezone->date()->format('d-m-Y');
-                $this->checkoutOnestepPriceCacheResourceModel
-                    ->save(
-                        $tempModelPriceCache,
-                    );
-            }
-        }
-        return $shippingData;
     }
 
     /**
@@ -435,6 +301,21 @@ class NovaposhtaShipping extends AbstractCarrier implements
     }
 
     /**
+     * @return \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface
+     */
+    protected function loadCachedData(): ShippingCheckoutOnestepPriceCacheInterface
+    {
+        $tempModelPriceCache = $this->checkoutOnestepPriceCacheFactory->create();
+        $this->checkoutOnestepPriceCacheResourceModel
+            ->load(
+                $tempModelPriceCache,
+                $this->getQuoteId(),
+                ShippingCheckoutOnestepPriceCacheInterface::CART_ID
+            );
+        return $tempModelPriceCache;
+    }
+
+    /**
      * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache
      * @param array $data
      * @return array
@@ -449,12 +330,136 @@ class NovaposhtaShipping extends AbstractCarrier implements
     }
 
     /**
+     * @param \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache
+     * @param $allowedMethods
+     * @param $shippingData
+     * @return array
+     */
+    protected function prepareCachedData(ShippingCheckoutOnestepPriceCacheInterface $tempModelPriceCache, $allowedMethods, $shippingData): array
+    {
+        if ($tempModelPriceCache->getId() && $tempModelPriceCache->getShippingMethod() === $allowedMethods) {
+            if (!isset($shippingData['price'])) {
+                $shippingData['price'] = floatval($tempModelPriceCache->getCachePrice());
+                $shippingData['deliveryMethod'] = $tempModelPriceCache->getShippingMethod();
+                $shippingData['date'] = $this->timezone->date()->format('d-m-Y');
+                $this->checkoutOnestepPriceCacheResourceModel
+                    ->save(
+                        $tempModelPriceCache,
+                    );
+            }
+        }
+        return $shippingData;
+    }
+
+    /**
+     * @param $val
+     */
+    public function makeCarrierWithError($val)
+    {
+        $errorNPmessage = __('Shipping cost by carrier');
+        if (isset($val)) {
+            $this->method->setCarrierTitle($this->getConfigData('name') . ' ' . __($val));
+        } else {
+            $this->method->setCarrierTitle($this->getConfigData('name'));
+        }
+        $this->method->setCarrier($this->_code);
+        $this->method->setMethodTitle($errorNPmessage);
+        $this->method->setMethod($val);
+        $this->method->setMethodDescription($errorNPmessage);
+        $this->method->setPrice($this->getConfigData('default_cost') ?? 0);
+        $this->method->setCost($this->getConfigData('default_cost') ?? 0);
+        $this->result->append($this->method);
+    }
+
+    /**
+     * @param $shippingData
+     * @param $allowedMethod
+     * @param $deliveryText
+     * @return void
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     */
+    public function createNormalCarrier($shippingData, $allowedMethod, $deliveryText)
+    {
+        $this->method->setCarrierTitle($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y') . ' - ' . $deliveryText);
+        if (isset($shippingData)) {
+            if (isset($shippingData['price'])) {
+                if ($shippingData['price'] === 0) {
+                    $deliveryText .= __(' Free');
+                }
+            }
+            if (isset($shippingData['sale'])) {
+                if (count($shippingData['sale']) > 0) {
+                    $deliveryText .= __(' Sale product included');
+                }
+            }
+            if (isset($shippingData['free_sample'])) {
+                if (count($shippingData['free_sample']) > 0) {
+                    $deliveryText .= __(' Free sample of the products included');
+                }
+            }
+        }
+        $this->method->setMethodTitle($this->getConfigData('name') . ' ' . __($allowedMethod));
+        if (isset($shippingData['date'])) {
+            $this->method->setMethodDescription($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y') . ' - ' . $shippingData['price'] . ' ' . __('UAH') . ' - ' . $deliveryText . ' - ');
+            $this->method->setExpectedDelivery($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y'));
+            $this->method->setEarliest($this->timezone->date(strtotime($shippingData['date']))->format('d-m-Y'));
+        } else {
+            $this->method->setMethodDescription($this->timezone->date()->format('d-m-Y') . ' - ' . ' 0 ' . __('UAH') . ' - ' . $deliveryText . ' - ');
+            $this->method->setExpectedDelivery($this->timezone->date()->format('d-m-Y'));
+            $this->method->setEarliest($this->timezone->date()->format('d-m-Y'));
+        }
+
+        $this->method->setCarrier($this->_code);
+        $this->method->setMethod($allowedMethod);
+        $this->cacheOrRetriveCachedData($shippingData, $allowedMethod);
+        $this->result->append($this->method);
+    }
+
+    /**
+     * @param array $shippingData
+     * @param $allowedMethod
+     * @return void
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     */
+    protected function cacheOrRetriveCachedData(array $shippingData, $allowedMethod)
+    {
+        /** @var \Perspective\NovaposhtaShipping\Api\Data\ShippingCheckoutOnestepPriceCacheInterface $priceCache */
+        $tempModelPriceCache = $this->loadCachedData();
+        if (isset($shippingData['price'])) {
+            /** але насправді конвертація відбуваєтся до base валюти
+             * $this->method->setCost або setPrice мають приймати валюту(еквівалент) що є у
+             * Stores - Configuration - General - Currency Setup - Currency Options - Base Currency
+             */
+            $convertedPrice = $this->convertPriceFromBaseToAnotherCurrency($shippingData['price']);
+            $this->method->setPrice($convertedPrice);
+            $this->method->setCost($convertedPrice);
+            if ($tempModelPriceCache->getShippingMethod() === $allowedMethod) {
+                $tempModelPriceCache->setCartId($this->getQuoteId());
+                $tempModelPriceCache->setCachePrice($convertedPrice);
+                $tempModelPriceCache->setShippingMethod($allowedMethod);
+                $this->checkoutOnestepPriceCacheResourceModel->save($tempModelPriceCache);
+            }
+        } else {
+            //для двух-шагового чекаута
+            //пробуем загрузить кешированные данные
+            if ($tempModelPriceCache->getId()) {
+                $this->method->setPrice($tempModelPriceCache->getCachePrice());
+                $this->method->setCost($tempModelPriceCache->getCachePrice());
+            } else {
+                $this->method->setPrice(0);
+                $this->method->setCost(0);
+            }
+        }
+    }
+
+    /**
      * Щодо інформації по заокругленню
-     * @see \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\Method
+     *
      * @param $price
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @see \Perspective\NovaposhtaShipping\Model\Quote\Address\RateResult\Method
      */
     protected function convertPriceFromBaseToAnotherCurrency($price)
     {
@@ -462,6 +467,17 @@ class NovaposhtaShipping extends AbstractCarrier implements
         $currencyCodeFrom = $this->storeManager->getStore()->getBaseCurrency()->getCode();
         $rate = $this->currencyFactory->create()->load($currencyCodeTo)->getAnyRate($currencyCodeFrom);
         return number_format($price * $rate, 2);
+    }
+
+    /**
+     * getAllowedMethods
+     *
+     * @param array
+     * @return array
+     */
+    public function getAllowedMethods()
+    {
+        return [$this->_code => $this->getConfigData('allowed_methods')];
     }
 
 }

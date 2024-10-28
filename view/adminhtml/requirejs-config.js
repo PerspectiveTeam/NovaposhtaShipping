@@ -11,6 +11,10 @@ var config = {
     },
     map: {
         '*': {
+            AddressShippingFormComponent:
+                'Perspective_NovaposhtaShipping/js/order/shipping/addressShippingFormComponent',
+            WarehouseShippingFormComponent:
+                'Perspective_NovaposhtaShipping/js/order/shipping/warehouseShippingFormComponent',
             warehouseOnChange:
                 'Perspective_NovaposhtaShipping/js/order/address/change/warehouse',
             addressOnChange:

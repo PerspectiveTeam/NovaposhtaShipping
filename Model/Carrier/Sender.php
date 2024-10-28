@@ -2,7 +2,11 @@
 
 namespace Perspective\NovaposhtaShipping\Model\Carrier;
 
+use Magento\Framework\DataObject;
+use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
+use Perspective\NovaposhtaShipping\Helper\Config;
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
+use Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory;
 
 class Sender
 {
@@ -23,24 +27,28 @@ class Sender
     private $cityRepository;
 
     /**
-     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory
+     * @var \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyOrgThirdparty\CollectionFactory
      */
-    private $counterpartyAddressIndexCollectionFactory;
+    private CollectionFactory $counterpartyContactPersonCollectionFactory;
 
     /**
      * @param \Perspective\NovaposhtaShipping\Helper\Config $config
      * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
      */
     public function __construct(
-        \Perspective\NovaposhtaShipping\Helper\Config $config,
-        \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository,
-        \Perspective\NovaposhtaShipping\Model\ResourceModel\CounterpartyAddressIndex\CollectionFactory $counterpartyAddressIndexCollectionFactory
+        Config $config,
+        CityRepositoryInterface $cityRepository,
+        CollectionFactory $counterpartyContactPersonCollectionFactory
+
     ) {
         $this->config = $config;
         $this->cityRepository = $cityRepository;
-        $this->counterpartyAddressIndexCollectionFactory = $counterpartyAddressIndexCollectionFactory;
+        $this->counterpartyContactPersonCollectionFactory = $counterpartyContactPersonCollectionFactory;
     }
 
+    /**
+     * @return void
+     */
     public function prepareSenderCity()
     {
         $senderCityArr = explode(',', $this->config->getShippingConfigByCode('novaposhtashipping', 'sender_city') ?? '');
@@ -63,10 +71,11 @@ class Sender
     {
         $saleSender = $this->config->getShippingConfigByCode('novaposhtashipping', 'sale_sender');
         $defaultSaleSenderCounterparty = '';
-        if ($saleSender) {
+        if ($saleSender && strpos($saleSender, ',') !== false) {
             $saleSenderData = explode(',', $saleSender);
             $defaultSaleSenderCounterparty = $saleSenderData[0];
-            $defaultSaleCitySenderCounterparty = $saleSenderData[1];
+        } else {
+            $defaultSaleSenderCounterparty = $saleSender;
         }
         $defaultSaleContactSenderData = '';
         $saleContactSender = $this->config->getShippingConfigByCode('novaposhtashipping', 'sale_sender_contact');
@@ -89,34 +98,49 @@ class Sender
         return $this->senderCityListObject;
     }
 
-    public function searchCounterpartyAddress($counterparty, $citySender)
+    /**
+     * @param $counterparty
+     * @return array
+     */
+    public function searchCounterpartyAddress($counterparty)
     {
-        /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyAddressIndex $value */
-        $counterpartyIndexCollection = $this->counterpartyAddressIndexCollectionFactory->create()
-            ->addFieldToFilter('CounterpartyRef', ['like' => $counterparty])
+        //todo recheck this collection
+        /** @var \Perspective\NovaposhtaShipping\Model\CounterpartyOrgThirdparty $value */
+        $counterpartyIndexCollection = $this->counterpartyContactPersonCollectionFactory->create()
+            ->addFieldToFilter('counterpartyRef', ['like' => $counterparty])
             ->getItems();
         $result = [];
+        $counter = 0;
         foreach ($counterpartyIndexCollection as $index => $value) {
-            if ($value->getDescription()
-                && $value->getCityDescription()
-                && $value->getStreetDescription()
-                && $value->getBuildingDescription()
-                && $value->getCounterpartyRef()
-                && $value->getCityRef() === $citySender
-            ) {
-                $result[$index]['description'] =
-                    $value->getDescription()
-                    . ', ' .
-                    $value->getCityDescription()
-                    . ' ' .
-                    $value->getAddressName()
-                    . ', ' .
-                    $value->getStreetDescription()
-                    . ', ' .
-                    $value->getBuildingDescription()/*. ', ' .
-                    $value->getCounterpartyRef()*/
-                ;
-                $result[$index]['ref'] = $value->getRef();
+            $addressesArr = is_string($value->getAddresses()) ? json_decode($value->getAddresses()) : $value->getAddresses();
+            if (is_array($addressesArr)) {
+                foreach ($addressesArr as $addressTypeName => $addressType) {
+                    foreach ($addressType as $address) {
+                        $counter++;
+                        $addressObj = new DataObject($address);
+                        if ($addressTypeName == 'DoorsAddresses') {
+                            $result[$counter]['description'] = sprintf(
+                                "%s. %s %s %s %s %s %s ",
+                                $addressObj->getData('SettlementDescription'),
+                                $addressObj->getData('StreetsType'),
+                                $addressObj->getData('StreetDescription'),
+                                __('building number'),
+                                $addressObj->getData('BuildingNumber'),
+                                __('flat number'),
+                                $addressObj->getData('Flat'),
+                            );
+                        }
+                        if ($addressTypeName == 'WarehouseAddresses') {
+                            $result[$counter]['description'] = sprintf(
+                                "%s. %s",
+                                $addressObj->getData('CityDescription'),
+                                $addressObj->getData('AddressDescription'),
+
+                            );
+                        }
+                        $result[$counter]['ref'] = $addressObj->getData('Ref');
+                    }
+                }
             }
         }
         return $result;

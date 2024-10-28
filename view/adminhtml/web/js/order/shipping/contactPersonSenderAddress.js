@@ -11,7 +11,7 @@ define([
     return Select.extend({
 
         defaults: {
-            template: 'Perspective_NovaposhtaShipping/order/create/city',
+            template: 'Perspective_NovaposhtaShipping/order/create/sender/contactPersonSenderAddress',
             backendRestURL: '',
             inputCustomName: '',
             classCustomName: '',
@@ -21,7 +21,7 @@ define([
 
         initialize: function (config) {
             this._super();
-            this.backendRestURL(config.cityBackendUrl);
+            this.backendRestURL(config.backendUrl);
             this.inputCustomName(config.inputName);
             this.backendCityName(config.cityLabel);
             this.backendCityValue(config.cityValue);
@@ -51,16 +51,16 @@ define([
             if (this.backendCityValue() != '' && this.backendCityName() != '') {
                 initialData = [{id: this.backendCityValue(), text: this.backendCityName()}];
             } else {
-                initialData = [{id: 0, text: $.mage.__('Choose city')}];
+                initialData = [{id: 0, text: $.mage.__('Choose Contact Person Address')}];
             }
             $(element).select2({
                 name: this.inputCustomName(),
                 placeholder: $.mage.__(''),
                 dropdownAutoWidth: true,
                 width: '100%',
-                minimumInputLength: 2,
+                minimumInputLength: 0,
                 language: lang,
-                data: initialData,
+                // data: initialData,
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",
