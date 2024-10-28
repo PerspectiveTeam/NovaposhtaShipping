@@ -1,9 +1,9 @@
 {
     "name": "perspectiveteam/module-novaposhtashipping",
-    "description": "",
+    "description": "Novaposhta integration for Magento 2",
     "type": "magento2-module",
     "license": "MIT",
-    "version": "2.4.8.3",
+    "version": "2.4.9.0",
     "authors": [
         {
             "email": "faqreg@gmail.com",
