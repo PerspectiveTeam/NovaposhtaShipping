@@ -4,7 +4,7 @@ var config = {
             'mage/menu': {
                 'Perspective_NovaposhtaShipping/js/lib/mage/menu-mixin': true
             },
-            'mage/validation': {
+            'mage/backend/validation': {
                 'Perspective_NovaposhtaShipping/js/mixin/city-validation-mixin': true
             }
         }
@@ -21,7 +21,7 @@ var config = {
                 'Perspective_NovaposhtaShipping/js/order/address/change/address',
             postbox:
                 'Perspective_NovaposhtaShipping/js/lib/knockout-postbox-min',
-            validation: "mage/validation/validation"
+            validation: "mage/backend/validation"
         }
     }
 };
