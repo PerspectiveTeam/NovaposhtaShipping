@@ -1,6 +1,6 @@
 ## Perspective Novaposhta Shipping
 
-[Demo](https://try.merchantduo.com/_sandbox/setup?template=luma&magento_version=2.4.8-p4%2Bsampledata&composer_packages=perspectiveteam%2Fmodule-novaposhtashipping)
+[![Demo](https://try.merchantduo.com/_sandbox/button)](https://try.merchantduo.com/_sandbox/setup?composer_packages=perspectiveteam%2Fmodule-novaposhtashipping&store_config_map=carriers%2Fnovaposhtashipping%2Factive%3D1)
 
 ### To install this package use the following steps:
 
