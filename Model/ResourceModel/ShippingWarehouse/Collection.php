@@ -21,7 +21,7 @@ class Collection extends AbstractCollection implements SearchResultInterface
     /**
      * @inheritDoc
      */
-    public function setItems(array $items = null)
+    public function setItems(?array $items = null)
     {
         return $this;
     }

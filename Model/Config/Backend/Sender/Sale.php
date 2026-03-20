@@ -159,8 +159,8 @@ class Sale extends Value
         CounterpartyorgthirdpartyWarehouseAddressesFactory $counterpartyorgthirdpartyWarehouseAddressesFactory,
         CounterpartyOrgThirdpartyDoorsAddressFactory $counterpartyOrgThirdpartyDoorsAddressResourceFactory,
         CounterpartyOrgThirdpartyWarehouseAddressFactory $counterpartyOrgThirdpartyWarehouseAddressResourceFactory,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->novaposhtaHelper = $novaposhtaHelper;
