@@ -74,13 +74,17 @@
                     </depends>
                     <comment>Threshold to remove the Lathing Cost</comment>
                 </field>
+                <field id="always_use_default_cost" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
+                    <label>Always use default cost</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="default_cost" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Default Cost</label>
                     <validate>validate-number</validate>
                     <depends>
                         <field id="active">1</field>
                     </depends>
-                    <comment>Default cost for shipping. For situations when we cannot calculate shipping costs for some reasons.</comment>
+                    <comment>Default cost for shipping. For situations when we cannot calculate shipping costs for some reason or by intention.</comment>
                 </field>
                 <field id="lathing" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Lathing cost</label>

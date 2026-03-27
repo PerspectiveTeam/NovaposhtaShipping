@@ -15,6 +15,7 @@
 				<specificcountry>UA</specificcountry>
 				<api_key>Your-key-here</api_key>
 				<allowed_methods>c2c,c2w</allowed_methods>
+				<always_use_default_cost>0</always_use_default_cost>
 				<default_cost>100</default_cost>
 				<free_cost>20000</free_cost>
 				<lathing>200</lathing>

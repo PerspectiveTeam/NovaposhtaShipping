@@ -64,6 +64,10 @@ class ShippingSales
                     $result['price'] = 0;
                 }
             }
+            //Бесплатная доставка безусловно
+            if ($this->config->getShippingConfigByCode('novaposhtashipping', 'always_use_default_cost') == true) {
+                $result['price'] = 0;
+            }
         }
         return $result;
     }
