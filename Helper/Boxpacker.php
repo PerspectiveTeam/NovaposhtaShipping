@@ -95,6 +95,7 @@ class Boxpacker
      */
     public function calcSeats(array $products): array
     {
+        $this->packer = null;
         $finalOptionSeats = [];
         $this->getPacker();
 
@@ -338,7 +339,10 @@ class Boxpacker
     protected function getPacker()
     {
         if (!$this->packer) {
-            $this->packer = $this->packerFactory->create();
+            $this->packer = $this->packerFactory->create([
+                'items' => new \DVDoug\BoxPacker\ItemList(),
+                'boxes' => new \DVDoug\BoxPacker\BoxList(),
+            ]);
         }
         return $this->packer;
 
