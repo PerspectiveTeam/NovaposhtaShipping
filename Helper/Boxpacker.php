@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Perspective\NovaposhtaShipping\Helper;
 
+use DVDoug\BoxPacker\BoxListFactory;
+use DVDoug\BoxPacker\ItemListFactory;
 use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer;
 use DVDoug\BoxPacker\PackerFactory;
@@ -28,6 +30,16 @@ class Boxpacker
      * @var PackerFactory $packerFactory
      */
     private $packerFactory;
+
+    /**
+     * @var ItemListFactory
+     */
+    private ItemListFactory $itemListFactory;
+
+    /**
+     * @var BoxListFactory
+     */
+    private BoxListFactory $boxListFactory;
 
     /**
      * @var TestBoxFactory $boxFactory
@@ -78,7 +90,9 @@ class Boxpacker
         TestItemFactory $ItemFactory,
         ProductRepositoryInterface $productRepositoryInterface,
         LimitedSupplyTestBoxFactory $limitedSupplyBoxFactory,
-        CollectionFactory $packageTypesResourceModelCollectionFactory
+        CollectionFactory $packageTypesResourceModelCollectionFactory,
+        ItemListFactory $itemListFactory,
+        BoxListFactory $boxListFactory
     ) {
         $this->packerFactory = $packerFactory;
         $this->boxFactory = $BoxFactory;
@@ -86,6 +100,8 @@ class Boxpacker
         $this->productRepositoryInterface = $productRepositoryInterface;
         $this->limitedSupplyBoxFactory = $limitedSupplyBoxFactory;
         $this->packageTypesResourceModelCollectionFactory = $packageTypesResourceModelCollectionFactory;
+        $this->itemListFactory = $itemListFactory;
+        $this->boxListFactory = $boxListFactory;
     }
 
     /**
@@ -338,7 +354,10 @@ class Boxpacker
     protected function getPacker()
     {
         if (!$this->packer) {
-            $this->packer = $this->packerFactory->create();
+            $this->packer = $this->packerFactory->create([
+                'items' => $this->itemListFactory->create(),
+                'boxes' => $this->boxListFactory->create(),
+            ]);
         }
         return $this->packer;
 
