@@ -71,7 +71,7 @@ class SaveAddressInformationPlugin extends Save
         $flatNum = $this->getRequest()->getParam('order')['billing_address']['street'][2]
             ?? $this->getRequest()->getParam('order')['shipping_address']['street'][2]
             ?? null;
-        $shippingMethod = $this->getRequest()->getParam('order')['shipping_method'];
+        $shippingMethod = $this->getRequest()->getParam('order')['shipping_method'] ?? null;
         $cartId = (int)$this->_getQuote()->getId();
         $result = $proceed();
         $cart = $this->cartRepository->get($cartId);
