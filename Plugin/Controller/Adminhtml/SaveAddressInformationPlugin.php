@@ -83,6 +83,7 @@ class SaveAddressInformationPlugin extends Save
         $this->processShippingFlat($cart, $flatNum);
         $this->cartInfoPreserver->process($cart);
         return $result;
+
     }
 
     /**
@@ -92,8 +93,10 @@ class SaveAddressInformationPlugin extends Save
      */
     protected function processShippingCode(\Magento\Quote\Api\Data\CartInterface $cart, $shippingMethod): void
     {
-        $cart->getShippingAddress()->setData('shipping_method_code', str_replace('novaposhtashipping_', '', $shippingMethod));
-        $cart->setShippingAddress($cart->getShippingAddress());
+        if (!empty($shippingMethod)) {
+            $cart->getShippingAddress()->setData('shipping_method_code', str_replace('novaposhtashipping_', '', $shippingMethod));
+            $cart->setShippingAddress($cart->getShippingAddress());
+        }
     }
 
     /**
