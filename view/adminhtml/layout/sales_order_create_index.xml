@@ -21,6 +21,9 @@
                    template="Perspective_NovaposhtaShipping::order/create/autocomplete/scriptsAddAutocompleteToCityInput.phtml"
                    name="perspective_autocomplete_city_input_js">
                 <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
+                       template="Perspective_NovaposhtaShipping::order/create/autocomplete/xMagentoInit_area.phtml"
+                       name="perspective_autocomplete_area_x_magento_js"/>
+                <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"
                        template="Perspective_NovaposhtaShipping::order/create/autocomplete/xMagentoInit_city.phtml"
                        name="perspective_autocomplete_city_x_magento_js"/>
                 <block class="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts"

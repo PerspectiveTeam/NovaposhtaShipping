@@ -3,64 +3,108 @@
 namespace Perspective\NovaposhtaShipping\Block\Checkout;
 
 use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
-use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Request\DataPersistorInterface;
+use Perspective\NovaposhtaCatalog\Api\AreaRepositoryInterface;
 use Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface;
-use Perspective\NovaposhtaShipping\Model\Quote\Info\Session\QuoteObject;
+use Magento\Framework\Locale\Resolver;
 
 /**
- * Класс добавляет список городов в jsLayout
+ * Adds a list of cities and regions to jsLayout to restore the state after a reload
  */
 class LayoutProcessor implements LayoutProcessorInterface
 {
     const CITY_NOVAPOSHTA_FIELD = 'city_novaposhta_field';
+    const AREA_NOVAPOSHTA_FIELD = 'area_novaposhta_field';
+
     /**
-     * @var \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface
+     * @var CityRepositoryInterface
      */
     private $cityRepository;
 
     /**
-     * @var \Magento\Framework\App\Request\DataPersistorInterface
+     * @var DataPersistorInterface
      */
     private DataPersistorInterface $dataPersistor;
 
     /**
-     * @param \Magento\Framework\App\Request\DataPersistorInterface $dataPersistor
-     * @param \Perspective\NovaposhtaCatalog\Api\CityRepositoryInterface $cityRepository
+     * @var AreaRepositoryInterface
      */
+    private AreaRepositoryInterface $areaRepository;
+
+    /**
+     * @var Resolver
+     */
+    private Resolver $localeResolver;
+
     public function __construct(
-        DataPersistorInterface $dataPersistor,
-        CityRepositoryInterface $cityRepository
+        DataPersistorInterface  $dataPersistor,
+        CityRepositoryInterface $cityRepository,
+        AreaRepositoryInterface $areaRepository,
+        Resolver                $localeResolver
     ) {
         $this->cityRepository = $cityRepository;
         $this->dataPersistor = $dataPersistor;
+        $this->areaRepository = $areaRepository;
+        $this->localeResolver = $localeResolver;
     }
 
     /**
-     * Process js Layout of block
-     *
      * @param array $jsLayout
      * @return array
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function process($jsLayout)
     {
-        $cities = array();
-        if ($fieldValue = $this->dataPersistor->get(self::CITY_NOVAPOSHTA_FIELD)) {
-            $city = $this->cityRepository->getCityByCityRef($fieldValue);
+        $areaRef = $this->dataPersistor->get(self::AREA_NOVAPOSHTA_FIELD);
 
-            if (!empty($city->getRef())) {
-                $cities[] = [
-                    'value' => $city->getRef(),
-                    'label' => $city->getDescriptionUa(),
-                ];
+        if ($areaRef) {
+            $this->populateAreaDictionary($areaRef, $jsLayout);
+
+            if ($cityRef = $this->dataPersistor->get(self::CITY_NOVAPOSHTA_FIELD)) {
+                $this->populateCityDictionary($cityRef, $jsLayout);
             }
         }
 
-        if (!isset($jsLayout['components']['checkoutProvider']['dictionaries']['city'])) {
-            $jsLayout['components']['checkoutProvider']['dictionaries']['city'] = $cities;
-        }
         return $jsLayout;
     }
 
+    /**
+     * @param $areaRef
+     * @param $jsLayout
+     * @return void
+     */
+    private function populateAreaDictionary($areaRef, &$jsLayout)
+    {
+        $area = $this->areaRepository->getAreaByAreaRef($areaRef);
+
+        if (empty($area->getRef())) {
+            return;
+        }
+
+        $lang = $this->localeResolver->getLocale();
+        if (!isset($jsLayout['components']['checkoutProvider']['dictionaries']['area'])) {
+            $jsLayout['components']['checkoutProvider']['dictionaries']['area'] = [
+                ['value' => $area->getRef(), 'label' => $lang === 'ru_RU' ? $area->getDescriptionRu() : $area->getDescriptionUa()],
+            ];
+        }
+    }
+
+    /**
+     * @param $cityRef
+     * @param $jsLayout
+     * @return void
+     */
+    private function populateCityDictionary($cityRef, &$jsLayout)
+    {
+        $city = $this->cityRepository->getCityByCityRef($cityRef);
+        if (empty($city->getRef())) {
+            return;
+        }
+
+        $lang = $this->localeResolver->getLocale();
+        if (!isset($jsLayout['components']['checkoutProvider']['dictionaries']['city'])) {
+            $jsLayout['components']['checkoutProvider']['dictionaries']['city'] = [
+                ['value' => $city->getRef(), 'label' => $lang === 'ru_RU' ? $city->getDescriptionRu() : $city->getDescriptionUa()],
+            ];
+        }
+    }
 }

@@ -51,6 +51,17 @@
                     </div>
                 </div>
                 <br/>
+                <div style="display: flow-root;" class="row-gray">
+                    <label><?= __('Private house') ?></label>
+                    <div class="input-to-right">
+                        <?php if ($block->getIsPrivateHouse()): ?>
+                            <strong><?= __('Yes') ?></strong>
+                        <?php else: ?>
+                            <span><?= __('No') ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <br/>
                 <div class="admin__page-section-title">
                     <span class="title"><?php echo __('Data prediction from NovaPost:') ?></span>
                 </div>

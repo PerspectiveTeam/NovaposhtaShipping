@@ -22,6 +22,7 @@ define([
             buildingNum: '',
             novaposhtaNewAddressDoor: '',
             placeholder: $t('House number'),
+            allowShippingUpdate: true,
             exports: {
                 "buildingNum": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.1:value"
             },
@@ -41,6 +42,14 @@ define([
             this.observe('address');
             this.observe('buildingNum');
             this.observe('novaposhtaNewAddressDoor');
+
+            postbox.subscribe('selectedCityPost', function (cityRef) {
+                this.allowShippingUpdate = false;
+                this.buildingNum('');
+                this.value('');
+                this.allowShippingUpdate = true;
+            }, this);
+
             return this;
         },
 
@@ -48,7 +57,7 @@ define([
             this._super();
             this.buildingNum(this.getPreview());
             postbox.publish('selectedStreetNumPost',this.getPreview());
-            if (this.getPreview()) {
+            if (this.allowShippingUpdate && this.getPreview()) {
                 try {
                     setShippingInformationAction();
                 } catch (e) {
