@@ -254,6 +254,11 @@ class AddressShipment extends AbstractShipment
         return $this->getNpAddressData()->getFlat();
     }
 
+    public function getIsPrivateHouse(): bool
+    {
+        return (bool)$this->getNpAddressData()->getIsPrivateHouse();
+    }
+
     /**
      * @return array|mixed|null
      */

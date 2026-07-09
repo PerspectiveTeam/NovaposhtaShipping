@@ -8,11 +8,13 @@ define([
     'postbox'
 ], function ($, wrapper, quote, ko, postbox) {
     'use strict';
+    var perspective_novaposhta_shipping_area_val = '';
     var perspective_novaposhta_shipping_city_val = '';
     var perspective_novaposhta_shipping_warehouse_val = '';
     var perspective_novaposhta_shipping_street_val = '';
     var perspective_novaposhta_shipping_building_val = '';
     var perspective_novaposhta_shipping_flat_val = '';
+    var perspective_novaposhta_shipping_is_private_house_val = false;
     window.perspective_novaposhta = window.perspective_novaposhta || {
         warehouse: {
             react: true
@@ -21,6 +23,9 @@ define([
             react: true
         }
     };
+    postbox.subscribe("selectedAreaPost", function (value) {
+        perspective_novaposhta_shipping_area_val = value;
+    });
     postbox.subscribe("selectedCityPost", function (value) {
         perspective_novaposhta_shipping_city_val = value;
     });
@@ -36,6 +41,9 @@ define([
     postbox.subscribe("selectedApartNumPost", function (value) {
         perspective_novaposhta_shipping_flat_val = value;
     });
+    postbox.subscribe("privateHousePost", function (value) {
+        perspective_novaposhta_shipping_is_private_house_val = value;
+    });
     return function (setShippingInformationAction) {
         return wrapper.wrap(setShippingInformationAction, function (originalAction) {
             var shippingAddress = quote.shippingAddress();
@@ -45,6 +53,8 @@ define([
                 }
                 shippingAddress['extension_attributes'] = {};
             }
+            shippingAddress['extension_attributes']['perspective_novaposhta_shipping_area'] =
+                perspective_novaposhta_shipping_area_val;
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
                 perspective_novaposhta_shipping_city_val;
             if (window.perspective_novaposhta.warehouse.react) {
@@ -59,6 +69,8 @@ define([
                 perspective_novaposhta_shipping_building_val;
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_flat'] =
                 perspective_novaposhta_shipping_flat_val;
+            shippingAddress['extension_attributes']['perspective_novaposhta_shipping_is_private_house'] =
+                perspective_novaposhta_shipping_is_private_house_val;
 
             var billingAddress = quote.billingAddress();
             if (!billingAddress || billingAddress['extension_attributes'] === undefined) {
@@ -76,6 +88,8 @@ define([
                     quote.billingAddress(billingAddress);
                 }
             }
+            billingAddress['extension_attributes']['perspective_novaposhta_shipping_area'] =
+                perspective_novaposhta_shipping_area_val;
             billingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
                 perspective_novaposhta_shipping_city_val;
             if (window.perspective_novaposhta.warehouse.react) {
@@ -90,6 +104,8 @@ define([
                 perspective_novaposhta_shipping_building_val;
             billingAddress['extension_attributes']['perspective_novaposhta_shipping_flat'] =
                 perspective_novaposhta_shipping_flat_val;
+            billingAddress['extension_attributes']['perspective_novaposhta_shipping_is_private_house'] =
+                perspective_novaposhta_shipping_is_private_house_val;
             return originalAction();
         });
     };

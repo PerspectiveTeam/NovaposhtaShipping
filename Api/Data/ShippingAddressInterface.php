@@ -17,6 +17,7 @@ interface ShippingAddressInterface
     const STREET = "street";
     const BUILDING = "building";
     const FLAT = "flat";
+    const IS_PRIVATE_HOUSE = "is_private_house";
     public function setCartId($data);
     public function setCity($data);
     public function setArea($data);
@@ -24,6 +25,7 @@ interface ShippingAddressInterface
     public function setStreet($data);
     public function setBuilding($data);
     public function setFlat($data);
+    public function setIsPrivateHouse($data);
     public function getCartId();
     public function getCity();
     public function getArea();
@@ -31,5 +33,6 @@ interface ShippingAddressInterface
     public function getStreet();
     public function getBuilding();
     public function getFlat();
+    public function getIsPrivateHouse();
 
 }

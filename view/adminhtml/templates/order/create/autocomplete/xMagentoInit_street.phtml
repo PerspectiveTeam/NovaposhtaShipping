@@ -10,14 +10,16 @@
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/streets-formatted-for-select') ?>",
                 "inputName":"order[shipping_address][novaposhta_street]",
                 "preselectedValue":"<?= $escaper->escapeJs($block->getStreet()) ?>",
-                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>"
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>",
+                "addressType":"shipping"
                 },
             "streetInputAutocompleteBilling":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/street",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/streets-formatted-for-select') ?>",
                 "inputName":"order[billing_address][novaposhta_street]",
                 "preselectedValue":"<?= $escaper->escapeJs($block->getStreet()) ?>",
-                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>"
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getStreetLabel()) ?>",
+                "addressType":"billing"
                 },
             "streetInputAutocompleteOrphan":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/street",

@@ -5,12 +5,12 @@ namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Field
 use Magento\Framework\Data\Form;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Controls\Select2;
 
-class Warehouse extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\AbstractSelectField
+class Area extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\AbstractSelectField
 {
 
-    public const NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID = 'novaposhtashipping_warehouse';
+    public const NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID = 'novaposhtashipping_area';
 
-    public const NOVAPOSHTA_SHIPPING_HIDDEN_INPUT_ID = 'novaposhtashipping_warehouse_hidden';
+    public const NOVAPOSHTA_SHIPPING_HIDDEN_INPUT_ID = 'novaposhtashipping_area_hidden';
 
     /**
      * @param \Magento\Framework\Data\Form $result
@@ -22,25 +22,24 @@ class Warehouse extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Cr
             static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID,
             Select2::class,
             [],
-            \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Street::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID
+            'city'
         );
         $element = $result->getElement(static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
-        $element->setData('label', __('NP Warehouse'));
+        $element->setData('label', __('NP Region'));
         $element->setData('name', static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
-//        $element->setData('required', true);
         $prefix = explode('-', $result->getHtmlIdPrefix() ?? '');
         if ($prefix && is_array($prefix) && count($prefix) > 1) {
             if ($prefix[1] == 'billing_address_') {
-                $dataBindArray['scope'] = '\'warehouseInputAutocompleteBilling\'';
-                $element->addClass('warehouseInputAutocompleteBillingClass');
+                $dataBindArray['scope'] = '\'areaInputAutocompleteBilling\'';
+                $element->addClass('areaInputAutocompleteBillingClass');
             }
             if ($prefix[1] == 'shipping_address_') {
-                $dataBindArray['scope'] = '\'warehouseInputAutocompleteShipping\'';
-                $element->addClass('warehouseInputAutocompleteShippingClass');
+                $dataBindArray['scope'] = '\'areaInputAutocompleteShipping\'';
+                $element->addClass('areaInputAutocompleteShippingClass');
             }
         } else {
-            $dataBindArray['scope'] = '\'warehouseInputAutocompleteOrphan\'';
-            $element->addClass('warehouseInputAutocompleteOrphanClass');
+            $dataBindArray['scope'] = '\'areaInputAutocompleteOrphan\'';
+            $element->addClass('areaInputAutocompleteOrphanClass');
         }
         $element->setDataBind($dataBindArray ?? []);
 

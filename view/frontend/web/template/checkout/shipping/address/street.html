@@ -1,5 +1,7 @@
-<div style="margin-top: 0px;" class="input-block-level" data-bind="visible: selectedMethodCode() == 'c2c' || selectedMethodCode() == 'w2c'">
-    <label class="label-np-help" data-bind="i18n: 'Street'"></label>
+<div style="margin-top: 0px;" class="input-block-level field" data-bind="visible: selectedMethodCode() == 'c2c' || selectedMethodCode() == 'w2c', css: {'_error': error(), '_required': required()}">
+    <label class="label label-np-help" data-bind="attr: {for: uid}">
+        <span data-bind="i18n: 'Street'"></span>
+    </label>
     <select style="width:100%" class="select" data-bind="
     attr: {
         name: inputName,
@@ -10,6 +12,7 @@
         'aria-invalid': error() ? true : 'false',
         placeholder: placeholder
     },
+    css: {'mage-error': error()},
     value: value,
     hasFocus: focused,
     optgroup: options,
@@ -23,6 +26,6 @@
         if (item && item.disabled) {
             ko.applyBindingsToNode(option, {attr: {disabled: true}}, item);
         }
-    }"
-    />
+    }"></select>
+    <!-- ko if: error() --><div class="mage-error" data-bind="text: error()"></div><!-- /ko -->
 </div>

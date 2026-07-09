@@ -1,10 +1,6 @@
-<div data-bind="visible: selectedMethod() == 'c2w' || selectedMethod() == 'w2w'"
-     id="warehouse-and-city-wrapper">
-    <div class="field" data-bind="css: {'_required': required(), '_error': error()}">
-        <label class="label label-np-help" data-bind="attr: {for: uid}">
-            <span data-bind="i18n: 'Choose warehouse'"></span>
-        </label>
-        <select class="select" style="width: 100%;" data-bind="
+<div data-bind="visible: isNpMethod()"
+     id="novaposhta-area-wrapper">
+<select class="select" style="width: 100%;" data-bind="
     attr: {
         name: inputName,
         id: uid,
@@ -14,7 +10,6 @@
         'aria-invalid': error() ? true : 'false',
         placeholder: placeholder
     },
-    css: {'mage-error': error()},
     hasFocus: focused,
     optgroup: options,
     value: value,
@@ -28,7 +23,6 @@
         if (item && item.disabled) {
             ko.applyBindingsToNode(option, {attr: {disabled: true}}, item);
         };
-    }"></select>
-        <!-- ko if: error() --><div class="mage-error" data-bind="text: error()"></div><!-- /ko -->
-    </div>
+    }"
+/>
 </div>

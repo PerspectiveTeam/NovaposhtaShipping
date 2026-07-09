@@ -29,6 +29,45 @@ define([
             this._super();
             this.backendRestURL(config.cityBackendUrl);
             this.inputCustomName(config.inputName);
+
+            var self = this;
+            var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
+
+            if (!this.preselectedValue() || sameAsBilling) {
+                this.disabled(true);
+            }
+
+            // Reset street selection after city updated
+            postbox.subscribe('selectedCityPost', function (data) {
+                var addressType = data?.addressType ?? null;
+                var cityRef = (data?.cityRef && data.cityRef !== '0') ? data.cityRef : null;
+
+                // Perform changes only for component matching addressType
+                if (cityRef !== null && addressType !== null && addressType === self.addressType) {
+                    var streetSelect = $('[name="order[' + addressType + '_address][novaposhta_warehouse]"]');
+                    streetSelect.data('cityRef', cityRef);
+                    this.disabled(!cityRef);
+
+                    var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
+                    if (sameAsBilling && addressType === 'billing') {
+                        var shippingSelect = $('[name="order[shipping_address][novaposhta_warehouse]"]');
+                        shippingSelect.data('cityRef', cityRef);
+                    }
+                    self._resetSelect();
+                }
+            }, this);
+
+            postbox.subscribe('selectedCityPost', function (data) {
+                var addressType = data?.addressType ?? null;
+                if (addressType !== null && addressType === self.addressType) {
+                    var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
+                    if (addressType === 'shipping' && sameAsBilling) {
+                        return;
+                    }
+                    this.disabled(!(data.cityRef && data.cityRef !== '0'));
+                }
+            }, this);
+
             return this;
         },
 
@@ -47,20 +86,23 @@ define([
         },
 
         select2: function (element) {
+            var self = this;
+
             if (this.inputCustomName()) {
-                //такое нужно чтобы не пропадал name после изменения инпута
+                // Reassign name to prevent it from being lost after DOM updates
                 this.inputName = element.name = this.inputCustomName();
             }
+
+            var hasCity = !!($(element).data('cityRef') || this.preselectedValue());
             var preselectObject = {};
+            var lang = $('html').attr('lang') === 'uk' ? 'uk' : 'ru';
+
             if (this.preselectedLabel() && this.preselectedValue()) {
                 preselectObject = {id: this.preselectedValue(), text: $.mage.__(this.preselectedLabel())};
             } else {
-                preselectObject = {id: 0, text: $.mage.__('Choose warehouse')};
+                preselectObject = {id: 0, text: hasCity ? $.mage.__('Choose warehouse') : $.mage.__('Choose city first')};
             }
-            var lang = "ru";
-            if ($('html').attr('lang') == "uk") {
-                lang = "uk";
-            }
+
             $(element).select2({
                 name: this.inputCustomName(),
                 placeholder: $.mage.__(''),
@@ -79,13 +121,7 @@ define([
                         //Empty to remove magento's default handler
                     },
                     data: function (params) {
-                        var cityRef = '';
-                        let ko = require('ko');
-                        if ($('#order-shipping_same_as_billing').is(":checked")) {
-                            cityRef = ko.dataFor(this[0]).cityBilling();
-                        } else {
-                            cityRef = ko.dataFor(this[0]).cityShipping();
-                        }
+                        var cityRef = $(element).data('cityRef') || '';
                         if (!cityRef) {
                             cityRef = ko.dataFor(this[0]).cityOrphan();
                             ko.dataFor(this[0]).isOrphan(true);
@@ -103,51 +139,74 @@ define([
                         };
                     }
                 }
+            }).on('select2:select', function (e) {
+                var value = e.params.data.id;
+                var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
+                self._propagateToWarehouseInput(self.hasValue() ? self.getPreview() : '', sameAsBilling);
+                if (sameAsBilling) {
+                    self._syncShippingWarehouseFromBilling();
+                }
+                postbox.publish('selectedStreetPost', {streetRef: value, addressType: self.addressType});
             });
         },
+
         getPreview: function () {
             return $('[id="' + this.uid + '"] option:selected').text();
         },
-        setDifferedFromDefault: function (a, b, c) {
-            this._super();
-            this.exportCityName(this.getPreview());
-            this.exportCityValue(this.value());
+
+        _propagateToWarehouseInput: function (value, sameAsBilling) {
+            var shippingSelect = $('[name="order[shipping_address][street][0]"]');
+            var billingSelect = $('[name="order[billing_address][street][0]"]');
+            var orphanSelect = $('[name="street[0]"]');
+
+            if (sameAsBilling) {
+                this.exportValue(value, billingSelect);
+                this.exportValue(value, shippingSelect);
+            } else if (this.index === 'warehouseInputAutocompleteShipping') {
+                this.exportValue(value, shippingSelect);
+            } else if (this.index === 'warehouseInputAutocompleteBilling') {
+                this.exportValue(value, billingSelect);
+            } else if (this.isOrphan() && orphanSelect.length) {
+                this.exportValue(value, orphanSelect);
+                orphanSelect.change();
+                return;
+            }
+
+            shippingSelect.change();
+            billingSelect.change();
         },
-        exportCityName: function (value) {
-            if (this.index == 'warehouseInputAutocompleteShipping') {
-                this.exportValue(value, $('[name="order[shipping_address][street][0]"]'));
-            }
-            if (this.index == 'warehouseInputAutocompleteBilling') {
-                this.exportValue(value, $('[name="order[billing_address][street][0]"]'));
-            }
-            if ($('#order-shipping_same_as_billing').is(":checked")) {
-                this.exportValue(value, $('[name="order[billing_address][street][0]"]'));
-                this.exportValue(value, $('[name="order[shipping_address][street][0]"]'));
-            }
-            $('[name="order[shipping_address][street][0]"]').change();
-            $('[name="order[billing_address][street][0]"]').change();
-            if (this.isOrphan()) {
-                this.exportValue(value, $('[name="street[0]"]'));
-                $('[name="street[0]"]').change();
-            }
-        },
-        exportCityValue: function (value) {
-            if ($('#order-shipping_same_as_billing').is(":checked")) {
-                $('[name="order[shipping_address][novaposhta_warehouse]"]').select2({
-                    data: $('[name="order[billing_address][novaposhta_warehouse]"]').select2("data"),
-                    initSelection: function (element, callback) {
-                        callback($('[name="order[billing_address][novaposhta_warehouse]"]').select2("data"));
-                    }
-                });
-                $('[name="order[shipping_address][novaposhta_warehouse]"]').val($('[name="order[billing_address][novaposhta_warehouse]"]').val());
+
+        _syncShippingWarehouseFromBilling: function () {
+            var billingSelect = $('[name="order[billing_address][novaposhta_warehouse]"]');
+            var shippingSelect = $('[name="order[shipping_address][novaposhta_warehouse]"]');
+            var selectedData = billingSelect.select2('data');
+            if (selectedData && selectedData.length) {
+                var option = new Option(selectedData[0].text, selectedData[0].id, true, true);
+                shippingSelect.append(option).trigger('change');
             }
         },
+
         exportValue: function (value, control) {
             control.val(value);
         },
+
         exportLabel: function (value, control) {
             control.text(value);
             this.exportValue(value, control);
         },
+
+        hasValue: function () {
+            return !!(this.value() !== '0' && this.value());
+        },
+
+        _resetSelect: function () {
+            var select = $('[name="' + this.inputName + '"]');
+            if (select.data('select2')) {
+                $(select[0]).empty();
+                this.select2(select[0]);
+            }
+            this.value('');
+            this._propagateToWarehouseInput('', $('#order-shipping_same_as_billing').is(':checked'));
+        }
     });
 });

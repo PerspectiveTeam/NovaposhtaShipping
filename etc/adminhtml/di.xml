@@ -30,9 +30,10 @@
     <type name="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\AbstractFormPlugin">
         <arguments>
             <argument name="data" xsi:type="array">
-                <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Warehouse</item>
-                <item name="street" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Street</item>
+                <item name="area" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Area</item>
                 <item name="city" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\City</item>
+                <item name="street" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Street</item>
+                <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Warehouse</item>
             </argument>
         </arguments>
     </type>
