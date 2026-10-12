@@ -19,12 +19,13 @@ define([
 
     return Input.extend({
 
-
         defaults: {
             address: '',
             apartNum: ko.observable(''),
             novaposhtaNewAddressDoorNum: '',
             placeholder: $t('House door number'),
+            allowShippingUpdate: true,
+            isPrivateHouse: false,
             exports: {
                 "apartNum": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.2:value"
             },
@@ -32,7 +33,6 @@ define([
                 "novaposhtaNewAddressDoorNum": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.perspective_novaposhtashipping_house_door_num:value"
             }
         },
-
 
         initialize: function () {
             this._super();
@@ -42,6 +42,20 @@ define([
         initObservable: function () {
             this._super();
             this.observe('novaposhtaNewAddressDoorNum');
+            this.observe('isPrivateHouse');
+
+            postbox.subscribe('selectedCityPost', function () {
+                this.allowShippingUpdate = false;
+                this.apartNum('');
+                this.value('');
+                this.isPrivateHouse(false);
+                this.allowShippingUpdate = true;
+            }, this);
+
+            postbox.subscribe('privateHousePost', function (isPrivate) {
+                this.isPrivateHouse(isPrivate);
+            }, this);
+
             return this;
         },
 
@@ -49,7 +63,7 @@ define([
             this._super();
             this.apartNum(this.getPreview());
             postbox.publish('selectedApartNumPost',this.getPreview());
-            if (this.getPreview()) {
+            if (this.allowShippingUpdate && this.getPreview()) {
                 try {
                     setShippingInformationAction();
                 } catch (e) {

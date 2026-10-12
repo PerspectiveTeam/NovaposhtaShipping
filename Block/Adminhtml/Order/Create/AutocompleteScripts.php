@@ -3,11 +3,13 @@
 namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create;
 
 use Exception;
+use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Model\Session\Quote;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Framework\Registry;
 use Magento\Store\Model\StoreManagerInterface;
+use Perspective\NovaposhtaCatalog\Service\DirectorySyncMapper;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo;
 
 class AutocompleteScripts extends \Magento\Backend\Block\Template
@@ -24,18 +26,23 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
     private Quote $sessionQuote;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param Context $context
+     * @param StoreManagerInterface $storeManager
+     * @param NovaposhtaDeliveryInfo $novaposhtaDeliveryInfo
+     * @param Registry $registry
+     * @param Quote $sessionQuote
+     * @param DirectorySyncMapper $directorySyncMapper
      * @param array $data
-     * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
-     * @param \Magento\Directory\Helper\Data|null $directoryHelper
+     * @param JsonHelper|null $jsonHelper
+     * @param DirectoryHelper|null $directoryHelper
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
+        Context $context,
         StoreManagerInterface $storeManager,
         NovaposhtaDeliveryInfo $novaposhtaDeliveryInfo,
         Registry $registry,
         Quote $sessionQuote,
+        DirectorySyncMapper $directorySyncMapper,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -45,6 +52,15 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
         $this->novaposhtaDeliveryInfo = $novaposhtaDeliveryInfo;
         $this->registry = $registry;
         $this->sessionQuote = $sessionQuote;
+        $this->directorySyncMapper = $directorySyncMapper;
+    }
+
+    /**
+     * Returns JSON map of {regionId: areaRef} built from directory_sync config + DB.
+     */
+    public function getRegionIdToAreaRefJson(): string
+    {
+        return json_encode($this->directorySyncMapper->getRegionIdToAreaRefMap());
     }
 
     public function getData($key = '', $index = null)

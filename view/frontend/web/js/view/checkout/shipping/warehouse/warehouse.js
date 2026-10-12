@@ -13,6 +13,7 @@ define([
         {
             defaults: {
                 warehouseName: '',
+                allowShippingUpdate: true,
                 exports: {
                     warehouseName: 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.0:value'
                 },
@@ -30,16 +31,44 @@ define([
                 return this;
             },
             select2: function (element) {
+                var self = this;
+                var preselect = [{id: '', text: $.mage.__('Choose warehouse')}];
+                if (self.options() && self.options().length) {
+                    var currentWarehouse = self.value();
+                    if (currentWarehouse && currentWarehouse !== 'none') {
+                        var opt = self.options().find(function (o) { return o.value === currentWarehouse; });
+                        if (opt) {
+                            preselect = [{id: opt.value, text: opt.label}];
+                        }
+                    }
+                }
                 $(element).select2({
-                    placeholder: $.mage.__('Choose the warehouse...'),
+                    placeholder: $.mage.__('Choose warehouse'),
                     dropdownAutoWidth: true,
-                    width: $(element).parent().parent().width().toString() + 'px'
+                    width: $(element).parent().parent().width().toString() + 'px',
+                    data: preselect
                 });
             },
             initObservable: function () {
                 this._super();
                 this.observe('warehouseName');
                 this.observe('cityValue');
+
+                var self = this;
+                var updateRequired = function () {
+                    var method = quote.shippingMethod();
+                    var code = method ? method.method_code : null;
+                    self.required(code === 'c2w' || code === 'w2w');
+                };
+                quote.shippingMethod.subscribe(updateRequired);
+                updateRequired();
+
+                postbox.subscribe('selectedCityPost', function (cityRef) {
+                    this.allowShippingUpdate = false;
+                    this.warehouseName('');
+                    this.value('');
+                    this.allowShippingUpdate = true;
+                }, this);
                 return this;
             },
             setDifferedFromDefault: function () {
@@ -90,6 +119,8 @@ define([
                         window.perspective_novaposhta.warehouse.react = true;
                         if (currentWarehouse && currentWarehouse !== 'none') {
                             vm.value(currentWarehouse);
+                        } else {
+                            vm.value('');
                         }
                         vm.isLoading = false;
                     }

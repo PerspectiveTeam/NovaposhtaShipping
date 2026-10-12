@@ -31,6 +31,36 @@
                                                     <item name="children" xsi:type="array">
                                                         <item name="shipping-address-fieldset" xsi:type="array">
                                                             <item name="children" xsi:type="array">
+                                                                <item name="area_novaposhta_field" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/area
+                                                                    </item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="imports" xsi:type="array">
+                                                                            <item name="setOptions" xsi:type="string">index = checkoutProvider:dictionaries.area</item>
+                                                                        </item>
+                                                                        <item name="template" xsi:type="string">
+                                                                            ui/form/field
+                                                                        </item>
+                                                                        <item name="elementTmpl" xsi:type="string">
+                                                                            Perspective_NovaposhtaShipping/checkout/shipping/area
+                                                                        </item>
+                                                                        <item name="visible" xsi:type="boolean">true</item>
+                                                                    </item>
+                                                                    <item name="dataScope" xsi:type="string">
+                                                                        shippingAddress.area_novaposhta_field
+                                                                    </item>
+                                                                    <item name="provider" xsi:type="string">
+                                                                        checkoutProvider
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">112</item>
+                                                                    <item name="label" translate="true" xsi:type="string">Region</item>
+                                                                    <item name="validation" xsi:type="array">
+                                                                        <item name="required-entry" xsi:type="boolean">
+                                                                            true
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
                                                                 <item name="city_novaposhta_field" xsi:type="array">
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/city
@@ -54,7 +84,7 @@
                                                                     <item name="provider" xsi:type="string">
                                                                         checkoutProvider
                                                                     </item>
-                                                                    <item name="sortOrder" xsi:type="string">50</item>
+                                                                    <item name="sortOrder" xsi:type="string">113</item>
                                                                     <item name="label" translate="true" xsi:type="string">City</item>
                                                                     <item name="validation" xsi:type="array">
                                                                         <item name="required-entry" xsi:type="boolean">
@@ -62,11 +92,19 @@
                                                                         </item>
                                                                     </item>
                                                                 </item>
-                                                                <item name="city" xsi:type="array">
-                                                                    <item name="sortOrder" xsi:type="string">51</item>
+                                                                <item name="region_id" xsi:type="array">
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="visible" xsi:type="boolean">false</item>
                                                                     </item>
+                                                                </item>
+                                                                <item name="city" xsi:type="array">
+                                                                    <item name="sortOrder" xsi:type="string">114</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="visible" xsi:type="boolean">false</item>
+                                                                    </item>
+                                                                </item>
+                                                                <item name="postcode" xsi:type="array">
+                                                                    <item name="sortOrder" xsi:type="string">115</item>
                                                                 </item>
                                                             </item>
                                                         </item>
@@ -110,12 +148,23 @@
                                                                     </item>
                                                                 </item>
                                                                 <item
+                                                                    name="perspective_novaposhtashipping_private_house"
+                                                                    xsi:type="array">
+                                                                    <item name="component" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/private_house
+                                                                    </item>
+                                                                    <item name="sortOrder" xsi:type="string">2</item>
+                                                                    <item name="template" xsi:type="string">
+                                                                        Perspective_NovaposhtaShipping/checkout/shipping/address/private_house
+                                                                    </item>
+                                                                </item>
+                                                                <item
                                                                     name="perspective_novaposhtashipping_house_door_num"
                                                                     xsi:type="array">
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/house_door_num
                                                                     </item>
-                                                                    <item name="sortOrder" xsi:type="string">2</item>
+                                                                    <item name="sortOrder" xsi:type="string">3</item>
                                                                     <item name="template" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/checkout/shipping/address/house_door_num
                                                                     </item>

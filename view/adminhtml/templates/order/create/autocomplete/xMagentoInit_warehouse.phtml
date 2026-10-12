@@ -10,14 +10,16 @@
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
                 "inputName":"order[shipping_address][novaposhta_warehouse]",
                 "preselectedValue":"<?= $escaper->escapeJs($block->getWarehouseId()) ?>",
-                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>"
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>",
+                "addressType":"shipping"
                 },
             "warehouseInputAutocompleteBilling":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",
                 "cityBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/filtered_warehouses') ?>",
                 "inputName":"order[billing_address][novaposhta_warehouse]",
                 "preselectedValue":"<?= $escaper->escapeJs($block->getWarehouseId()) ?>",
-                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>"
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getWarehouseIdLabel()) ?>",
+                "addressType":"billing"
                 },
             "warehouseInputAutocompleteOrphan":{
                 "component": "Perspective_NovaposhtaShipping/js/order/create/warehouse",

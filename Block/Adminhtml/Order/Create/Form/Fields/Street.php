@@ -23,7 +23,7 @@ class Street extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Creat
             static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID,
             Select2::class,
             [],
-            'city'
+            \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\City::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID
         );
         $element = $result->getElement(static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $element->setData('label', __('NP Street'));

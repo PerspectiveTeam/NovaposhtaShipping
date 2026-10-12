@@ -1,0 +1,30 @@
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php /** @var \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts $block */ ?>
+<script type="text/x-magento-init">
+{
+"*":{
+     "Magento_Ui/js/core/app":{
+        "components":{
+            "areaInputAutocompleteShipping":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/area",
+                "areaBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/area') ?>",
+                "inputName":"order[shipping_address][novaposhta_area]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getData('area')) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getData('area_label')) ?>",
+                "regionIdToAreaRef":<?= /* @noEscape */ $block->getRegionIdToAreaRefJson() ?>,
+                "addressType":"shipping"
+                },
+            "areaInputAutocompleteBilling":{
+                "component": "Perspective_NovaposhtaShipping/js/order/create/area",
+                "areaBackendUrl":"<?= $block->getRestUrl('rest/V1/novaposhtashipping/area') ?>",
+                "inputName":"order[billing_address][novaposhta_area]",
+                "preselectedValue":"<?= $escaper->escapeJs($block->getData('area')) ?>",
+                "preselectedLabel":"<?= $escaper->escapeJs($block->getData('area_label')) ?>",
+                "regionIdToAreaRef":<?= /* @noEscape */ $block->getRegionIdToAreaRefJson() ?>,
+                "addressType":"billing"
+                }
+            }
+        }
+    }
+}
+</script>

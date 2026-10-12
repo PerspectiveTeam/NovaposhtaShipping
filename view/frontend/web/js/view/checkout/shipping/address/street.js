@@ -23,17 +23,18 @@ define([
 
         defaults: {
             address: '',
+            cityRef: '',
             placeholder: $t('Enter address'),
+            allowShippingUpdate: true,
             exports: {
                 "address": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.0:value"
             },
             imports: {
                 "novaposhtaNewAddressDoor": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.perspective_novaposhtashipping_warehouse_house_street:value",
-                "cityValue": 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city_novaposhta_field:value'
+                "cityRef": 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city_novaposhta_field:value'
             }
         },
         streets: {},
-        cityRef: '',
 
         initialize: function () {
             this._super();
@@ -44,15 +45,32 @@ define([
         initObservable: function () {
             this._super();
             this.observe('address');
-            this.observe('cityValue');
+            this.observe('cityRef');
             this.observe('novaposhtaNewAddressDoor');
+
+            var self = this;
+            var updateRequired = function () {
+                var method = quote.shippingMethod();
+                var code = method ? method.method_code : null;
+                self.required(code === 'c2c' || code === 'w2c');
+            };
+            quote.shippingMethod.subscribe(updateRequired);
+            updateRequired();
+
+            postbox.subscribe('selectedCityPost', function (cityRef) {
+                this.allowShippingUpdate = false;
+                this.cityRef(cityRef);
+                this.value('');
+                this.allowShippingUpdate = true;
+            }, this);
+
             return this;
         },
 
         onUpdate: function () {
             this._super();
             this.address(this.getPreview());
-            if (this.value() !== 'none') {
+            if (this.allowShippingUpdate && this.value() !== 'none') {
                 postbox.publish('selectedStreetPost', this.value());
                 postbox.publish('selectedWarehousePost', '');
                 if (this.getPreview()) {
@@ -73,8 +91,8 @@ define([
                 if (!this.isLoading) {
                     this.isLoading = true;
                     try {
-                        if (this.cityValue()) {
-                            this.getCityStreets(this.cityValue(), this);
+                        if (this.cityRef()) {
+                            this.getCityStreets(this.cityRef(), this);
                         }
                     } catch (e) {
                         console.log(e);
@@ -86,8 +104,9 @@ define([
             }
             return selectedMethodCode;
         },
-        getCityStreets: function (cityValue, vm) {
-            let cityTerm = JSON.stringify({cityRef: cityValue ? cityValue : ''});
+
+        getCityStreets: function (cityRef, vm) {
+            let cityTerm = JSON.stringify({cityRef: cityRef ? cityRef : ''});
             $.ajax({
                 url: url.build('rest/V1/novaposhtashipping/streets-formatted'),
                 data: cityTerm,
@@ -133,7 +152,7 @@ define([
 
                         var query = JSON.stringify({
                             term: params.term,
-                            cityRef: ko.dataFor(this.get(0)).cityValue()
+                            cityRef: ko.dataFor(this.get(0)).cityRef()
                         })
                         return query;
                     },
@@ -162,6 +181,10 @@ define([
                     $("[name='warehouse_novaposhta_id'] option:contains(" + street + ")").attr('selected', 'selected');
                 }
             }
+        },
+
+        hasValue: function() {
+            return this.value() !== '0' && !!this.value() && this.value() !== 'none';
         },
 
         getCityRef: function () {

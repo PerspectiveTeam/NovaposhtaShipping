@@ -45,6 +45,7 @@
         <column xsi:type="text" name="street" nullable="false" comment="Client's street"/>
         <column xsi:type="text" name="building" nullable="false" comment="Client's building"/>
         <column xsi:type="text" name="flat" nullable="false" comment="Client's flat"/>
+        <column xsi:type="smallint" name="is_private_house" nullable="false" default="0" comment="Is private house (no flat)"/>
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Update Time"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">

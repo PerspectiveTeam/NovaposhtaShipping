@@ -6,6 +6,7 @@
             <argument name="data" xsi:type="array">
                 <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\WarehouseProcessor</item>
                 <item name="address" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AddressProcessor</item>
+                <item name="area" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AreaProcessor</item>
                 <item name="city" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\CityProcessor</item>
             </argument>
         </arguments>
@@ -50,6 +51,10 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Checkout\CustomerData\DirectoryData">
+        <plugin name="perspective_novaposhta_directory_section_area_ref"
+                type="Perspective\NovaposhtaShipping\Plugin\CustomerData\DirectoryDataPlugin"/>
+    </type>
     <type name="Magento\Checkout\Model\ShippingInformationManagement">
         <plugin name="perspective_novaposhta_shipping_address"
                 type="Perspective\NovaposhtaShipping\Model\Quote\SaveAddressInformationPlugin" sortOrder="1"
@@ -83,7 +88,9 @@
         </arguments>
     </virtualType>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedCitiesRepositoryInterface"
-                type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepositoryInterface"/>
+                type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\PreparedAreasRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\PreparedAreasRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface"
                 type="Perspective\NovaposhtaShipping\Model\SenderRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface"

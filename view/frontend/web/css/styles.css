@@ -30,3 +30,9 @@ table.novaposhta-chek td span, img {
     font-size: 1.1em;
     font-weight: 600;
 }
+.field._required > .label:after{
+    content: '*';
+    color: #e02b27;
+    font-size: 1.2rem;
+    margin: 0 0 0 5px;
+}
