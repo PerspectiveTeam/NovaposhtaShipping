@@ -25,6 +25,8 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
 
     private Quote $sessionQuote;
 
+    private DirectorySyncMapper $directorySyncMapper;
+
     /**
      * @param Context $context
      * @param StoreManagerInterface $storeManager
