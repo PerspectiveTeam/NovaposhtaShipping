@@ -129,6 +129,7 @@ class AddressProcessor implements \Perspective\NovaposhtaShipping\Api\Data\Proce
      */
     private function processAddress($ext): void
     {
+        $this->checkoutAddressModel->setArea($ext->getPerspectiveNovaposhtaShippingArea() ?? '');
         if (!empty($ext->getPerspectiveNovaposhtaShippingCity())) {
             $this->checkoutAddressModel->setCity($ext->getPerspectiveNovaposhtaShippingCity());
         }
