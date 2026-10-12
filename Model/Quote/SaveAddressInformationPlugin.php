@@ -38,6 +38,9 @@ class SaveAddressInformationPlugin
         $cartId,
         ShippingInformationInterface $addressInformation
     ) {
+        if ($addressInformation->getShippingCarrierCode() !== 'novaposhtashipping') {
+            return;
+        }
         $this->shippingCartProcessor->process($cartId, $addressInformation);
     }
 }
