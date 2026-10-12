@@ -63,21 +63,15 @@ class SaveAddressInformationPlugin extends Save
         if (!str_starts_with($shippingMethod, 'novaposhtashipping_')) {
             return $proceed();
         }
-        $cityRef = $this->getRequest()->getParam('order')['billing_address']['novaposhta_city']
-            ?? $this->getRequest()->getParam('order')['shipping_address']['novaposhta_city']
-            ?? null;
-        $warehouseRef = $this->getRequest()->getParam('order')['billing_address']['novaposhta_warehouse']
-            ?? $this->getRequest()->getParam('order')['shipping_address']['novaposhta_warehouse']
-            ?? null;
-        $street = $this->getRequest()->getParam('order')['billing_address']['street'][0]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][0]
-            ?? null;
-        $buildingNum = $this->getRequest()->getParam('order')['billing_address']['street'][1]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][1]
-            ?? null;
-        $flatNum = $this->getRequest()->getParam('order')['billing_address']['street'][2]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][2]
-            ?? null;
+        $addressType = $this->_getQuote()->getShippingAddress()->getSameAsBilling()
+            ? 'billing_address'
+            : 'shipping_address';
+        $addressData = $orderData[$addressType] ?? [];
+        $cityRef = $addressData['novaposhta_city'] ?? null;
+        $warehouseRef = $addressData['novaposhta_warehouse'] ?? null;
+        $street = $addressData['street'][0] ?? null;
+        $buildingNum = $addressData['street'][1] ?? null;
+        $flatNum = $addressData['street'][2] ?? null;
         $cartId = (int)$this->_getQuote()->getId();
         $result = $proceed();
         $cart = $this->cartRepository->get($cartId);
