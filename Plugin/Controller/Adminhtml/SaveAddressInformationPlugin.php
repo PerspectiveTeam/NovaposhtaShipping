@@ -56,6 +56,13 @@ class SaveAddressInformationPlugin extends Save
      */
     public function aroundExecute(Save $subject, callable $proceed): ResultInterface
     {
+        $orderData = $this->getRequest()->getParam('order') ?? [];
+        $shippingMethod = $orderData['shipping_method']
+            ?? $this->_getQuote()->getShippingAddress()->getShippingMethod()
+            ?? '';
+        if (!str_starts_with($shippingMethod, 'novaposhtashipping_')) {
+            return $proceed();
+        }
         $cityRef = $this->getRequest()->getParam('order')['billing_address']['novaposhta_city']
             ?? $this->getRequest()->getParam('order')['shipping_address']['novaposhta_city']
             ?? null;
@@ -71,7 +78,6 @@ class SaveAddressInformationPlugin extends Save
         $flatNum = $this->getRequest()->getParam('order')['billing_address']['street'][2]
             ?? $this->getRequest()->getParam('order')['shipping_address']['street'][2]
             ?? null;
-        $shippingMethod = $this->getRequest()->getParam('order')['shipping_method'];
         $cartId = (int)$this->_getQuote()->getId();
         $result = $proceed();
         $cart = $this->cartRepository->get($cartId);
