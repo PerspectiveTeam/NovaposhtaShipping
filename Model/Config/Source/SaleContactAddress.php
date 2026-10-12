@@ -3,60 +3,91 @@
 namespace Perspective\NovaposhtaShipping\Model\Config\Source;
 
 use Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper;
+use Perspective\NovaposhtaShipping\Service\Cache\OperationsCache;
 
 class SaleContactAddress
 {
-    /**
-     * @var \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper
-     */
-    private $novaposhtaHelper;
-
-    /**
-     * @var bool
-     */
-    private $allowProceed;
-
-    /**
-     * @var \Perspective\NovaposhtaShipping\Model\Carrier\Sender
-     */
-    private $sender;
-
-    /**
-     * @param \Perspective\NovaposhtaShipping\Helper\NovaposhtaHelper $novaposhtaHelper
-     * @param \Perspective\NovaposhtaShipping\Model\Carrier\Sender $sender
-     */
     public function __construct(
-        NovaposhtaHelper $novaposhtaHelper,
-        \Perspective\NovaposhtaShipping\Model\Carrier\Sender $sender
+        private NovaposhtaHelper $novaposhtaHelper,
+        private OperationsCache $cache
     ) {
-        $this->novaposhtaHelper = $novaposhtaHelper;
-        $this->sender = $sender;
     }
 
     public function toOptionArray($isMultiselect = false)
     {
-        $senderInAdmin = $this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'sale_sender') ?? '';
-        $options[] = ['value' => '-3', 'label' => __('Select default contact person address')];
-        if (!empty($senderInAdmin)) {
-            $counterpartyRef = $senderInAdmin;
-            $this->allowProceed = true;
+        $options = [['value' => '', 'label' => __('Select default contact person address')]];
+        $sender = explode(',', (string)$this->novaposhtaHelper->getStoreConfigByCode(
+            'novaposhtashipping',
+            'sale_sender'
+        ))[0];
+        $contact = (string)$this->novaposhtaHelper->getStoreConfigByCode(
+            'novaposhtashipping',
+            'sale_sender_contact'
+        );
+        $apiKey = (string)$this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'api_key');
+        if ($sender === '' || $apiKey === '') {
+            return $options;
         }
 
-        if ($senderInAdmin && $this->allowProceed) {
-            $result = $this->sender->searchCounterpartyAddress($counterpartyRef);
-            if ($result) {
-                foreach ($result as $counterpartyAddressIndex => $counterpartyAddressValue) {
-                    $options[] =
-                        [
-                            'label' => $counterpartyAddressValue ['description'],
-                            'value' => $counterpartyAddressValue['ref']
-                        ];
-                }
-                return $options;
-            } else {
-                return [['label' => __('Firstly you need to specify sale sender contact'), 'value' => -1]];
+        $cacheId = 'np_sender_addresses_' . hash('sha256', $apiKey . ':' . $sender);
+        if ($cached = $this->cache->load($cacheId)) {
+            $response = unserialize($cached);
+        } else {
+            $response = $this->novaposhtaHelper->getApi()->request(
+                'ContactPersonGeneral',
+                'getContactPersonsList',
+                [
+                    'ContactProperty' => 'Sender',
+                    'CounterpartyRef' => $sender,
+                    'getContactPersonAddress' => 1,
+                    'Limit' => 200,
+                    'Page' => 1
+                ]
+            );
+            if (($response['success'] ?? false) === true) {
+                $this->cache->save(serialize($response), $cacheId);
             }
         }
-        return [['label' => __('Error occurs(sale sender contact)'), 'value' => -1]];
+
+        if (($response['success'] ?? false) !== true) {
+            return [['value' => '', 'label' => __('Unable to load sender addresses. Please try again.')]];
+        }
+
+        $seen = [];
+        foreach ($response['data'] ?? [] as $person) {
+            if ($contact !== '' && ($person['Ref'] ?? '') !== $contact) {
+                continue;
+            }
+            foreach ($person['Addresses'] ?? [] as $type => $addresses) {
+                foreach ($addresses as $address) {
+                    $ref = $address['Ref'] ?? '';
+                    if ($ref === '' || isset($seen[$ref])) {
+                        continue;
+                    }
+                    if ($type === 'DoorsAddresses') {
+                        $label = trim(implode(' ', [
+                            $address['SettlementDescription'] ?? '',
+                            $address['StreetsType'] ?? '',
+                            $address['StreetDescription'] ?? '',
+                            $address['BuildingNumber'] ?? ''
+                        ]));
+                        if (!empty($address['Flat'])) {
+                            $label .= ', ' . __('flat number') . ' ' . $address['Flat'];
+                        }
+                    } elseif ($type === 'WarehouseAddresses') {
+                        $label = trim(($address['CityDescription'] ?? '') . '. '
+                            . ($address['AddressDescription'] ?? ''));
+                    } else {
+                        continue;
+                    }
+                    $options[] = ['value' => $ref, 'label' => $label];
+                    $seen[$ref] = true;
+                }
+            }
+        }
+        if (count($options) === 1) {
+            $options[0]['label'] = __('Nova Poshta returned no saved addresses for this sender contact.');
+        }
+        return $options;
     }
 }

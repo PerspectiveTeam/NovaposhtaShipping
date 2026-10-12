@@ -31,12 +31,13 @@ class SaleContact
         if ($valueInAdmin) {
             $data = explode(',', $valueInAdmin);
 
-            $cacheId = 'np_sale_counterparty_contact_person';
+            $apiKey = (string)$this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'api_key');
+            $cacheId = 'np_sale_counterparty_contact_person_' . hash('sha256', $apiKey . ':' . $data[0]);
             if ($cacheResult = $this->cache->load($cacheId)) {
                 $response = unserialize($cacheResult);
             } else {
                 $response = $this->novaposhtaHelper->getApi()->getCounterpartyContactPersons($data[0]);
-                if (!empty($response)) {
+                if (($response['success'] ?? false) === true) {
                     $this->cache->save(serialize($response), $cacheId);
                 }
             }
@@ -54,9 +55,9 @@ class SaleContact
                 }
                 return $options;
             } else {
-                return ['label' => __('Firstly you need to specify sale sender'), 'value' => -1];
+                return [['label' => __('Unable to load sender contacts. Check the API key and try again.'), 'value' => '']];
             }
         }
-        return [['label' => __('Error occurs(sale sender)'), 'value' => -1]];
+        return $options;
     }
 }
