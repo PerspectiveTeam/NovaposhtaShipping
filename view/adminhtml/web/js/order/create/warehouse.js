@@ -43,7 +43,7 @@ define([
                 var cityRef = (data?.cityRef && data.cityRef !== '0') ? data.cityRef : null;
 
                 // Perform changes only for component matching addressType
-                if (cityRef !== null && addressType !== null && addressType === self.addressType) {
+                if (addressType !== null && addressType === self.addressType) {
                     var streetSelect = $('[name="order[' + addressType + '_address][novaposhta_warehouse]"]');
                     streetSelect.data('cityRef', cityRef);
                     this.disabled(!cityRef);
