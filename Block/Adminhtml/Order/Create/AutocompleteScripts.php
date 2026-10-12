@@ -92,7 +92,14 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
      */
     public function getRestUrl(string $path)
     {
-        return $this->storeManager->getStore(1)->getBaseUrl() . $path;
+        $storeId = $this->sessionQuote->getStoreId();
+        $store = $storeId
+            ? $this->storeManager->getStore($storeId)
+            : $this->storeManager->getDefaultStoreView();
+        $basePath = parse_url($store->getBaseUrl(), PHP_URL_PATH) ?: '/';
+        $path = preg_replace('#^rest/#', 'rest/' . rawurlencode($store->getCode()) . '/', ltrim($path, '/'));
+
+        return rtrim($basePath, '/') . '/' . $path;
     }
 
     /**
