@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Config\Block\System\Config\Tabs">
+        <plugin name="perspective_novaposhta_shipping_config_link"
+                type="Perspective\NovaposhtaShipping\Plugin\Block\System\Config\ShippingLink"/>
+    </type>
     <type name="Perspective\NovaposhtaShipping\Model\Carrier\Mapping" >
         <arguments>
             <argument name="data" xsi:type="array">
