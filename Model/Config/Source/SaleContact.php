@@ -27,11 +27,11 @@ class SaleContact
     public function toOptionArray($isMultiselect = false)
     {
         $valueInAdmin = $this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'sale_sender');
+        $apiKey = (string)$this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'api_key');
         $options[] = ['value' => '', 'label' => __('Select default contact person')];
-        if ($valueInAdmin) {
+        if ($valueInAdmin && $apiKey !== '') {
             $data = explode(',', $valueInAdmin);
 
-            $apiKey = (string)$this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'api_key');
             $cacheId = 'np_sale_counterparty_contact_person_' . hash('sha256', $apiKey . ':' . $data[0]);
             if ($cacheResult = $this->cache->load($cacheId)) {
                 $response = unserialize($cacheResult);
@@ -52,6 +52,9 @@ class SaleContact
                                 'value' => $counterpartyFromApiValue['Ref']
                             ];
                     }
+                }
+                if ($response['success'] !== true) {
+                    return [['label' => __('Unable to load sender contacts. Check the API key and try again.'), 'value' => '']];
                 }
                 return $options;
             } else {
