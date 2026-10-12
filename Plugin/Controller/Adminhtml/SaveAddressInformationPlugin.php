@@ -69,7 +69,7 @@ class SaveAddressInformationPlugin extends Save
         $addressData = $orderData[$addressType] ?? [];
         $cityRef = $addressData['novaposhta_city'] ?? null;
         $warehouseRef = $addressData['novaposhta_warehouse'] ?? null;
-        $street = $addressData['street'][0] ?? null;
+        $street = $addressData['novaposhta_street'] ?? null;
         $buildingNum = $addressData['street'][1] ?? null;
         $flatNum = $addressData['street'][2] ?? null;
         $cartId = (int)$this->_getQuote()->getId();
