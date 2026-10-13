@@ -10,7 +10,10 @@ define([
     return Component.extend({
         defaults: {
             template: 'Perspective_NovaposhtaShipping/checkout/shipping/address/private_house',
-            isPrivateHouse: false
+            isPrivateHouse: false,
+            links: {
+                isPrivateHouse: 'checkoutProvider:shippingAddress.novaposhta_is_private_house'
+            }
         },
 
         initialize: function () {

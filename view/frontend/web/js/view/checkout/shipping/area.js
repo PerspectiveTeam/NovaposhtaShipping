@@ -7,8 +7,9 @@ define([
     'Magento_Checkout/js/model/quote',
     'uiRegistry',
     'Magento_Customer/js/customer-data',
+    'Magento_Checkout/js/checkout-data',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, quote, registry, customerData) {
+], function ($, ko, Select, url, postbox, quote, registry, customerData, checkoutData) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -33,6 +34,7 @@ define([
             self._directoryData.subscribe(function () {
                 self._lookups = null;
                 if (self.isNpMethod() && self.areaRef()) {
+                    self._applyAreaToSelect(self.areaRef());
                     self._syncRegionFromArea(self.areaRef());
                 }
             });
@@ -56,6 +58,16 @@ define([
         },
 
         initObservable: function () {
+            var saved = checkoutData.getShippingAddressFromData() || {},
+                directory = customerData.get('directory-data')() || {},
+                regions = directory.UA && directory.UA.regions || {},
+                region = regions[saved.region_id];
+
+            if (saved.country_id === 'UA' && saved.area_novaposhta_field &&
+                saved.area_novaposhta_field !== '0') {
+                this.options = [{value: saved.area_novaposhta_field,
+                    label: saved.area_novaposhta_field_label || (region && region.name) || $.mage.__('Choose region')}];
+            }
             this._super();
             this.observe('areaRef');
             this.observe('regionDefaultVisible');
@@ -110,6 +122,7 @@ define([
                 self.areaRef(selectedRef);
                 postbox.publish('selectedAreaPost', selectedRef);
                 postbox.publish('selectedAreaTextPost', e.params.data.text);
+                self.source.set(self.dataScope + '_label', e.params.data.text);
                 self._syncRegionFromArea(selectedRef);
             });
         },
@@ -160,11 +173,23 @@ define([
             var $el = $(el);
             if (!$el.data('select2')) return;
 
+            var name = label || (this._getLookups().areaRefToRegion[areaRef] || {}).name;
             if (!$el.find('option[value="' + areaRef + '"]').length) {
-                var name = label || (this._getLookups().areaRefToRegion[areaRef] || {}).name || areaRef;
                 $el.append(new Option(name, areaRef, true, true));
+            } else if (name) {
+                $el.find('option[value="' + areaRef + '"]').text(name);
+            }
+            if (name && this.source) {
+                this.source.set(this.dataScope + '_label', name);
             }
             $el.val(areaRef).trigger('change');
+        },
+
+        setRestoredOptions: function (options) {
+            var saved = checkoutData.getShippingAddressFromData() || {};
+            if (!saved.country_id || (saved.country_id === 'UA' && saved.area_novaposhta_field === undefined)) {
+                this.setOptions(options);
+            }
         },
 
         getPreview: function () {

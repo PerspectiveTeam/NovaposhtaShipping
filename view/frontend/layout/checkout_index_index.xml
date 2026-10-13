@@ -37,7 +37,7 @@
                                                                     </item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="imports" xsi:type="array">
-                                                                            <item name="setOptions" xsi:type="string">index = checkoutProvider:dictionaries.area</item>
+                                                                            <item name="setRestoredOptions" xsi:type="string">index = checkoutProvider:dictionaries.area</item>
                                                                         </item>
                                                                         <item name="template" xsi:type="string">
                                                                             ui/form/field
@@ -67,7 +67,7 @@
                                                                     </item>
                                                                     <item name="config" xsi:type="array">
                                                                         <item name="imports" xsi:type="array">
-                                                                            <item name="setOptions" xsi:type="string">index = checkoutProvider:dictionaries.city</item>
+                                                                            <item name="setRestoredOptions" xsi:type="string">index = checkoutProvider:dictionaries.city</item>
                                                                         </item>
                                                                         <item name="template" xsi:type="string">
                                                                             ui/form/field
@@ -120,6 +120,8 @@
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/warehouse/warehouse
                                                                     </item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="dataScope" xsi:type="string">shippingAddress.novaposhta_warehouse</item>
                                                                     <item name="template" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/checkout/shipping/warehouse/warehouse
                                                                     </item>
@@ -131,6 +133,8 @@
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/street
                                                                     </item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="dataScope" xsi:type="string">shippingAddress.novaposhta_street</item>
                                                                     <item name="sortOrder" xsi:type="string">0</item>
                                                                     <item name="template" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/checkout/shipping/address/street
@@ -142,6 +146,8 @@
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/build_num
                                                                     </item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="dataScope" xsi:type="string">shippingAddress.novaposhta_building</item>
                                                                     <item name="sortOrder" xsi:type="string">1</item>
                                                                     <item name="template" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/checkout/shipping/address/build_num
@@ -164,6 +170,8 @@
                                                                     <item name="component" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/js/view/checkout/shipping/address/house_door_num
                                                                     </item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="dataScope" xsi:type="string">shippingAddress.novaposhta_flat</item>
                                                                     <item name="sortOrder" xsi:type="string">3</item>
                                                                     <item name="template" xsi:type="string">
                                                                         Perspective_NovaposhtaShipping/checkout/shipping/address/house_door_num

@@ -7,6 +7,7 @@ define([
     'mage/url',
     'postbox',
     'Magento_Checkout/js/action/set-shipping-information',
+    'Magento_Checkout/js/checkout-data'
 ], function (
     $,
     Select,
@@ -15,14 +16,15 @@ define([
     select2Component,
     url,
     postbox,
-    setShippingInformationAction
+    setShippingInformationAction,
+    checkoutData
 ) {
     'use strict';
 
     return Select.extend({
 
         defaults: {
-            address: '',
+            address: undefined,
             cityRef: '',
             placeholder: $t('Enter address'),
             allowShippingUpdate: true,
@@ -36,12 +38,17 @@ define([
         },
 
         initialize: function () {
+            this._initializing = true;
             this._super();
-            this.address('');
+            this._initializing = false;
             return this;
         },
 
         initObservable: function () {
+            var saved = checkoutData.getShippingAddressFromData() || {};
+            if (saved.country_id === 'UA' && saved.novaposhta_street && saved.novaposhta_street_label) {
+                this.options = [{value: saved.novaposhta_street, label: saved.novaposhta_street_label}];
+            }
             this._super();
             this.observe('address');
             this.observe('cityRef');
@@ -68,6 +75,11 @@ define([
 
         onUpdate: function () {
             this._super();
+            var method = quote.shippingMethod();
+            if (this._initializing || !method || method.carrier_code !== 'novaposhtashipping' ||
+                ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
+                return;
+            }
             this.address(this.getPreview());
             if (this.allowShippingUpdate && this.value() !== 'none') {
                 postbox.publish('selectedStreetPost', this.value());
@@ -91,9 +103,11 @@ define([
         select2: function (element) {
             var ko = require('ko');
             $(element).on('select2:select', function (e) {
-                let data = e.params.data;
+                var data = e.params.data,
+                    component = ko.dataFor(e.currentTarget);
                 quote.shippingAddress().street[0] = data.text;
-                ko.dataFor(e.currentTarget).address(data.text);
+                component.address(data.text);
+                component.source.set(component.dataScope + '_label', data.text);
             });
             $(element).select2({
                 placeholder: $.mage.__('Enter address'),

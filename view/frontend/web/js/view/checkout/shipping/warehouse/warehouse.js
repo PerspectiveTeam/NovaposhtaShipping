@@ -6,13 +6,14 @@ define([
     'postbox',
     'Magento_Checkout/js/action/set-shipping-information',
     'mage/translate',
+    'Magento_Checkout/js/checkout-data',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, Select, quote, url, postbox, setShippingInformationAction) {
+], function ($, Select, quote, url, postbox, setShippingInformationAction, $t, checkoutData) {
     'use strict';
     return Select.extend(
         {
             defaults: {
-                warehouseName: '',
+                warehouseName: undefined,
                 allowShippingUpdate: true,
                 exports: {
                     warehouseName: 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.0:value'
@@ -22,12 +23,10 @@ define([
                 }
             },
             isLoading: false,
-            warehouses: {},
             initialize: function (config) {
+                this._initializing = true;
                 this._super();
-                var self = this;
-                this.setOptions(this.warehouses);
-                this.warehouseName(this.getPreview());
+                this._initializing = false;
                 return this;
             },
             select2: function (element) {
@@ -50,6 +49,10 @@ define([
                 });
             },
             initObservable: function () {
+                var saved = checkoutData.getShippingAddressFromData() || {};
+                if (saved.country_id === 'UA' && saved.novaposhta_warehouse && saved.novaposhta_warehouse_label) {
+                    this.options = [{value: saved.novaposhta_warehouse, label: saved.novaposhta_warehouse_label}];
+                }
                 this._super();
                 this.observe('warehouseName');
                 this.observe('cityValue');
@@ -73,7 +76,13 @@ define([
             },
             setDifferedFromDefault: function () {
                 this._super();
+                var method = quote.shippingMethod();
+                if (this._initializing || !method || method.carrier_code !== 'novaposhtashipping' ||
+                    ['c2w', 'w2w'].indexOf(method.method_code) === -1) {
+                    return;
+                }
                 this.warehouseName(this.getPreview());
+                this.source.set(this.dataScope + '_label', this.getPreview());
                 postbox.publish('selectedWarehousePost', this.value());
                 postbox.publish('selectedStreetPost', '');
                 postbox.publish('selectedStreetNumPost', '');

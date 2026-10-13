@@ -5,9 +5,10 @@ define([
     'mage/url',
     'postbox',
     'Magento_Checkout/js/model/quote',
+    'Magento_Checkout/js/checkout-data',
     'mage/translate',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, quote) {
+], function ($, ko, Select, url, postbox, quote, checkoutData) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -16,7 +17,7 @@ define([
 
         defaults: {
             template: 'Perspective_NovaposhtaShipping/checkout/shipping/city',
-            cityName: '',
+            cityName: undefined,
             areaRef: '',
             exports: {
                 "cityName": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city:value",
@@ -25,8 +26,9 @@ define([
         },
 
         initialize: function () {
+            this._initializing = true;
             this._super();
-            this.cityName(this.getPreview());
+            this._initializing = false;
 
             // Reset city on area(region) update
             postbox.subscribe('selectedAreaPost', function (areaRef) {
@@ -46,6 +48,12 @@ define([
         },
 
         initObservable: function () {
+            var saved = checkoutData.getShippingAddressFromData() || {};
+            if (saved.country_id === 'UA' && saved.city_novaposhta_field &&
+                saved.city_novaposhta_field !== '0' && saved.city) {
+                this.options = [{value: saved.city_novaposhta_field, label: saved.city}];
+                this.areaRef = saved.area_novaposhta_field || '';
+            }
             this._super();
 
             this.observe('cityName');
@@ -106,6 +114,13 @@ define([
             });
         },
 
+        setRestoredOptions: function (options) {
+            var saved = checkoutData.getShippingAddressFromData() || {};
+            if (!saved.country_id || (saved.country_id === 'UA' && saved.city_novaposhta_field === undefined)) {
+                this.setOptions(options);
+            }
+        },
+
         getPreview: function () {
             return this.hasValue() ? $('[name="' + this.inputName + '"] option:selected').text() : '';
         },
@@ -120,7 +135,7 @@ define([
 
         setDifferedFromDefault: function () {
             this._super();
-            if (!this.isNpMethod()) {
+            if (this._initializing || !this.isNpMethod()) {
                 return;
             }
             var preview = this.getPreview();

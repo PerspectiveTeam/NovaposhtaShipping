@@ -19,7 +19,7 @@ define([
 
         defaults: {
             address: '',
-            buildingNum: '',
+            buildingNum: undefined,
             novaposhtaNewAddressDoor: '',
             placeholder: $t('House number'),
             allowShippingUpdate: true,
@@ -32,7 +32,9 @@ define([
         },
 
         initialize: function () {
+            this._initializing = true;
             this._super();
+            this._initializing = false;
             this.address('');
             return this;
         },
@@ -55,6 +57,11 @@ define([
 
         onUpdate: function () {
             this._super();
+            var method = quote.shippingMethod();
+            if (this._initializing || !method || method.carrier_code !== 'novaposhtashipping' ||
+                ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
+                return;
+            }
             this.buildingNum(this.getPreview());
             postbox.publish('selectedStreetNumPost',this.getPreview());
             if (this.allowShippingUpdate && this.getPreview()) {

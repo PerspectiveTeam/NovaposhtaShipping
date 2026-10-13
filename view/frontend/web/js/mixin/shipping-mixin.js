@@ -1,8 +1,12 @@
 define([
     'Magento_Checkout/js/model/quote',
     'uiRegistry',
-    'mage/translate'
-], function (quote, registry, $t) {
+    'mage/translate',
+    'Magento_Checkout/js/checkout-data',
+    'Magento_Checkout/js/model/address-converter',
+    'Magento_Checkout/js/action/select-shipping-address',
+    'Magento_Checkout/js/model/shipping-service'
+], function (quote, registry, $t, checkoutData, addressConverter, selectShippingAddress, shippingService) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -11,6 +15,54 @@ define([
 
     return function (Component) {
         return Component.extend({
+            initialize: function () {
+                this._super();
+                if (!this.isFormInline || quote.isVirtual() ||
+                    window.checkoutConfig.activeCarriers.indexOf('novaposhtashipping') === -1) {
+                    return this;
+                }
+
+                var fieldset = 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.';
+                registry.get([
+                    'checkoutProvider', fieldset + 'country_id', fieldset + 'region_id',
+                    fieldset + 'city', fieldset + 'area_novaposhta_field', fieldset + 'city_novaposhta_field'
+                ], function (provider) {
+                    var subscription,
+                        hasNpDraft = provider.get('shippingAddress').country_id === 'UA';
+                    var saveDraft = function (address) {
+                        hasNpDraft = hasNpDraft || address.country_id === 'UA';
+                        if (hasNpDraft) {
+                            checkoutData.setShippingAddressFromData(address);
+                        }
+                    };
+                    provider.on('shippingAddress', saveDraft);
+                    saveDraft(provider.get('shippingAddress'));
+
+                    var reconcileCountry = function () {
+                        var form = provider.get('shippingAddress'),
+                            address = quote.shippingAddress();
+
+                        if (form.country_id === 'UA' && address && address.countryId !== form.country_id) {
+                            if ((checkoutData.getSelectedShippingRate() || '').indexOf('novaposhtashipping_') === 0) {
+                                quote.shippingMethod(null);
+                            }
+                            selectShippingAddress(addressConverter.formAddressDataToQuoteAddress(form));
+                        }
+                    };
+                    if (shippingService.isLoading()) {
+                        subscription = shippingService.isLoading.subscribe(function (loading) {
+                            if (!loading) {
+                                subscription.dispose();
+                                reconcileCountry();
+                            }
+                        });
+                    } else {
+                        reconcileCountry();
+                    }
+                });
+                return this;
+            },
+
             validateShippingInformation: function () {
                 var method = quote.shippingMethod();
                 var methodCode = method ? method.method_code : null;
