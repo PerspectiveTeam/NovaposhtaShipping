@@ -15,7 +15,7 @@ define([
                 var method = quote.shippingMethod();
                 var methodCode = method ? method.method_code : null;
 
-                if (NP_METHODS.indexOf(methodCode) !== -1) {
+                if (method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(methodCode) !== -1) {
                     var areaValidationResult = this.validateNpAreaField(),
                         cityValidationResult = this.validateNpCityField();
 

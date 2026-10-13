@@ -14,6 +14,9 @@ define([
 
             initialize: function () {
                 this._super();
+                if (this.name.indexOf('shippingAddress.shipping-address-fieldset') === -1) {
+                    return this;
+                }
                 var self = this;
                 self._suppressRegionSync = false;
 
@@ -46,6 +49,9 @@ define([
 
             initObservable: function () {
                 this._super();
+                if (this.name.indexOf('shippingAddress.shipping-address-fieldset') === -1) {
+                    return this;
+                }
                 var self = this;
                 this.value.subscribe(function (newVal) {
                     if (!newVal || self._suppressRegionSync) return;

@@ -4,9 +4,6 @@ var config = {
             'Magento_Checkout/js/action/set-shipping-information': {
                 'Perspective_NovaposhtaShipping/js/mixin/set-shipping-information-mixin': true
             },
-            'Magento_Checkout/js/model/shipping-save-processor/payload-extender': {
-                'Perspective_NovaposhtaShipping/js/mixin/payload-extender-mixin': true
-            },
             'Magento_Ui/js/form/element/region': {
                 'Perspective_NovaposhtaShipping/js/mixin/region-select-mixin': true
             },

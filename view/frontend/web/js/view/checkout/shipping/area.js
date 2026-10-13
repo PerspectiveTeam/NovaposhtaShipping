@@ -4,12 +4,11 @@ define([
     'Magento_Ui/js/form/element/select',
     'mage/url',
     'postbox',
-    'Magento_Checkout/js/action/set-shipping-information',
     'Magento_Checkout/js/model/quote',
     'uiRegistry',
     'Magento_Customer/js/customer-data',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, setShippingInformationAction, quote, registry, customerData) {
+], function ($, ko, Select, url, postbox, quote, registry, customerData) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -33,16 +32,25 @@ define([
 
             self._directoryData.subscribe(function () {
                 self._lookups = null;
+                if (self.isNpMethod() && self.areaRef()) {
+                    self._syncRegionFromArea(self.areaRef());
+                }
             });
 
             postbox.subscribe('selectedRegionIdPost', function (regionId) {
-                if (!regionId || self._suppressAreaSync) return;
+                if (!regionId || self._suppressAreaSync || !self.isNpMethod()) return;
                 var lookups = self._getLookups();
                 var areaRef = lookups.regionIdToAreaRef[String(regionId)] || null;
                 if (areaRef && areaRef !== self.areaRef()) {
                     self._applyAreaToSelect(areaRef);
                     postbox.publish('selectedAreaPost', areaRef);
                 }
+            });
+            postbox.subscribe('selectedCityAreaPost', function (area) {
+                self._applyAreaToSelect(area.areaRef, area.label);
+                postbox.publish('selectedAreaPost', area.areaRef);
+                postbox.publish('selectedAreaTextPost', area.label);
+                self._syncRegionFromArea(area.areaRef);
             });
             return this;
         },
@@ -54,10 +62,10 @@ define([
             this.isNpMethod = ko.pureComputed(function () {
                 var method = quote.shippingMethod();
                 var code = method ? method.method_code : null;
-                var isNp = NP_METHODS.indexOf(code) !== -1;
+                var isNp = method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(code) !== -1;
                 this.regionDefaultVisible(!isNp);
                 this.visible(isNp);
-                return code;
+                return isNp;
             }, this);
             return this;
         },
@@ -102,7 +110,6 @@ define([
                 self.areaRef(selectedRef);
                 postbox.publish('selectedAreaPost', selectedRef);
                 postbox.publish('selectedAreaTextPost', e.params.data.text);
-                setShippingInformationAction();
                 self._syncRegionFromArea(selectedRef);
             });
         },
@@ -121,7 +128,9 @@ define([
                 var areaRef = region['area_ref'] || '';
                 if (!areaRef) continue;
                 regionIdToAreaRef[String(regionId)] = areaRef;
-                areaRefToRegion[areaRef] = {regionId: String(regionId), name: region['name'] || ''};
+                if (!areaRefToRegion[areaRef]) {
+                    areaRefToRegion[areaRef] = {regionId: String(regionId), name: region['name'] || ''};
+                }
             }
 
             this._lookups = {regionIdToAreaRef: regionIdToAreaRef, areaRefToRegion: areaRefToRegion};
@@ -143,7 +152,7 @@ define([
             this._suppressAreaSync = false;
         },
 
-        _applyAreaToSelect: function (areaRef) {
+        _applyAreaToSelect: function (areaRef, label) {
             this.areaRef(areaRef);
 
             var el = this._select2Element;
@@ -152,10 +161,10 @@ define([
             if (!$el.data('select2')) return;
 
             if (!$el.find('option[value="' + areaRef + '"]').length) {
-                var name = (this._getLookups().areaRefToRegion[areaRef] || {}).name || areaRef;
+                var name = label || (this._getLookups().areaRefToRegion[areaRef] || {}).name || areaRef;
                 $el.append(new Option(name, areaRef, true, true));
             }
-            $el.val(areaRef).trigger('change.select2');
+            $el.val(areaRef).trigger('change');
         },
 
         getPreview: function () {

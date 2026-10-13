@@ -54,6 +54,9 @@ define([
 
             postbox.subscribe('privateHousePost', function (isPrivate) {
                 this.isPrivateHouse(isPrivate);
+                if (isPrivate) {
+                    this.value('');
+                }
             }, this);
 
             return this;

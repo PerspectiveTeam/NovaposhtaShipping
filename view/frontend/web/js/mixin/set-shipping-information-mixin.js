@@ -1,12 +1,11 @@
 /*jshint browser:true jquery:true*/
 /*global alert*/
 define([
-    'jquery',
     'mage/utils/wrapper',
     'Magento_Checkout/js/model/quote',
-    'ko',
+    'uiRegistry',
     'postbox'
-], function ($, wrapper, quote, ko, postbox) {
+], function (wrapper, quote, registry, postbox) {
     'use strict';
     var perspective_novaposhta_shipping_area_val = '';
     var perspective_novaposhta_shipping_city_val = '';
@@ -46,17 +45,28 @@ define([
     });
     return function (setShippingInformationAction) {
         return wrapper.wrap(setShippingInformationAction, function (originalAction) {
-            var shippingAddress = quote.shippingAddress();
-            if (!shippingAddress || shippingAddress['extension_attributes'] === undefined) {
-                if (shippingAddress === null) {
-                    shippingAddress = [];
-                }
-                shippingAddress['extension_attributes'] = {};
+            var method = quote.shippingMethod();
+
+            if (!method || method.carrier_code !== 'novaposhtashipping') {
+                return originalAction();
             }
+
+            var shippingAddress = quote.shippingAddress();
+            if (!shippingAddress) {
+                return originalAction();
+            }
+            var fieldset = 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.',
+                area = registry.get(fieldset + 'area_novaposhta_field'),
+                city = registry.get(fieldset + 'city_novaposhta_field');
+
+            if (city && city.hasValue() && city.getPreview()) {
+                shippingAddress.city = city.getPreview();
+            }
+            shippingAddress.extension_attributes = shippingAddress.extension_attributes || {};
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_area'] =
-                perspective_novaposhta_shipping_area_val;
+                area ? area.areaRef() : perspective_novaposhta_shipping_area_val;
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
-                perspective_novaposhta_shipping_city_val;
+                city ? (city.hasValue() ? city.value() : '') : perspective_novaposhta_shipping_city_val;
             if (window.perspective_novaposhta.warehouse.react) {
                 shippingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
                     perspective_novaposhta_shipping_warehouse_val;
@@ -72,40 +82,6 @@ define([
             shippingAddress['extension_attributes']['perspective_novaposhta_shipping_is_private_house'] =
                 perspective_novaposhta_shipping_is_private_house_val;
 
-            var billingAddress = quote.billingAddress();
-            if (!billingAddress || billingAddress['extension_attributes'] === undefined) {
-                if (billingAddress === null) {
-                    billingAddress = {};
-                }
-                billingAddress['extension_attributes'] = {};
-                //fix for M2.4.4 bug - absent the street arr
-                if (billingAddress.street === undefined || !Array.isArray(billingAddress.street)) {
-                    billingAddress.street = [];
-                    var getCacheKeyFunc = function () {
-                        return quote.shippingAddress().getCacheKey();
-                    }
-                    billingAddress.getCacheKey = getCacheKeyFunc;
-                    quote.billingAddress(billingAddress);
-                }
-            }
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_area'] =
-                perspective_novaposhta_shipping_area_val;
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_city'] =
-                perspective_novaposhta_shipping_city_val;
-            if (window.perspective_novaposhta.warehouse.react) {
-                billingAddress['extension_attributes']['perspective_novaposhta_shipping_warehouse'] =
-                    perspective_novaposhta_shipping_warehouse_val;
-            }
-            if (window.perspective_novaposhta.street.react) {
-                billingAddress['extension_attributes']['perspective_novaposhta_shipping_street'] =
-                    perspective_novaposhta_shipping_street_val;
-            }
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_building'] =
-                perspective_novaposhta_shipping_building_val;
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_flat'] =
-                perspective_novaposhta_shipping_flat_val;
-            billingAddress['extension_attributes']['perspective_novaposhta_shipping_is_private_house'] =
-                perspective_novaposhta_shipping_is_private_house_val;
             return originalAction();
         });
     };

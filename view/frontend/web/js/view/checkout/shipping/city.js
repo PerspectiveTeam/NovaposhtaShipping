@@ -4,11 +4,10 @@ define([
     'Magento_Ui/js/form/element/select',
     'mage/url',
     'postbox',
-    'Magento_Checkout/js/action/set-shipping-information',
     'Magento_Checkout/js/model/quote',
     'mage/translate',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, setShippingInformationAction, quote) {
+], function ($, ko, Select, url, postbox, quote) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -18,10 +17,7 @@ define([
         defaults: {
             template: 'Perspective_NovaposhtaShipping/checkout/shipping/city',
             cityName: '',
-            postcode: '',
-            city_fast: [],
             areaRef: '',
-            allowShippingUpdate: true,
             exports: {
                 "cityName": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city:value",
                 "cityDefaultVisible": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city:visible"
@@ -34,20 +30,16 @@ define([
 
             // Reset city on area(region) update
             postbox.subscribe('selectedAreaPost', function (areaRef) {
-                this.allowShippingUpdate = false;
-                if (!!this.areaRef() && this.areaRef() !== areaRef) {
+                if (this.areaRef() && this.areaRef() !== areaRef && this.hasValue()) {
                     var select = $('[name="' + this.inputName + '"]');
                     select.find('option').prop('selected', false);
                     if (select.data('select2')) {
                         select.find('option[value!="0"]').remove();
                         select.val(null).trigger('change');
-                        select.select2('destroy');
-                        this.select2(select[0]);
                     }
                     this.value('');
                 }
-                this.allowShippingUpdate = true;
-                this.areaRef(areaRef)
+                this.areaRef(areaRef);
             }, this);
 
             return this;
@@ -55,24 +47,19 @@ define([
 
         initObservable: function () {
             this._super();
-            var self = this;
 
             this.observe('cityName');
-            this.observe('postcode');
             this.observe('cityDefaultVisible');
             this.observe('areaRef');
             this.isNpMethod = ko.pureComputed(function () {
                 var method = quote.shippingMethod();
                 var code = method ? method.method_code : null;
-                var isNp = NP_METHODS.indexOf(code) !== -1;
+                var isNp = method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(code) !== -1;
                 this.cityDefaultVisible(!isNp);
                 this.visible(isNp);
-                return code;
+                return isNp;
             }, this);
-            this.areaRef.subscribe(function (areaRef) {
-                self.disabled(!areaRef);
-            });
-            this.disabled(!this.areaRef());
+            this.disabled(false);
 
             return this;
         },
@@ -80,18 +67,16 @@ define([
         select2: function (element) {
             var self = this;
             var lang = $('html').attr('lang') === 'uk' ? 'uk' : 'ru';
-            var isDisabled = !self.areaRef();
-
             $(element).select2({
-                placeholder: isDisabled
-                    ? $.mage.__('Choose region first')
-                    : $.mage.__('Choose city'),
+                placeholder: $.mage.__('Choose city'),
                 dropdownAutoWidth: true,
                 width: '100%',
                 minimumInputLength: 2,
                 language: lang,
-                disabled: isDisabled,
-                data: [{id: 0, text: isDisabled ? $.mage.__('Choose region first') : $.mage.__('Choose city')}],
+                data: [{id: 0, text: $.mage.__('Choose city')}],
+                templateResult: function (data) {
+                    return data.areaLabel ? data.text + ' (' + data.areaLabel + ')' : data.text;
+                },
                 ajax: {
                     url: url.build('rest/V1/novaposhtashipping/city'),
                     type: "POST",
@@ -101,7 +86,8 @@ define([
                     data: function (params) {
                         return JSON.stringify({
                             term: params.term,
-                            areaRef: self.areaRef()
+                            areaRef: '',
+                            includeArea: true
                         });
                     },
                     processResults: function (data) {
@@ -109,6 +95,13 @@ define([
                             results: JSON.parse(data)
                         };
                     }
+                }
+            }).on('select2:select', function (event) {
+                var city = event.params.data;
+
+                if (city.areaRef) {
+                    self.areaRef(city.areaRef);
+                    postbox.publish('selectedCityAreaPost', {areaRef: city.areaRef, label: city.areaLabel});
                 }
             });
         },
@@ -127,16 +120,12 @@ define([
 
         setDifferedFromDefault: function () {
             this._super();
+            if (!this.isNpMethod()) {
+                return;
+            }
             var preview = this.getPreview();
             this.cityName(this.hasValue() ? preview : '');
             postbox.publish('selectedCityPost', this.value());
-            if (this.allowShippingUpdate && this.hasValue()) {
-                try {
-                    setShippingInformationAction();
-                } catch (e) {
-                    console.log(e);
-                }
-            }
         }
     });
 });

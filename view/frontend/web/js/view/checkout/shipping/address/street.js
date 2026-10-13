@@ -34,7 +34,6 @@ define([
                 "cityRef": 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city_novaposhta_field:value'
             }
         },
-        streets: {},
 
         initialize: function () {
             this._super();
@@ -86,49 +85,7 @@ define([
 
         selectedMethodCode: function () {
             var method = quote.shippingMethod();
-            var selectedMethodCode = method != null ? method.method_code : false;
-            if (selectedMethodCode === 'c2c' || selectedMethodCode === 'w2c') {
-                if (!this.isLoading) {
-                    this.isLoading = true;
-                    try {
-                        if (this.cityRef()) {
-                            this.getCityStreets(this.cityRef(), this);
-                        }
-                    } catch (e) {
-                        console.log(e);
-                        this.isLoading = false;
-                    } finally {
-                        this.isLoading = false;
-                    }
-                }
-            }
-            return selectedMethodCode;
-        },
-
-        getCityStreets: function (cityRef, vm) {
-            let cityTerm = JSON.stringify({cityRef: cityRef ? cityRef : ''});
-            $.ajax({
-                url: url.build('rest/V1/novaposhtashipping/streets-formatted'),
-                data: cityTerm,
-                showLoader: true,
-                contentType: "application/json",
-                type: "post",
-                dataType: 'json',
-                error: function (data) {
-                    console.log(data.responseText);
-                    vm.isLoading = false;
-                },
-                success: function (data) {
-                    let currentStreet = vm.value();
-                    window.perspective_novaposhta.street.react = false;
-                    vm.setOptions(data);
-                    window.perspective_novaposhta.street.react = true;
-                    if (currentStreet && currentStreet !== 'none') {
-                        vm.value(currentStreet);
-                    }
-                    vm.isLoading = false;
-                }
-            });
+            return method ? method.method_code : false;
         },
 
         select2: function (element) {
@@ -170,29 +127,8 @@ define([
             });
         },
 
-        setStreets: function (data) {
-            this.clear();
-            this.streets = data;
-            this.setOptions(this.streets);
-
-            if (addressList().length > 0) {
-                var street = quote.shippingAddress().street[0];
-                if (street != '' && street != undefined) {
-                    $("[name='warehouse_novaposhta_id'] option:contains(" + street + ")").attr('selected', 'selected');
-                }
-            }
-        },
-
         hasValue: function() {
             return this.value() !== '0' && !!this.value() && this.value() !== 'none';
-        },
-
-        getCityRef: function () {
-            return this.cityRef;
-        },
-
-        setCityRef: function (cityRef) {
-            this.cityRef = cityRef;
         }
     });
 });
