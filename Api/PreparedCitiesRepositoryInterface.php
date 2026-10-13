@@ -9,8 +9,9 @@ interface PreparedCitiesRepositoryInterface
      *
      * @param string $term | null
      * @param string $areaRef | null
+     * @param bool $includeArea
      * @return string | null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function prepareCityArray($term = null, $areaRef = null);
+    public function prepareCityArray($term = null, $areaRef = null, $includeArea = false);
 }

@@ -62,7 +62,10 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
      */
     public function getRegionIdToAreaRefJson(): string
     {
-        return json_encode($this->directorySyncMapper->getRegionIdToAreaRefMap());
+        $storeId = (int)($this->sessionQuote->getStoreId()
+            ?: $this->storeManager->getDefaultStoreView()->getId());
+
+        return json_encode($this->directorySyncMapper->getRegionIdToAreaRefMap($storeId));
     }
 
     public function getData($key = '', $index = null)

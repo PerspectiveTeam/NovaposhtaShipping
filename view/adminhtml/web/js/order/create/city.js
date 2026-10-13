@@ -5,8 +5,10 @@ define([
     'mage/url',
     'postbox',
     'mage/translate',
+    'uiRegistry',
+    'Perspective_NovaposhtaShipping/js/order/create/address-state',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, setShippingInformationAction) {
+], function ($, ko, Select, url, postbox, translate, registry, refreshAddressState) {
     'use strict';
     return Select.extend({
 
@@ -27,7 +29,7 @@ define([
             var self = this;
             var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
 
-            if (!this.preselectedValue() || sameAsBilling) {
+            if (this.addressType === 'shipping' && sameAsBilling) {
                 this.disabled(true);
             }
 
@@ -40,7 +42,6 @@ define([
                 if (areaRef !== null && addressType !== null && addressType === self.addressType) {
                     var citySelect = $('[name="order[' + addressType + '_address][novaposhta_city]"]');
                     citySelect.data('areaRef', areaRef);
-                    this.disabled(!areaRef);
 
                     var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
                     if (sameAsBilling && addressType === 'billing') {
@@ -73,14 +74,15 @@ define([
                 this.inputName = element.name = this.inputCustomName();
             }
 
+            refreshAddressState();
+
             var lang = $('html').attr('lang') === 'uk' ? 'uk' : 'ru';
-            var hasArea = !!($(element).data('areaRef') || this.preselectedValue());
             var preselectObject = {};
 
             if (this.preselectedLabel() && this.preselectedValue()) {
                 preselectObject = {id: this.preselectedValue(), text: $.mage.__(this.preselectedLabel())};
             } else {
-                preselectObject = {id: 0, text: hasArea ? $.mage.__('Choose city') : $.mage.__('Choose region first')};
+                preselectObject = {id: 0, text: $.mage.__('Choose city')};
             }
 
             $(element).select2({
@@ -91,6 +93,9 @@ define([
                 minimumInputLength: 2,
                 language: lang,
                 data: [preselectObject],
+                templateResult: function (data) {
+                    return data.areaLabel ? data.text + ' (' + data.areaLabel + ')' : data.text;
+                },
                 ajax: {
                     url: this.backendRestURL(),
                     type: "post",
@@ -101,10 +106,10 @@ define([
                         // Empty to remove magento's default handler
                     },
                     data: function (params) {
-                        var areaRef = $(element).data('areaRef') || '';
                         return JSON.stringify({
                             term: params.term,
-                            areaRef: areaRef,
+                            areaRef: '',
+                            includeArea: true,
                             form_key: window.FORM_KEY
                         });
                     },
@@ -114,14 +119,63 @@ define([
                         };
                     }
                 }
-            }).on('select2:select', function (e) {
+            }).off('select2:select.novaposhta').on('select2:select.novaposhta', function (e) {
                 var value = e.params.data.id;
+                self.value(value);
+                self.preselectedValue(value);
+                self.preselectedLabel(e.params.data.text);
                 var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
+                var area = registry.get('areaInputAutocomplete' +
+                    (self.addressType === 'billing' ? 'Billing' : 'Shipping'));
+                if (area && e.params.data.areaRef) {
+                    area.selectCityArea(e.params.data.areaRef, e.params.data.areaLabel || '');
+                }
                 self._propagateToCityInput(self.getPreview(), sameAsBilling);
                 if (sameAsBilling) {
                     self._syncShippingCityFromBilling();
                 }
-                postbox.publish('selectedCityPost', {cityRef: value, addressType: self.addressType});
+                postbox.publish('selectedCityPost', {
+                    cityRef: value,
+                    addressType: self.addressType,
+                    preserveAddress: !!e.params.restore
+                });
+            });
+            refreshAddressState();
+            this._restoreCityFromAddress(element);
+        },
+
+        _restoreCityFromAddress: function (element) {
+            var self = this,
+                select = $(element),
+                addressCity = $('[name="order[' + this.addressType + '_address][city]"]'),
+                term = (addressCity.val() || '').trim(),
+                areaRef = select.data('areaRef');
+
+            if (!refreshAddressState.isActive(this.addressType) || this.hasValue() || !term ||
+                (this.addressType === 'shipping' && $('#order-shipping_same_as_billing').is(':checked'))) {
+                return;
+            }
+            $.ajax({
+                url: this.backendRestURL(),
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                beforeSend: function () {
+                    // Keep Admin bootstrap from appending form data to the JSON body.
+                },
+                data: JSON.stringify({term: term, areaRef: areaRef, includeArea: true, form_key: window.FORM_KEY})
+            }).done(function (data) {
+                var matches = (typeof data === 'string' ? JSON.parse(data) : data).filter(function (item) {
+                    return item.text.trim().toLocaleLowerCase() === term.toLocaleLowerCase();
+                });
+
+                if (matches.length !== 1 || !element.isConnected || self.hasValue() ||
+                    (addressCity.val() || '').trim() !== term ||
+                    (select.data('areaRef') && matches[0].areaRef !== select.data('areaRef'))) {
+                    return;
+                }
+                select.append(new Option(matches[0].text, matches[0].id, true, true)).trigger('change');
+                select.trigger({type: 'select2:select', params: {data: matches[0], restore: true}});
             });
         },
 
@@ -130,6 +184,10 @@ define([
         },
 
         _propagateToCityInput: function (value, sameAsBilling) {
+            if (this.addressType && !refreshAddressState.isActive(this.addressType)) {
+                return;
+            }
+
             var shippingSelect = $('[name="order[shipping_address][city]"]');
             var billingSelect = $('[name="order[billing_address][city]"]');
             var orphanSelect = $('[name="city"]');
@@ -147,8 +205,6 @@ define([
                 return;
             }
 
-            shippingSelect.change();
-            billingSelect.change();
         },
 
         _syncShippingCityFromBilling: function () {
@@ -162,7 +218,9 @@ define([
         },
 
         exportValue: function (value, control) {
-            control.val(value);
+            if (control.val() !== value) {
+                control.val(value).trigger('change');
+            }
         },
 
         exportLabel: function (value, control) {
@@ -176,11 +234,11 @@ define([
 
         _resetSelect: function () {
             var select = $('[name="' + this.inputName + '"]');
-            if (select.data('select2')) {
-                $(select[0]).empty();
-                this.select2(select[0]);
-            }
+            this.preselectedValue('');
+            this.preselectedLabel('');
             this.value('');
+            select.empty().append(new Option($.mage.__('Choose city'), '', true, true)).trigger('change');
+            refreshAddressState();
             this._propagateToCityInput('', $('#order-shipping_same_as_billing').is(':checked'));
         }
     });

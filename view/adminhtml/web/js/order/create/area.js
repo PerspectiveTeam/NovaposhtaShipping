@@ -5,9 +5,10 @@ define([
     'mage/url',
     'postbox',
     'mage/translate',
+    'Perspective_NovaposhtaShipping/js/order/create/address-state',
     'uiRegistry',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, translate, registry) {
+], function ($, ko, Select, url, postbox, translate, refreshAddressState, registry) {
     'use strict';
 
     return Select.extend({
@@ -47,11 +48,8 @@ define([
                 'select[name="order[' + self.addressType + '_address][region_id]"]',
                 function () {
                     var regionId = $(this).val();
-                    if (!regionId) return;
                     var areaRef = self._getAreaRefByRegionId(regionId);
-                    if (areaRef) {
-                        self._applyAreaRef(areaRef);
-                    }
+                    self._applyAreaRef(areaRef);
                 }
             );
 
@@ -96,6 +94,8 @@ define([
                 this.inputName = element.name = this.inputCustomName();
             }
 
+            refreshAddressState();
+
             var lang = $('html').attr('lang') === 'uk' ? 'uk' : 'ru';
             var preselectObject = {};
 
@@ -133,8 +133,11 @@ define([
                         };
                     }
                 }
-            }).on('select2:select', function (e) {
+            }).off('select2:select.novaposhta').on('select2:select.novaposhta', function (e) {
                 var value = e.params.data.id;
+                self.value(value);
+                self.preselectedValue(value);
+                self.preselectedLabel(e.params.data.text);
                 var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
                 self._propagateToRegionSelect(value, sameAsBilling);
                 if (sameAsBilling) {
@@ -142,10 +145,33 @@ define([
                 }
                 postbox.publish('selectedAreaPost', {areaRef: value, addressType: self.addressType});
             });
+            if (!this.value() || this.value() === '0') {
+                var regionId = $('[name="order[' + this.addressType + '_address][region_id]"]').val(),
+                    areaRef = this._getAreaRefByRegionId(regionId);
+
+                if (areaRef) {
+                    this._applyAreaRef(areaRef, false);
+                }
+            }
+            refreshAddressState();
         },
 
-        _applyAreaRef: function (areaRef) {
+        _applyAreaRef: function (areaRef, notify) {
+            var select = $('[name="' + this.inputName + '"]'),
+                region = $('[name="order[' + this.addressType + '_address][region_id]"] option:selected');
+
+            if (this.value() === areaRef) {
+                return;
+            }
+            this.preselectedValue(areaRef);
+            this.preselectedLabel(areaRef ? region.text() : '');
+            select.empty().append(new Option(areaRef ? region.text() : $.mage.__('Choose region'),
+                areaRef, true, true)).trigger('change');
             this.value(areaRef);
+            if (notify !== false) {
+                postbox.publish('selectedAreaPost', {areaRef: areaRef, addressType: this.addressType});
+            }
+            refreshAddressState();
         },
 
         _getRegionIdByAreaRef: function (areaRef) {
@@ -154,6 +180,17 @@ define([
                 if (map[regionId] === areaRef) return regionId;
             }
             return null;
+        },
+
+        selectCityArea: function (areaRef, label) {
+            var select = $('[name="' + this.inputName + '"]');
+
+            this.preselectedValue(areaRef);
+            this.preselectedLabel(label);
+            this.value(areaRef);
+            select.empty().append(new Option(label, areaRef, true, true)).trigger('change');
+            this._propagateToRegionSelect(areaRef, $('#order-shipping_same_as_billing').is(':checked'));
+            refreshAddressState();
         },
 
         _getAreaRefByRegionId: function (regionId) {
@@ -166,17 +203,23 @@ define([
         },
 
         _propagateToRegionSelect: function (areaRef, sameAsBilling) {
+            if (this.addressType && !refreshAddressState.isActive(this.addressType)) {
+                return;
+            }
+
             var regionId = this._getRegionIdByAreaRef(areaRef);
             if (!regionId) {
                 return;
             }
 
             var regionSelect = $('select[name="order[' + this.addressType + '_address][region_id]"]');
-            regionSelect.val(regionId).trigger('change');
+            if (regionSelect.val() !== regionId) {
+                regionSelect.val(regionId).trigger('change');
+            }
 
             if (this.addressType === 'billing' && sameAsBilling) {
                 var shippingSelect = $('select[name="order[shipping_address][region_id]"]');
-                if (shippingSelect.length) {
+                if (shippingSelect.length && shippingSelect.val() !== regionId) {
                     shippingSelect.val(regionId).trigger('change');
                 }
             }

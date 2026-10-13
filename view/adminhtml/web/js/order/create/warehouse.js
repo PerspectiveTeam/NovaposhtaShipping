@@ -5,8 +5,9 @@ define([
     'mage/url',
     'postbox',
     'mage/translate',
+    'Perspective_NovaposhtaShipping/js/order/create/address-state',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, setShippingInformationAction) {
+], function ($, ko, Select, url, postbox, translate, refreshAddressState) {
     'use strict';
     return Select.extend({
 
@@ -33,7 +34,7 @@ define([
             var self = this;
             var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
 
-            if (!this.preselectedValue() || sameAsBilling) {
+            if (!this.preselectedValue() || (this.addressType === 'shipping' && sameAsBilling)) {
                 this.disabled(true);
             }
 
@@ -53,18 +54,11 @@ define([
                         var shippingSelect = $('[name="order[shipping_address][novaposhta_warehouse]"]');
                         shippingSelect.data('cityRef', cityRef);
                     }
-                    self._resetSelect();
-                }
-            }, this);
-
-            postbox.subscribe('selectedCityPost', function (data) {
-                var addressType = data?.addressType ?? null;
-                if (addressType !== null && addressType === self.addressType) {
-                    var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
-                    if (addressType === 'shipping' && sameAsBilling) {
-                        return;
+                    if (!data.preserveAddress) {
+                        self._resetSelect();
+                    } else {
+                        refreshAddressState();
                     }
-                    this.disabled(!(data.cityRef && data.cityRef !== '0'));
                 }
             }, this);
 
@@ -92,6 +86,8 @@ define([
                 // Reassign name to prevent it from being lost after DOM updates
                 this.inputName = element.name = this.inputCustomName();
             }
+
+            refreshAddressState();
 
             var hasCity = !!($(element).data('cityRef') || this.preselectedValue());
             var preselectObject = {};
@@ -123,8 +119,8 @@ define([
                     data: function (params) {
                         var cityRef = $(element).data('cityRef') || '';
                         if (!cityRef) {
-                            cityRef = ko.dataFor(this[0]).cityOrphan();
-                            ko.dataFor(this[0]).isOrphan(true);
+                            cityRef = self.cityOrphan() || '';
+                            self.isOrphan(true);
                         }
                         var query = JSON.stringify({
                             cityRef: cityRef,
@@ -139,8 +135,11 @@ define([
                         };
                     }
                 }
-            }).on('select2:select', function (e) {
+            }).off('select2:select.novaposhta').on('select2:select.novaposhta', function (e) {
                 var value = e.params.data.id;
+                self.value(value);
+                self.preselectedValue(value);
+                self.preselectedLabel(e.params.data.text);
                 var sameAsBilling = $('#order-shipping_same_as_billing').is(':checked');
                 self._propagateToWarehouseInput(self.hasValue() ? self.getPreview() : '', sameAsBilling);
                 if (sameAsBilling) {
@@ -148,6 +147,7 @@ define([
                 }
                 postbox.publish('selectedStreetPost', {streetRef: value, addressType: self.addressType});
             });
+            refreshAddressState();
         },
 
         getPreview: function () {
@@ -155,6 +155,10 @@ define([
         },
 
         _propagateToWarehouseInput: function (value, sameAsBilling) {
+            if (this.addressType && !refreshAddressState.isActive(this.addressType)) {
+                return;
+            }
+
             var shippingSelect = $('[name="order[shipping_address][street][0]"]');
             var billingSelect = $('[name="order[billing_address][street][0]"]');
             var orphanSelect = $('[name="street[0]"]');
@@ -172,8 +176,6 @@ define([
                 return;
             }
 
-            shippingSelect.change();
-            billingSelect.change();
         },
 
         _syncShippingWarehouseFromBilling: function () {
@@ -187,7 +189,9 @@ define([
         },
 
         exportValue: function (value, control) {
-            control.val(value);
+            if (control.val() !== value) {
+                control.val(value).trigger('change');
+            }
         },
 
         exportLabel: function (value, control) {
@@ -201,11 +205,11 @@ define([
 
         _resetSelect: function () {
             var select = $('[name="' + this.inputName + '"]');
-            if (select.data('select2')) {
-                $(select[0]).empty();
-                this.select2(select[0]);
-            }
+            this.preselectedValue('');
+            this.preselectedLabel('');
             this.value('');
+            select.empty().append(new Option($.mage.__('Choose warehouse'), '', true, true)).trigger('change');
+            refreshAddressState();
             this._propagateToWarehouseInput('', $('#order-shipping_same_as_billing').is(':checked'));
         }
     });
