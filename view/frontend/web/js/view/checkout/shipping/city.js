@@ -6,9 +6,10 @@ define([
     'postbox',
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/checkout-data',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state',
     'mage/translate',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, quote, checkoutData) {
+], function ($, ko, Select, url, postbox, quote, checkoutData, addressState) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -62,7 +63,7 @@ define([
             this.isNpMethod = ko.pureComputed(function () {
                 var method = quote.shippingMethod();
                 var code = method ? method.method_code : null;
-                var isNp = method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(code) !== -1;
+                var isNp = addressState.isNp() && NP_METHODS.indexOf(code) !== -1;
                 this.cityDefaultVisible(!isNp);
                 this.visible(isNp);
                 return isNp;
@@ -107,6 +108,8 @@ define([
             }).on('select2:select', function (event) {
                 var city = event.params.data;
 
+                self.setOptions([{value: city.id, label: city.text}]);
+
                 if (city.areaRef) {
                     self.areaRef(city.areaRef);
                     postbox.publish('selectedCityAreaPost', {areaRef: city.areaRef, label: city.areaLabel});
@@ -122,7 +125,8 @@ define([
         },
 
         getPreview: function () {
-            return this.hasValue() ? $('[name="' + this.inputName + '"] option:selected').text() : '';
+            var option = this.indexedOptions && this.indexedOptions[this.value()];
+            return this.hasValue() ? (option ? option.label : $('[name="' + this.inputName + '"] option:selected').text()) : '';
         },
 
         getCityName: function () {

@@ -150,3 +150,5 @@
 "Apart num","Apart num"
 "House","House"
 "Street","Street"
+"Select an address with a Nova Poshta warehouse, or use ""+ New Address"" to create a new delivery address.","Select an address with a Nova Poshta warehouse, or use ""+ New Address"" to create a new delivery address."
+"Select an address with a Nova Poshta street and house number, or use ""+ New Address"" to create a new delivery address.","Select an address with a Nova Poshta street and house number, or use ""+ New Address"" to create a new delivery address."

@@ -20,6 +20,7 @@ function fixture({country = 'UA', quoteCountry = 'US', loading = false, selected
     const isLoading = () => loading;
     isLoading.subscribe = callback => {onLoading = callback;return {dispose() {disposed++;onLoading = undefined;}};};
     const dependencies = {
+        'Perspective_NovaposhtaShipping/js/model/checkout-address-state': {init() {}},
         'Magento_Checkout/js/model/quote': {
             isVirtual: () => virtual,
             shippingAddress: () => ({countryId: countryValue}),

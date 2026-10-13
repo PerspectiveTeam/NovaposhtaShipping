@@ -8,8 +8,9 @@ define([
     'uiRegistry',
     'Magento_Customer/js/customer-data',
     'Magento_Checkout/js/checkout-data',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state',
     'Perspective_NovaposhtaShipping/js/lib/select2/select2'
-], function ($, ko, Select, url, postbox, quote, registry, customerData, checkoutData) {
+], function ($, ko, Select, url, postbox, quote, registry, customerData, checkoutData, addressState) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -74,7 +75,7 @@ define([
             this.isNpMethod = ko.pureComputed(function () {
                 var method = quote.shippingMethod();
                 var code = method ? method.method_code : null;
-                var isNp = method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(code) !== -1;
+                var isNp = addressState.isNp() && NP_METHODS.indexOf(code) !== -1;
                 this.regionDefaultVisible(!isNp);
                 this.visible(isNp);
                 return isNp;
@@ -119,6 +120,7 @@ define([
                 }
             }).on('select2:select', function (e) {
                 var selectedRef = e.params.data.id;
+                self.setOptions([{value: selectedRef, label: e.params.data.text}]);
                 self.areaRef(selectedRef);
                 postbox.publish('selectedAreaPost', selectedRef);
                 postbox.publish('selectedAreaTextPost', e.params.data.text);

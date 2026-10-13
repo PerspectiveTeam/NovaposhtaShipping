@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Quote\Model\Quote\Address">
+        <plugin name="perspective_novaposhta_export_customer_address"
+                type="Perspective\NovaposhtaShipping\Plugin\Quote\ExportCustomerAddressPlugin"/>
+    </type>
     <type name="Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AbstractChain">
         <arguments>
             <argument name="data" xsi:type="array">

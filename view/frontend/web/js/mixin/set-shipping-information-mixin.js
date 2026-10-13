@@ -1,11 +1,13 @@
 /*jshint browser:true jquery:true*/
 /*global alert*/
 define([
+    'jquery',
     'mage/utils/wrapper',
     'Magento_Checkout/js/model/quote',
     'uiRegistry',
-    'postbox'
-], function (wrapper, quote, registry, postbox) {
+    'postbox',
+    'Magento_Checkout/js/model/shipping-address/form-popup-state'
+], function ($, wrapper, quote, registry, postbox, popup) {
     'use strict';
     var perspective_novaposhta_shipping_area_val = '';
     var perspective_novaposhta_shipping_city_val = '';
@@ -59,6 +61,9 @@ define([
             if (!method || method.carrier_code !== 'novaposhtashipping') {
                 return originalAction();
             }
+            if (popup && popup.isVisible()) {
+                return $.Deferred().resolve().promise();
+            }
 
             var shippingAddress = quote.shippingAddress();
             if (!shippingAddress) {
@@ -75,7 +80,8 @@ define([
                 privateHouse = registry.get(additional + 'perspective_novaposhtashipping_private_house'),
                 isAddressDelivery = ['c2c', 'w2c'].indexOf(method.method_code) !== -1;
 
-            if (city && city.hasValue() && city.getPreview()) {
+            if ((!shippingAddress.getType || shippingAddress.getType() !== 'customer-address') &&
+                city && city.hasValue() && city.getPreview()) {
                 shippingAddress.city = city.getPreview();
             }
             shippingAddress.extension_attributes = shippingAddress.extension_attributes || {};

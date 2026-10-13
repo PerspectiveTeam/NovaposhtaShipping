@@ -5,8 +5,9 @@ define([
     'Magento_Checkout/js/checkout-data',
     'Magento_Checkout/js/model/address-converter',
     'Magento_Checkout/js/action/select-shipping-address',
-    'Magento_Checkout/js/model/shipping-service'
-], function (quote, registry, $t, checkoutData, addressConverter, selectShippingAddress, shippingService) {
+    'Magento_Checkout/js/model/shipping-service',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state'
+], function (quote, registry, $t, checkoutData, addressConverter, selectShippingAddress, shippingService, addressState) {
     'use strict';
 
     var NP_METHODS = ['c2w', 'w2w', 'w2c', 'c2c'];
@@ -17,10 +18,11 @@ define([
         return Component.extend({
             initialize: function () {
                 this._super();
-                if (!this.isFormInline || quote.isVirtual() ||
-                    window.checkoutConfig.activeCarriers.indexOf('novaposhtashipping') === -1) {
+                if (quote.isVirtual() || window.checkoutConfig.activeCarriers.indexOf('novaposhtashipping') === -1) {
                     return this;
                 }
+                addressState.init(this);
+                if (!this.isFormInline) return this;
 
                 var fieldset = 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.';
                 registry.get([
@@ -68,6 +70,10 @@ define([
                 var methodCode = method ? method.method_code : null;
 
                 if (method && method.carrier_code === 'novaposhtashipping' && NP_METHODS.indexOf(methodCode) !== -1) {
+                    if (addressState.needsNewAddress()) {
+                        this.errorValidationMessage(addressState.newAddressMessage());
+                        return false;
+                    }
                     var areaValidationResult = this.validateNpAreaField(),
                         cityValidationResult = this.validateNpCityField();
 
@@ -96,6 +102,21 @@ define([
                 }
 
                 return this._super();
+            },
+
+            saveNewAddress: function () {
+                var isNp = addressState.isNp(), result;
+                if (isNp) {
+                    if (!this.validateNpAreaField() || !this.validateNpCityField()) return;
+                    var method = quote.shippingMethod().method_code;
+                    if (NP_WAREHOUSE_METHODS.indexOf(method) !== -1 && !this.validateNpWarehouseField()) return;
+                    if (NP_ADDRESS_METHODS.indexOf(method) !== -1 && (!this.validateNpStreetField() ||
+                        !this.validateNpBuildNumField() || (!this._isPrivateHouseChecked() && !this.validateNpHouseDoorNumField()))) return;
+                    addressState.attach();
+                }
+                result = this._super();
+                if (isNp && !this.source.get('params.invalid')) this.errorValidationMessage(false);
+                return result;
             },
 
             validateNpAreaField: function () {

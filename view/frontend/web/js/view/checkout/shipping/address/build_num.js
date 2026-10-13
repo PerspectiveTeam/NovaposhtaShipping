@@ -4,6 +4,7 @@ define([
     'Magento_Checkout/js/model/quote',
     'mage/translate',
     'postbox',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state',
     'Magento_Checkout/js/action/set-shipping-information',
 ], function (
     $,
@@ -11,6 +12,7 @@ define([
     quote,
     $t,
     postbox,
+    addressState,
     setShippingInformationAction
 ) {
     'use strict';
@@ -58,7 +60,7 @@ define([
         onUpdate: function () {
             this._super();
             var method = quote.shippingMethod();
-            if (this._initializing || !method || method.carrier_code !== 'novaposhtashipping' ||
+            if (this._initializing || addressState.restoring || !addressState.isNp() || !method ||
                 ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
                 return;
             }
@@ -75,9 +77,7 @@ define([
         },
 
         selectedMethodCode: function () {
-            var method = quote.shippingMethod();
-            var selectedMethodCode = method != null ? method.method_code : false;
-            return selectedMethodCode;
+            return addressState.methodCode();
         }
     });
 });

@@ -1,0 +1,19 @@
+<!-- ko if: addressState.showAdditional() -->
+    <!-- ko foreach: novaposhtaElements() -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    <!-- /ko -->
+<!-- /ko -->
+<!-- ko if: addressState.needsNewAddress() -->
+    <div class="message notice" role="status">
+        <span data-bind="text: addressState.newAddressMessage"></span>
+    </div>
+    <button type="button" class="action action-show-popup" data-bind="click: openNewAddress">
+        <span data-bind="i18n: 'New Address'"></span>
+    </button>
+<!-- /ko -->
+<!-- ko foreach: otherElements() -->
+    <!-- ko template: getTemplate() --><!-- /ko -->
+<!-- /ko -->
+<!-- ko if: addressState.showDestination() -->
+    <p data-bind="text: addressState.destinationLabel"></p>
+<!-- /ko -->

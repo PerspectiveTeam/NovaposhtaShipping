@@ -3,8 +3,9 @@ define([
     'uiComponent',
     'Magento_Checkout/js/model/quote',
     'postbox',
-    'mage/translate'
-], function (ko, Component, quote, postbox, $t) {
+    'mage/translate',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state'
+], function (ko, Component, quote, postbox, $t, addressState) {
     'use strict';
 
     return Component.extend({
@@ -35,8 +36,7 @@ define([
         },
 
         selectedMethodCode: function () {
-            var method = quote.shippingMethod();
-            return method ? method.method_code : false;
+            return addressState.methodCode();
         }
     });
 });

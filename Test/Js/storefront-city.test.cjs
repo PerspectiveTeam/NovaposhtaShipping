@@ -53,6 +53,7 @@ function fixture(directory = {UA: {regions: {
         uiRegistry: {get: () => region},
         'Magento_Customer/js/customer-data': {get: () => data},
         'Magento_Checkout/js/checkout-data': {getShippingAddressFromData: () => null},
+        'Perspective_NovaposhtaShipping/js/model/checkout-address-state': {deliveryChanged() {}, isNp: () => method?.carrier_code === 'novaposhtashipping'},
     };
     function component(name) {
         let definition;
@@ -62,7 +63,7 @@ function fixture(directory = {UA: {regions: {
             Option: function (label, ref) {this.text = label;this.value = ref;},
         });
         const instance = Object.assign({}, definition.defaults, definition, {
-            _super() {}, observe(property) {
+            _super() {}, setOptions() {}, observe(property) {
                 if (typeof this[property] !== 'function') this[property] = observable(this[property]);
                 return this;
             },
@@ -184,6 +185,7 @@ test('rendering street visibility repeatedly does not launch competing street pr
                 };
                 if (name === 'mage/translate') return value => value;
                 if (name === 'mage/url') return {build: value => value};
+                if (name === 'Perspective_NovaposhtaShipping/js/model/checkout-address-state') return {methodCode: () => 'c2c'};
                 return {};
             }));
         },

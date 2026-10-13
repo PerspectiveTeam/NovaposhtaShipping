@@ -28,6 +28,7 @@
                                                     </item>
                                                 </item>
                                                 <item name="shippingAddress" xsi:type="array">
+                                                    <item name="shippingFormTemplate" xsi:type="string">Perspective_NovaposhtaShipping/checkout/shipping/form</item>
                                                     <item name="children" xsi:type="array">
                                                         <item name="shipping-address-fieldset" xsi:type="array">
                                                             <item name="children" xsi:type="array">
@@ -109,7 +110,7 @@
                                                             </item>
                                                         </item>
                                                         <item name="shippingAdditional" xsi:type="array">
-                                                            <item name="component" xsi:type="string">uiComponent</item>
+                                                            <item name="component" xsi:type="string">Perspective_NovaposhtaShipping/js/view/checkout/shipping/additional</item>
                                                             <item name="displayArea" xsi:type="string">
                                                                 shippingAdditional
                                                             </item>

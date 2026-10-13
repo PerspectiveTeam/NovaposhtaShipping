@@ -151,3 +151,5 @@
 "Apart num","№ кв."
 "House","№ дом."
 "Street","Улица"
+"Select an address with a Nova Poshta warehouse, or use ""+ New Address"" to create a new delivery address.","Выберите адрес с отделением Новой почты или нажмите «+ New Address», чтобы создать новый адрес доставки."
+"Select an address with a Nova Poshta street and house number, or use ""+ New Address"" to create a new delivery address.","Выберите адрес с улицей и номером дома Новой почты или нажмите «+ New Address», чтобы создать новый адрес доставки."

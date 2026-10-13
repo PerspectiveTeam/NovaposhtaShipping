@@ -168,3 +168,26 @@ for (const method of ['c2w', 'c2c']) {
         assert.equal(attrs.custom, 'retained');
     });
 }
+
+test('editing NP delivery in the popup defers shipping saves and never reads the selected address', () => {
+    const resolved = {};
+    const mixin = load('set-shipping-information-mixin.js', {
+        jquery: {Deferred: () => ({resolve() {return this;}, promise: () => resolved})},
+        'mage/utils/wrapper': wrapper,
+        'Magento_Checkout/js/model/quote': {
+            shippingMethod: () => ({carrier_code: 'novaposhtashipping', method_code: 'c2c'}),
+            shippingAddress() {throw new Error('Popup edits must not touch the selected address');},
+        },
+        'Magento_Checkout/js/model/shipping-address/form-popup-state': {isVisible: () => true},
+        postbox: {subscribe() {}},
+    });
+    assert.equal(mixin(() => {throw new Error('No API save before Ship Here');})(), resolved);
+});
+
+test('only NP metadata is hidden from address labels', () => {
+    const mixin = load('address-attribute-label-mixin.js', {});
+    const methods = mixin({extend: value => value});
+    const instance = {_super: attribute => attribute.value};
+    assert.equal(methods.getCustomAttributeLabel.call(instance, {attribute_code: 'novaposhta_shipping_data', value: '{internal}'}), '');
+    assert.equal(methods.getCustomAttributeLabel.call(instance, {attribute_code: 'other_module', value: 'Visible label'}), 'Visible label');
+});

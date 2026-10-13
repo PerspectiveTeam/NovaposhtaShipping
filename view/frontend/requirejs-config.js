@@ -1,6 +1,15 @@
 var config = {
     config: {
         mixins: {
+            'Magento_Checkout/js/view/shipping-address/address-renderer/default': {
+                'Perspective_NovaposhtaShipping/js/mixin/address-attribute-label-mixin': true
+            },
+            'Magento_Checkout/js/view/billing-address': {
+                'Perspective_NovaposhtaShipping/js/mixin/address-attribute-label-mixin': true
+            },
+            'Magento_Checkout/js/model/shipping-save-processor/payload-extender': {
+                'Perspective_NovaposhtaShipping/js/mixin/shipping-payload-mixin': true
+            },
             'Magento_Checkout/js/action/set-shipping-information': {
                 'Perspective_NovaposhtaShipping/js/mixin/set-shipping-information-mixin': true
             },

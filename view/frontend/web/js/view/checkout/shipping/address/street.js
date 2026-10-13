@@ -7,7 +7,8 @@ define([
     'mage/url',
     'postbox',
     'Magento_Checkout/js/action/set-shipping-information',
-    'Magento_Checkout/js/checkout-data'
+    'Magento_Checkout/js/checkout-data',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state'
 ], function (
     $,
     Select,
@@ -17,7 +18,8 @@ define([
     url,
     postbox,
     setShippingInformationAction,
-    checkoutData
+    checkoutData,
+    addressState
 ) {
     'use strict';
 
@@ -56,11 +58,10 @@ define([
 
             var self = this;
             var updateRequired = function () {
-                var method = quote.shippingMethod();
-                var code = method ? method.method_code : null;
+                var code = addressState.methodCode();
                 self.required(code === 'c2c' || code === 'w2c');
             };
-            quote.shippingMethod.subscribe(updateRequired);
+            addressState.methodCode.subscribe(updateRequired);
             updateRequired();
 
             postbox.subscribe('selectedCityPost', function (cityRef) {
@@ -76,7 +77,7 @@ define([
         onUpdate: function () {
             this._super();
             var method = quote.shippingMethod();
-            if (this._initializing || !method || method.carrier_code !== 'novaposhtashipping' ||
+            if (this._initializing || addressState.restoring || !addressState.isNp() || !method ||
                 ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
                 return;
             }
@@ -96,8 +97,7 @@ define([
         },
 
         selectedMethodCode: function () {
-            var method = quote.shippingMethod();
-            return method ? method.method_code : false;
+            return addressState.methodCode();
         },
 
         select2: function (element) {
@@ -105,7 +105,7 @@ define([
             $(element).on('select2:select', function (e) {
                 var data = e.params.data,
                     component = ko.dataFor(e.currentTarget);
-                quote.shippingAddress().street[0] = data.text;
+                component.setOptions([{value: data.id, label: data.text}]);
                 component.address(data.text);
                 component.source.set(component.dataScope + '_label', data.text);
             });
