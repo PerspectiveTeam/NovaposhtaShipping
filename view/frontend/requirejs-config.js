@@ -4,6 +4,9 @@ var config = {
             'Magento_Checkout/js/view/shipping-address/address-renderer/default': {
                 'Perspective_NovaposhtaShipping/js/mixin/address-attribute-label-mixin': true
             },
+            'Magento_Checkout/js/view/shipping-information/address-renderer/default': {
+                'Perspective_NovaposhtaShipping/js/mixin/address-attribute-label-mixin': true
+            },
             'Magento_Checkout/js/view/billing-address': {
                 'Perspective_NovaposhtaShipping/js/mixin/address-attribute-label-mixin': true
             },
