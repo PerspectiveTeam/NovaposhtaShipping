@@ -134,3 +134,37 @@ test('restored NP city and area are read from current fields even without select
     assert.equal(shipping.extension_attributes.perspective_novaposhta_shipping_area, 'restored-area');
     assert.equal(shipping.extension_attributes.custom, true);
 });
+
+for (const method of ['c2w', 'c2c']) {
+    test('restored ' + method + ' delivery sends current destination fields without selection events', () => {
+        const shipping = {extension_attributes: {custom: 'retained'}};
+        const controls = {
+            area_novaposhta_field: {areaRef: () => 'area-ref'},
+            city_novaposhta_field: {hasValue: () => true, value: () => 'city-ref', getPreview: () => 'Київ'},
+            perspective_novaposhtashipping_warehouse: {value: () => 'warehouse-ref'},
+            perspective_novaposhtashipping_warehouse_house_street: {value: () => 'street-ref'},
+            perspective_novaposhtashipping_warehouse_house_build_num: {value: () => '10'},
+            perspective_novaposhtashipping_house_door_num: {value: () => '1'},
+            perspective_novaposhtashipping_private_house: {isPrivateHouse: () => true},
+        };
+        const mixin = load('set-shipping-information-mixin.js', {
+            'mage/utils/wrapper': wrapper,
+            'Magento_Checkout/js/model/quote': {
+                shippingMethod: () => ({carrier_code: 'novaposhtashipping', method_code: method}),
+                shippingAddress: () => shipping,
+                billingAddress: () => {throw new Error('Billing address must remain untouched');},
+            },
+            uiRegistry: {get: name => controls[name.split('.').at(-1)]},
+            postbox: {subscribe() {}},
+        });
+        mixin(() => {})();
+        const attrs = shipping.extension_attributes;
+        assert.equal(attrs.perspective_novaposhta_shipping_city, 'city-ref');
+        assert.equal(attrs.perspective_novaposhta_shipping_warehouse, method === 'c2w' ? 'warehouse-ref' : '');
+        assert.equal(attrs.perspective_novaposhta_shipping_street, method === 'c2c' ? 'street-ref' : '');
+        assert.equal(attrs.perspective_novaposhta_shipping_building, method === 'c2c' ? '10' : '');
+        assert.equal(attrs.perspective_novaposhta_shipping_flat, method === 'c2c' ? '1' : '');
+        assert.equal(attrs.perspective_novaposhta_shipping_is_private_house, method === 'c2c');
+        assert.equal(attrs.custom, 'retained');
+    });
+}

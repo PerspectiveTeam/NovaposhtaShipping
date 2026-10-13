@@ -52,6 +52,7 @@ function fixture(directory = {UA: {regions: {
         'Magento_Checkout/js/model/quote': {shippingMethod: () => method},
         uiRegistry: {get: () => region},
         'Magento_Customer/js/customer-data': {get: () => data},
+        'Magento_Checkout/js/checkout-data': {getShippingAddressFromData: () => null},
     };
     function component(name) {
         let definition;
