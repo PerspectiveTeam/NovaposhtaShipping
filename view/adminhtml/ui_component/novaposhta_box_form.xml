@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">novaposhta_box_form.box_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Box Details</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Perspective\NovaposhtaShipping\Block\Adminhtml\Box\BackButton"/>
+            <button name="save" class="Perspective\NovaposhtaShipping\Block\Adminhtml\Box\SaveButton"/>
+        </buttons>
+        <namespace>novaposhta_box_form</namespace>
+        <dataScope>data</dataScope>
+        <deps><dep>novaposhta_box_form.box_form_data_source</dep></deps>
+    </settings>
+    <dataSource name="box_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings><submitUrl path="novaposhtashipping/box/save"/></settings>
+        <dataProvider class="Perspective\NovaposhtaShipping\Ui\DataProvider\Box\Form" name="box_form_data_source">
+            <settings><requestFieldName>id</requestFieldName><primaryFieldName>id</primaryFieldName></settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general" sortOrder="10">
+        <settings><label translate="true">Box Details</label></settings>
+        <field name="id" formElement="input">
+            <settings><dataType>text</dataType><visible>false</visible><dataScope>id</dataScope></settings>
+        </field>
+        <field name="duplicate_id" formElement="input">
+            <settings><dataType>text</dataType><visible>false</visible><dataScope>duplicate_id</dataScope></settings>
+        </field>
+        <field name="boxpacker_enabled" sortOrder="10" formElement="checkbox">
+            <settings>
+                <dataType>boolean</dataType><label translate="true">Enabled for BoxPacker</label><dataScope>boxpacker_enabled</dataScope>
+            </settings>
+            <formElements><checkbox><settings>
+                <valueMap><map name="false" xsi:type="string">0</map><map name="true" xsi:type="string">1</map></valueMap>
+                <prefer>toggle</prefer>
+            </settings></checkbox></formElements>
+        </field>
+        <field name="description_ua" sortOrder="20" formElement="input">
+            <settings>
+                <dataType>text</dataType><label translate="true">Box Name</label><dataScope>description_ua</dataScope>
+                <validation><rule name="required-entry" xsi:type="boolean">true</rule><rule name="max_text_length" xsi:type="number">255</rule></validation>
+            </settings>
+        </field>
+        <field name="length" sortOrder="30" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Length (mm)</label><dataScope>length</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="width" sortOrder="40" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Width (mm)</label><dataScope>width</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="height" sortOrder="50" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Height (mm)</label><dataScope>height</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="max_weight" sortOrder="60" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Maximum Weight (kg)</label><dataScope>max_weight</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+    <fieldset name="additional" sortOrder="20">
+        <settings><collapsible>true</collapsible><opened>false</opened><label translate="true">Additional Parameters</label></settings>
+        <field name="inner_length" sortOrder="10" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Inner Length (mm)</label><dataScope>inner_length</dataScope>
+                <notice translate="true">Leave empty to use the outer dimension.</notice>
+                <validation><rule name="validate-number" xsi:type="boolean">true</rule></validation>
+            </settings>
+        </field>
+        <field name="inner_width" sortOrder="20" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Inner Width (mm)</label><dataScope>inner_width</dataScope>
+                <notice translate="true">Leave empty to use the outer dimension.</notice>
+                <validation><rule name="validate-number" xsi:type="boolean">true</rule></validation>
+            </settings>
+        </field>
+        <field name="inner_height" sortOrder="30" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Inner Height (mm)</label><dataScope>inner_height</dataScope>
+                <notice translate="true">Leave empty to use the outer dimension.</notice>
+                <validation><rule name="validate-number" xsi:type="boolean">true</rule></validation>
+            </settings>
+        </field>
+        <field name="empty_weight" sortOrder="40" formElement="input">
+            <settings>
+                <dataType>number</dataType><label translate="true">Empty Box Weight (kg)</label><dataScope>empty_weight</dataScope>
+                <notice translate="true">Leave empty to use zero.</notice>
+                <validation><rule name="validate-number" xsi:type="boolean">true</rule></validation>
+            </settings>
+        </field>
+    </fieldset>
+</form>

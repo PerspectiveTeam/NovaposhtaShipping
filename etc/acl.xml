@@ -6,6 +6,10 @@
 				<resource id="Magento_Backend::stores">
 					<resource id="Magento_Backend::stores_settings">
 						<resource id="Magento_Config::config">
+
+                            <resource id="Perspective_NovaposhtaCatalog::settings">
+                                <resource id="Perspective_NovaposhtaShipping::boxes" title="Manage BoxPacker Boxes" translate="title"/>
+                            </resource>
 							<resource id="Perspective_NovaposhtaShipping::config_perspective_novaposhtashipping" title="perspectivenovaposhtashipping"/>
 						</resource>
 					</resource>

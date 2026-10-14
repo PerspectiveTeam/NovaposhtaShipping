@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="buttons" xsi:type="array">
+            <item name="new_box" xsi:type="string">Perspective\NovaposhtaShipping\Block\Adminhtml\Box\AddButton</item>
+        </item>
+    </argument>
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction" class="Perspective\NovaposhtaShipping\Ui\Component\Listing\BoxMassAction">
+            <action name="delete">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="type" xsi:type="string">delete</item>
+                        <item name="label" xsi:type="string" translate="true">Delete custom boxes</item>
+                        <item name="url" xsi:type="url" path="novaposhtashipping/box/massAction/operation/delete"/>
+                        <item name="confirm" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Delete Boxes</item>
+                            <item name="message" xsi:type="string" translate="true">Delete selected custom boxes? Standard and API boxes will be skipped.</item>
+                        </item>
+                    </item>
+                </argument>
+            </action>
+            <action name="enable">
+                <settings>
+                    <type>enable</type>
+                    <label translate="true">Enable for BoxPacker</label>
+                    <url path="novaposhtashipping/box/massAction/operation/enable"/>
+                </settings>
+            </action>
+            <action name="disable">
+                <settings>
+                    <type>disable</type>
+                    <label translate="true">Disable for BoxPacker</label>
+                    <url path="novaposhtashipping/box/massAction/operation/disable"/>
+                </settings>
+            </action>
+        </massaction>
+    </listingToolbar>
+    <columns name="novaposhta_columns">
+        <column name="source" component="Magento_Ui/js/grid/columns/select" sortOrder="15">
+            <settings>
+                <options class="Perspective\NovaposhtaShipping\Model\Config\Source\BoxOrigin"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Origin</label>
+            </settings>
+        </column>
+        <column name="boxpacker_enabled" component="Magento_Ui/js/grid/columns/select" sortOrder="25">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Enabled for BoxPacker</label>
+            </settings>
+        </column>
+        <column name="max_weight" class="Perspective\NovaposhtaShipping\Ui\Component\Listing\Column\BoxWeight" sortOrder="70">
+            <settings><sortable>false</sortable><label translate="true">Maximum Weight (kg)</label></settings>
+        </column>
+        <actionsColumn name="box_actions" class="Perspective\NovaposhtaShipping\Ui\Component\Listing\Column\BoxActions" sortOrder="100">
+            <settings><indexField>id</indexField></settings>
+        </actionsColumn>
+    </columns>
+</listing>
