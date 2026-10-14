@@ -56,22 +56,22 @@ class SaveAddressInformationPlugin extends Save
      */
     public function aroundExecute(Save $subject, callable $proceed): ResultInterface
     {
-        $cityRef = $this->getRequest()->getParam('order')['billing_address']['novaposhta_city']
-            ?? $this->getRequest()->getParam('order')['shipping_address']['novaposhta_city']
-            ?? null;
-        $warehouseRef = $this->getRequest()->getParam('order')['billing_address']['novaposhta_warehouse']
-            ?? $this->getRequest()->getParam('order')['shipping_address']['novaposhta_warehouse']
-            ?? null;
-        $street = $this->getRequest()->getParam('order')['billing_address']['street'][0]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][0]
-            ?? null;
-        $buildingNum = $this->getRequest()->getParam('order')['billing_address']['street'][1]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][1]
-            ?? null;
-        $flatNum = $this->getRequest()->getParam('order')['billing_address']['street'][2]
-            ?? $this->getRequest()->getParam('order')['shipping_address']['street'][2]
-            ?? null;
-        $shippingMethod = $this->getRequest()->getParam('order')['shipping_method'];
+        $orderData = $this->getRequest()->getParam('order') ?? [];
+        $shippingMethod = $orderData['shipping_method']
+            ?? $this->_getQuote()->getShippingAddress()->getShippingMethod()
+            ?? '';
+        if (!str_starts_with($shippingMethod, 'novaposhtashipping_')) {
+            return $proceed();
+        }
+        $addressType = $this->_getQuote()->getShippingAddress()->getSameAsBilling()
+            ? 'billing_address'
+            : 'shipping_address';
+        $addressData = $orderData[$addressType] ?? [];
+        $cityRef = $addressData['novaposhta_city'] ?? null;
+        $warehouseRef = $addressData['novaposhta_warehouse'] ?? null;
+        $street = $addressData['novaposhta_street'] ?? null;
+        $buildingNum = $addressData['street'][1] ?? null;
+        $flatNum = $addressData['street'][2] ?? null;
         $cartId = (int)$this->_getQuote()->getId();
         $result = $proceed();
         $cart = $this->cartRepository->get($cartId);

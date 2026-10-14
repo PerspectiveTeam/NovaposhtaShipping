@@ -74,7 +74,8 @@ class ShippingAddressRepository implements ShippingAddressRepositoryInterface
                 $model->setCity($cityRef);
                 //для расчета улица не важна - берем первую попавшуюся в этом городе
                 $streetArr = $this->streetRepository->getByCityRef($cityRef)->getItems();
-                $model->setStreet(reset($streetArr)->getRef());
+                $street = reset($streetArr);
+                $model->setStreet($street ? $street->getRef() : null);
             } else {
                 $model->setCity('e221d64c-391c-11dd-90d9-001a92567626');
                 $model->setStreet('29207dc8-7aa5-11df-be73-000c290fbeaa');

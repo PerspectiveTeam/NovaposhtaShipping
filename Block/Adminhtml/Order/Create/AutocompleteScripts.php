@@ -3,11 +3,13 @@
 namespace Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create;
 
 use Exception;
+use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Model\Session\Quote;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Framework\Registry;
 use Magento\Store\Model\StoreManagerInterface;
+use Perspective\NovaposhtaCatalog\Service\DirectorySyncMapper;
 use Perspective\NovaposhtaShipping\Block\Adminhtml\Order\NovaposhtaDeliveryInfo;
 
 class AutocompleteScripts extends \Magento\Backend\Block\Template
@@ -23,19 +25,26 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
 
     private Quote $sessionQuote;
 
+    private DirectorySyncMapper $directorySyncMapper;
+
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param Context $context
+     * @param StoreManagerInterface $storeManager
+     * @param NovaposhtaDeliveryInfo $novaposhtaDeliveryInfo
+     * @param Registry $registry
+     * @param Quote $sessionQuote
+     * @param DirectorySyncMapper $directorySyncMapper
      * @param array $data
-     * @param \Magento\Framework\Json\Helper\Data|null $jsonHelper
-     * @param \Magento\Directory\Helper\Data|null $directoryHelper
+     * @param JsonHelper|null $jsonHelper
+     * @param DirectoryHelper|null $directoryHelper
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
+        Context $context,
         StoreManagerInterface $storeManager,
         NovaposhtaDeliveryInfo $novaposhtaDeliveryInfo,
         Registry $registry,
         Quote $sessionQuote,
+        DirectorySyncMapper $directorySyncMapper,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -45,6 +54,18 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
         $this->novaposhtaDeliveryInfo = $novaposhtaDeliveryInfo;
         $this->registry = $registry;
         $this->sessionQuote = $sessionQuote;
+        $this->directorySyncMapper = $directorySyncMapper;
+    }
+
+    /**
+     * Returns JSON map of {regionId: areaRef} built from directory_sync config + DB.
+     */
+    public function getRegionIdToAreaRefJson(): string
+    {
+        $storeId = (int)($this->sessionQuote->getStoreId()
+            ?: $this->storeManager->getDefaultStoreView()->getId());
+
+        return json_encode($this->directorySyncMapper->getRegionIdToAreaRefMap($storeId));
     }
 
     public function getData($key = '', $index = null)
@@ -74,7 +95,14 @@ class AutocompleteScripts extends \Magento\Backend\Block\Template
      */
     public function getRestUrl(string $path)
     {
-        return $this->storeManager->getStore(1)->getBaseUrl() . $path;
+        $storeId = $this->sessionQuote->getStoreId();
+        $store = $storeId
+            ? $this->storeManager->getStore($storeId)
+            : $this->storeManager->getDefaultStoreView();
+        $basePath = parse_url($store->getBaseUrl(), PHP_URL_PATH) ?: '/';
+        $path = preg_replace('#^rest/#', 'rest/' . rawurlencode($store->getCode()) . '/', ltrim($path, '/'));
+
+        return rtrim($basePath, '/') . '/' . $path;
     }
 
     /**

@@ -7,6 +7,8 @@ define([
     'mage/url',
     'postbox',
     'Magento_Checkout/js/action/set-shipping-information',
+    'Magento_Checkout/js/checkout-data',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state'
 ], function (
     $,
     Select,
@@ -15,44 +17,72 @@ define([
     select2Component,
     url,
     postbox,
-    setShippingInformationAction
+    setShippingInformationAction,
+    checkoutData,
+    addressState
 ) {
     'use strict';
 
     return Select.extend({
 
         defaults: {
-            address: '',
+            address: undefined,
+            cityRef: '',
             placeholder: $t('Enter address'),
+            allowShippingUpdate: true,
             exports: {
                 "address": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.0:value"
             },
             imports: {
                 "novaposhtaNewAddressDoor": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.perspective_novaposhtashipping_warehouse_house_street:value",
-                "cityValue": 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city_novaposhta_field:value'
+                "cityRef": 'checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.city_novaposhta_field:value'
             }
         },
-        streets: {},
-        cityRef: '',
 
         initialize: function () {
+            this._initializing = true;
             this._super();
-            this.address('');
+            this._initializing = false;
             return this;
         },
 
         initObservable: function () {
+            var saved = checkoutData.getShippingAddressFromData() || {};
+            if (saved.country_id === 'UA' && saved.novaposhta_street && saved.novaposhta_street_label) {
+                this.options = [{value: saved.novaposhta_street, label: saved.novaposhta_street_label}];
+            }
             this._super();
             this.observe('address');
-            this.observe('cityValue');
+            this.observe('cityRef');
             this.observe('novaposhtaNewAddressDoor');
+
+            var self = this;
+            var updateRequired = function () {
+                var code = addressState.methodCode();
+                self.required(code === 'c2c' || code === 'w2c');
+            };
+            addressState.methodCode.subscribe(updateRequired);
+            updateRequired();
+
+            postbox.subscribe('selectedCityPost', function (cityRef) {
+                this.allowShippingUpdate = false;
+                this.cityRef(cityRef);
+                this.value('');
+                this.allowShippingUpdate = true;
+            }, this);
+
             return this;
         },
 
         onUpdate: function () {
             this._super();
+            var method = quote.shippingMethod();
+            if (this._initializing || addressState.restoring || !addressState.isNp() || !method ||
+                ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
+                return;
+            }
             this.address(this.getPreview());
-            if (this.value() !== 'none') {
+            if (this.allowShippingUpdate && this.value() !== 'none') {
                 postbox.publish('selectedStreetPost', this.value());
                 postbox.publish('selectedWarehousePost', '');
                 if (this.getPreview()) {
@@ -67,57 +97,17 @@ define([
         },
 
         selectedMethodCode: function () {
-            var method = quote.shippingMethod();
-            var selectedMethodCode = method != null ? method.method_code : false;
-            if (selectedMethodCode === 'c2c' || selectedMethodCode === 'w2c') {
-                if (!this.isLoading) {
-                    this.isLoading = true;
-                    try {
-                        if (this.cityValue()) {
-                            this.getCityStreets(this.cityValue(), this);
-                        }
-                    } catch (e) {
-                        console.log(e);
-                        this.isLoading = false;
-                    } finally {
-                        this.isLoading = false;
-                    }
-                }
-            }
-            return selectedMethodCode;
-        },
-        getCityStreets: function (cityValue, vm) {
-            let cityTerm = JSON.stringify({cityRef: cityValue ? cityValue : ''});
-            $.ajax({
-                url: url.build('rest/V1/novaposhtashipping/streets-formatted'),
-                data: cityTerm,
-                showLoader: true,
-                contentType: "application/json",
-                type: "post",
-                dataType: 'json',
-                error: function (data) {
-                    console.log(data.responseText);
-                    vm.isLoading = false;
-                },
-                success: function (data) {
-                    let currentStreet = vm.value();
-                    window.perspective_novaposhta.street.react = false;
-                    vm.setOptions(data);
-                    window.perspective_novaposhta.street.react = true;
-                    if (currentStreet && currentStreet !== 'none') {
-                        vm.value(currentStreet);
-                    }
-                    vm.isLoading = false;
-                }
-            });
+            return addressState.methodCode();
         },
 
         select2: function (element) {
             var ko = require('ko');
             $(element).on('select2:select', function (e) {
-                let data = e.params.data;
-                quote.shippingAddress().street[0] = data.text;
-                ko.dataFor(e.currentTarget).address(data.text);
+                var data = e.params.data,
+                    component = ko.dataFor(e.currentTarget);
+                component.setOptions([{value: data.id, label: data.text}]);
+                component.address(data.text);
+                component.source.set(component.dataScope + '_label', data.text);
             });
             $(element).select2({
                 placeholder: $.mage.__('Enter address'),
@@ -133,7 +123,7 @@ define([
 
                         var query = JSON.stringify({
                             term: params.term,
-                            cityRef: ko.dataFor(this.get(0)).cityValue()
+                            cityRef: ko.dataFor(this.get(0)).cityRef()
                         })
                         return query;
                     },
@@ -151,25 +141,8 @@ define([
             });
         },
 
-        setStreets: function (data) {
-            this.clear();
-            this.streets = data;
-            this.setOptions(this.streets);
-
-            if (addressList().length > 0) {
-                var street = quote.shippingAddress().street[0];
-                if (street != '' && street != undefined) {
-                    $("[name='warehouse_novaposhta_id'] option:contains(" + street + ")").attr('selected', 'selected');
-                }
-            }
-        },
-
-        getCityRef: function () {
-            return this.cityRef;
-        },
-
-        setCityRef: function (cityRef) {
-            this.cityRef = cityRef;
+        hasValue: function() {
+            return this.value() !== '0' && !!this.value() && this.value() !== 'none';
         }
     });
 });

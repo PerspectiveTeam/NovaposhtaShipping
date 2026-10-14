@@ -1,55 +1,81 @@
 define([
     'jquery',
-    'ko',
     'Magento_Ui/js/form/element/textarea',
     'Magento_Checkout/js/model/quote',
     'mage/translate',
     'postbox',
+    'Perspective_NovaposhtaShipping/js/model/checkout-address-state',
     'Magento_Checkout/js/action/set-shipping-information'
 ], function (
     $,
-    ko,
     Input,
     quote,
     $t,
     postbox,
+    addressState,
     setShippingInformationAction
 ) {
     'use strict';
 
     return Input.extend({
 
-
         defaults: {
             address: '',
-            apartNum: ko.observable(''),
+            apartNum: undefined,
             novaposhtaNewAddressDoorNum: '',
-            placeholder: $t('House door number'),
+            placeholder: $t('Apartment number'),
+            allowShippingUpdate: true,
+            isPrivateHouse: false,
             exports: {
                 "apartNum": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.street.2:value"
             },
             imports: {
+                isPrivateHouse: 'checkoutProvider:shippingAddress.novaposhta_is_private_house',
                 "novaposhtaNewAddressDoorNum": "checkout.steps.shipping-step.shippingAddress.shipping-address-fieldset.perspective_novaposhtashipping_house_door_num:value"
             }
         },
 
-
         initialize: function () {
+            this._initializing = true;
             this._super();
+            this._initializing = false;
             return this;
         },
 
         initObservable: function () {
             this._super();
             this.observe('novaposhtaNewAddressDoorNum');
+            this.observe('apartNum');
+            this.observe('isPrivateHouse');
+
+            postbox.subscribe('selectedCityPost', function () {
+                this.allowShippingUpdate = false;
+                this.apartNum('');
+                this.value('');
+                this.isPrivateHouse(false);
+                this.allowShippingUpdate = true;
+            }, this);
+
+            postbox.subscribe('privateHousePost', function (isPrivate) {
+                this.isPrivateHouse(isPrivate);
+                if (isPrivate) {
+                    this.value('');
+                }
+            }, this);
+
             return this;
         },
 
         onUpdate: function () {
             this._super();
+            var method = quote.shippingMethod();
+            if (this._initializing || addressState.restoring || !addressState.isNp() || !method ||
+                ['c2c', 'w2c'].indexOf(method.method_code) === -1) {
+                return;
+            }
             this.apartNum(this.getPreview());
             postbox.publish('selectedApartNumPost',this.getPreview());
-            if (this.getPreview()) {
+            if (this.allowShippingUpdate && this.getPreview()) {
                 try {
                     setShippingInformationAction();
                 } catch (e) {
@@ -60,9 +86,7 @@ define([
         },
 
         selectedMethodCode: function () {
-            var method = quote.shippingMethod();
-            var selectedMethodCode = method != null ? method.method_code : false;
-            return selectedMethodCode;
+            return addressState.methodCode();
         }
     });
 });

@@ -28,12 +28,17 @@ class Sale
 
     public function toOptionArray($isMultiselect = false)
     {
-        $cacheId = 'np_sale_counterparties';
+        $apiKey = (string)$this->novaposhtaHelper->getStoreConfigByCode('novaposhtashipping', 'api_key');
+        if ($apiKey === '') {
+            return [['value' => '', 'label' => __('Firstly you need to specify API key')]];
+        }
+        $options = [['value' => '', 'label' => __('Select default sender')]];
+        $cacheId = 'np_sale_counterparties_' . hash('sha256', $apiKey);
         if ($cacheResult = $this->cache->load($cacheId)) {
             $response = unserialize($cacheResult);
         } else {
             $response = $this->novaposhtaHelper->getApi()->getCounterparties('Sender');
-            if (!empty($response)) {
+            if (($response['success'] ?? false) === true) {
                 $this->cache->save(serialize($response), $cacheId);
             }
         }
@@ -48,9 +53,9 @@ class Sale
                 }
                 return $options;
             } else {
-                return ['label' => __('Firstly you need to specify API key'), 'value' => -1];
+                return [['label' => __('Unable to load senders. Check the API key and try again.'), 'value' => '']];
             }
         }
-        return [];
+        return $options;
     }
 }

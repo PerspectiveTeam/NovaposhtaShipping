@@ -129,6 +129,7 @@ class AddressProcessor implements \Perspective\NovaposhtaShipping\Api\Data\Proce
      */
     private function processAddress($ext): void
     {
+        $this->checkoutAddressModel->setArea($ext->getPerspectiveNovaposhtaShippingArea() ?? '');
         if (!empty($ext->getPerspectiveNovaposhtaShippingCity())) {
             $this->checkoutAddressModel->setCity($ext->getPerspectiveNovaposhtaShippingCity());
         }
@@ -138,9 +139,13 @@ class AddressProcessor implements \Perspective\NovaposhtaShipping\Api\Data\Proce
         if (!empty($ext->getPerspectiveNovaposhtaShippingBuilding())) {
             $this->checkoutAddressModel->setBuilding($ext->getPerspectiveNovaposhtaShippingBuilding());
         }
-        if (!empty($ext->getPerspectiveNovaposhtaShippingFlat())) {
-            $this->checkoutAddressModel->setFlat($ext->getPerspectiveNovaposhtaShippingFlat());
-        }
+        $this->checkoutAddressModel->setFlat(
+            $ext->getPerspectiveNovaposhtaShippingIsPrivateHouse()
+                ? '' : ($ext->getPerspectiveNovaposhtaShippingFlat() ?? '')
+        );
+        $this->checkoutAddressModel->setIsPrivateHouse(
+            (bool)$ext->getPerspectiveNovaposhtaShippingIsPrivateHouse() ? 1 : 0
+        );
         $this->checkoutAddressResourceModel->save($this->checkoutAddressModel);
     }
 }

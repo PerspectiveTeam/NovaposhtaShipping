@@ -1,11 +1,16 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Quote\Model\Quote\Address">
+        <plugin name="perspective_novaposhta_export_customer_address"
+                type="Perspective\NovaposhtaShipping\Plugin\Quote\ExportCustomerAddressPlugin"/>
+    </type>
     <type name="Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AbstractChain">
         <arguments>
             <argument name="data" xsi:type="array">
                 <item name="warehouse" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\WarehouseProcessor</item>
                 <item name="address" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AddressProcessor</item>
+                <item name="area" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\AreaProcessor</item>
                 <item name="city" xsi:type="object">Perspective\NovaposhtaShipping\Model\Quote\Info\Type\CityProcessor</item>
             </argument>
         </arguments>
@@ -50,6 +55,10 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Checkout\CustomerData\DirectoryData">
+        <plugin name="perspective_novaposhta_directory_section_area_ref"
+                type="Perspective\NovaposhtaShipping\Plugin\CustomerData\DirectoryDataPlugin"/>
+    </type>
     <type name="Magento\Checkout\Model\ShippingInformationManagement">
         <plugin name="perspective_novaposhta_shipping_address"
                 type="Perspective\NovaposhtaShipping\Model\Quote\SaveAddressInformationPlugin" sortOrder="1"
@@ -83,7 +92,9 @@
         </arguments>
     </virtualType>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedCitiesRepositoryInterface"
-                type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepositoryInterface"/>
+                type="Perspective\NovaposhtaShipping\Model\PreparedCitiesRepository"/>
+    <preference for="Perspective\NovaposhtaShipping\Api\PreparedAreasRepositoryInterface"
+                type="Perspective\NovaposhtaShipping\Model\PreparedAreasRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\SenderRepositoryInterface"
                 type="Perspective\NovaposhtaShipping\Model\SenderRepository"/>
     <preference for="Perspective\NovaposhtaShipping\Api\PreparedWarehousesRepositoryInterface"
@@ -101,6 +112,11 @@
         <arguments>
             <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
             <argument name="backendQuoteSession" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts">
+        <arguments>
+            <argument name="sessionQuote" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
         </arguments>
     </type>
 </config>

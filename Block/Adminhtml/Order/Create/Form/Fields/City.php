@@ -22,7 +22,7 @@ class City extends \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\
             static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID,
             Select2::class,
             [],
-            'city'
+            \Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\Form\Fields\Area::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID
         );
         $element = $result->getElement(static::NOVAPOSHTA_SHIPPING_VISIBLE_SELECT_ID);
         $element->setData('label', __('NP City'));

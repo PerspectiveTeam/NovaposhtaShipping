@@ -75,7 +75,8 @@ class ShippingWarehouseRepository implements ShippingWarehouseRepositoryInterfac
                     $cityRef,
                     'uk_UA'
                 );
-                $model->setWarehouse(reset($warehouseCollection)->getRef());
+                $warehouse = reset($warehouseCollection);
+                $model->setWarehouse($warehouse ? $warehouse->getRef() : null);
             } else {
                 //задаем дефолтные значения
                 $model->setCity('e221d64c-391c-11dd-90d9-001a92567626');
