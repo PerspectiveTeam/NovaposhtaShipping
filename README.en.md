@@ -62,6 +62,18 @@ without leaving Magento 2 Admin. In the **Ship** form, they review recipient
 details, select the sender, contact person and dispatch address, then send
 the parcel parameters to Nova Poshta.
 
+### Packing visualisation
+
+The Admin order page includes an experimental packing visualiser. Click
+**Visualise Box #1** to open a 3D view of the box, showing product placement
+and dimensions from the BoxPacker calculation. Each box has its own link.
+
+![Packing visualisation link on the Magento Admin order page](images/readme/admin-packing.png)
+
+![BoxPacker 3D view of product placement inside a box](images/readme/packing-visualisation.png)
+
+*Packing example from a demo order. The visualisation opens on the BoxPacker website.*
+
 ## Setting up your store
 
 After installation, open **Stores → Configuration → Perspective Studio →
