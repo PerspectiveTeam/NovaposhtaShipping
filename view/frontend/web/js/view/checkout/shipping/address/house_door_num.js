@@ -23,7 +23,7 @@ define([
             address: '',
             apartNum: undefined,
             novaposhtaNewAddressDoorNum: '',
-            placeholder: $t('House door number'),
+            placeholder: $t('Apartment number'),
             allowShippingUpdate: true,
             isPrivateHouse: false,
             exports: {
