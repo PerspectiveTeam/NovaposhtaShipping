@@ -255,7 +255,6 @@ class NovaPoshtaApi2
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
             $result = curl_exec($ch);
-            curl_close($ch);
         } else {
             $result = file_get_contents($url, null, stream_context_create(array(
                 'http' => array(

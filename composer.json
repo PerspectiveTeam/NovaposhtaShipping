@@ -3,7 +3,7 @@
     "description": "Novaposhta integration for Magento 2",
     "type": "magento2-module",
     "license": "MIT",
-    "version": "2.6.1",
+    "version": "2.6.2",
     "authors": [
         {
             "email": "faqreg@gmail.com",
@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "~8.2 || ~8.3 || ~8.4",
+        "php": "~8.2 || ~8.3 || ~8.4 || ~8.5",
         "magento/framework": "*",
         "magento/module-catalog": "*",
         "magento/module-checkout": "*",
