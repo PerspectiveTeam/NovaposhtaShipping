@@ -119,4 +119,6 @@
             <argument name="sessionQuote" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
         </arguments>
     </type>
+    <preference for="Perspective\NovaposhtaShipping\Api\BoxManagementInterface"
+                type="Perspective\NovaposhtaShipping\Service\BoxManagement"/>
 </config>

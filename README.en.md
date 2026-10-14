@@ -138,6 +138,24 @@ In two-step checkout, the price may be updated after the address is saved
 and the customer moves to payment. Before launch, check the final price in
 the store currency, especially when the base and storefront currencies differ.
 
+## Managing boxes
+
+Open **Stores → Configuration → Perspective Studio → Nova Poshta Catalog → View Lists → View List Of Package Types**.
+Boxes are shared across all stores. **Enabled for BoxPacker** controls the administrator's
+selection; **Active** is directory availability. BoxPacker receives available, enabled boxes
+without filtering by total order weight and chooses suitable dimensions and weight capacity.
+
+The three standard pallets and existing API packages are enabled by default. Standard
+and API packages support duplication and enabling/disabling. Only custom boxes can be
+edited or deleted. Synchronization preserves manual BoxPacker disabling and excludes
+standard and custom packages from API presence checks.
+
+Use **New Box** or **Duplicate** to open the form. A duplicate is created only when saved
+and has its own identity. Dimensions use millimetres; maximum gross weight and tare use
+kilograms. Optional inner dimensions default to outer dimensions and tare defaults to zero.
+Mass deletion skips protected packages and reports their count. Administrators need the
+**Manage BoxPacker Boxes** permission. Temporary product-size boxes remain available.
+
 ## For developers
 
 ### Requirements and compatibility
