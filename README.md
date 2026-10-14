@@ -1,73 +1,201 @@
-## Perspective Novaposhta Shipping
+# Perspective Nova Poshta Shipping
 
-[![Demo](https://try.merchantduo.com/_sandbox/button)](https://try.merchantduo.com/_sandbox/setup?composer_packages=perspectiveteam%2Fmodule-novaposhtashipping&store_config_map=carriers%2Fnovaposhtashipping%2Factive%3D1)
+**Українська** · [English](README.en.md)
 
-### To install this package use the following steps:
+Доставка Новою поштою для Magento 2: покупець обирає місто й відділення або
+вводить адресу для кур'єра під час оформлення замовлення. Менеджер бачить
+ці дані в адмінпанелі та може підготувати ТТН у формі відправлення.
 
-1. Go to Magento 2 root directory.
-2. For Magento 2 use following command enter the following commands
-3. For Magento 2  (from 2.4.5+) use following commands:
+Модуль запитує вартість і орієнтовну дату доставки у Нової пошти, враховує
+вагу та габарити товарів і підбирає пакування через BoxPacker. Якщо магазин
+відправляє товари з кількох міст, розрахунок порівнює доступні варіанти.
+Також можна встановити фіксовану вартість доставки.
 
-3.1. Installation in app/code/  
+![Вибір області, міста й відділення Нової пошти під час оформлення замовлення](images/readme/checkout-warehouse.png)
 
-3.1.1. Install BoxPacker library  
-        ```
-        composer require dvdoug/boxpacker
-        ```  
+*Розрахунок у Magento Luma для однієї одиниці Configurable Product 16:
+вага 3 кг, габарити 150 × 250 × 350 мм. Доставка до відділення в Києві
+коштує 195 грн. Тариф і орієнтовну дату отримано через API Нової пошти;
+вони залежать від маршруту, товарів і налаштувань відправника.*
 
-3.1.2. Install Perspective Novaposhta Catalog Module  
-        ```
-        composer require perspectiveteam/module-novaposhtacatalog:"*"  
-        ```  
+## Як покупець обирає доставку
 
-3.1.3. Install Perspective Novaposhta Shipping Module  
-        ```
-        composer require perspectiveteam/module-novaposhtashipping:"*"  
-        ```  
+Для доставки в Україні покупець обирає спосіб Нової пошти, шукає населений
+пункт за назвою та вказує місце отримання. У результатах пошуку міста є назва
+області, щоб розрізняти населені пункти з однаковими назвами.
 
-3.2. OR Installation via composer  
-        ```
-        composer require perspectiveteam/module-novaposhtashipping:"*"  
-        ```  
-4. Wait while dependencies are updated.  
-5. Make an ordinary setup for the module  
+- Для відділення доступний пошук точок видачі у вибраному місті. Список
+  використовує довідники [Nova Poshta Catalog](https://github.com/PerspectiveTeam/NovaposhtaCatalog#readme).
+- Для доставки до дверей покупець обирає вулицю, вводить номер будинку
+  й квартири. Позначка **Приватний будинок** дозволяє оформити адресу без квартири.
+- Після зміни міста поля відділення й вулиці очищуються, щоб у замовленні
+  не залишилася адреса з попереднього міста.
 
-### How to use this module
-After installation, you can see the module in the admin panel in the menu:  
-Stores -> Configuration -> Sales -> Shipping Methods(Delivery Methods) -> Novaposhta Shipping with shipping price calculation and TTN creation.
-#### Proceed to the Novaposhta Catalog module settings to schedule update of entities.
-![proceed_to_update.png](images/proceed_to_update.png)  
-Be sure cron jobs are enabled for Magento 2.  
-Insert the API key and save the settings and enable the module.  
-![enable_np_catalog.png](images/enable_np_catalog.png)  
-Click the "Schedule update" button to update the catalog.  
-#### Set up the module
-1. To use the module, you need to register on the site https://novaposhta.ua/ and get the API key.
-2. In the admin panel, in the module settings, enter the API key and the sender's data.
-3. Adjust the Sender's Warehouse Cities  
-   ![cities_warehouses.png](images/cities_warehouses.png)  
-   3.1. This module can calculate the shipping price for several warehouses.
-4. Adjust "Is Organization" option for business or private sender  
-   ![is_organisation.png](images/is_organisation.png)
-5. Choose appropriate "Delivery Technology"  
-   ![delivery_tech.png](images/delivery_tech.png)
+![Доставка до дверей: пошук вулиці, номер будинку, квартира та позначка приватного будинку](images/readme/checkout-address.png)
 
-#### Check the module on frontend
-1. Add dimensions and weight to the products in the admin panel.
-![dimensions_and_weight.png](images/dimensions_and_weight.png)
-2. Add products to the cart and proceed to checkout.
-3. Fill obligatory fields and choose shipping method.
-4. Depends on the chosen delivery technology, you can see the shipping price and additional fields for persist data from customer. First part can be varied depends on your business processes(In example specified sender technology is "Client").    
-4.1. If you choose "Client-Warehouse" delivery technology, you can see the shipping price and select the warehouse from the list of warehouses of the customer's city.  
-![c2w_shipping.png](images/checkout/c2w_shipping.png)  
-![c2w_payment.png](images/checkout/c2w_payment.png)  
-![с2w_admin.png](images/checkout/c2w_admin.png)   
-4.2. If you choose "Client-Client" delivery technology, you can see the shipping price and select the address from the list of streets of the customer's city and house+apartment number.  
-![c2c_shipping.png](images/checkout/c2c_shipping.png)  
-![c2c_payment.png](images/checkout/c2c_payment.png)  
-![c2c_admin.png](images/checkout/c2c_admin.png)  
-5. Important notice about Luma checkout:  
-Sometimes on shipping and payment step shipping price can vary. It is because the finalisation of calculation of shipping price finished only after transition to next step(payment step).  
-You can debug this behaviour in cache table  
-```perspective_novaposhta_shipping_sales_onestep_price_cache```    
-![checkout_cache.png](images/checkout/checkout_cache.png)
+*Для того самого товару доставка до адреси в Києві коштує 255 грн за
+розрахунком Нової пошти. Назви полів залежать від локалізації магазину.*
+
+Після переходу до оплати розрахована вартість доставки входить до підсумку
+замовлення. Покупець бачить ціну товару й доставки окремо.
+
+![Підсумок замовлення з Configurable Product 16 та розрахованою доставкою 255 грн](images/readme/checkout-summary.png)
+
+*Підсумок у демонстраційному магазині: товар 7,22 грн, доставка 255 грн,
+разом 262,22 грн.*
+
+### Збережені адреси
+
+Зареєстрований покупець може вибрати адресу зі своєї адресної книги.
+Модуль відновлює пов'язані дані Нової пошти, зокрема місто, відділення або
+вулицю. Якщо адресу неможливо однозначно визначити чи вона не підходить
+до вибраного способу доставки, checkout пропонує додати нову.
+
+![Адресна книга покупця з адресами доставки Новою поштою](images/readme/checkout-saved-addresses.png)
+
+*Приклади збережених адрес у локальному демонстраційному магазині. Телефони приховані.*
+
+## Робота менеджера
+
+Під час створення відправлення (shipment) модуль дозволяє створити ТТН
+Нової пошти, не залишаючи адмінпанель Magento 2. У формі **Ship** менеджер
+перевіряє дані отримувача, обирає відправника, контактну особу й адресу
+відправлення та надсилає параметри посилки до Нової пошти.
+
+## Налаштування магазину
+
+Після встановлення відкрийте **Stores → Configuration → Perspective Studio →
+Nova Poshta Shipping**. Це посилання веде до налаштувань перевізника в
+**Sales → Delivery Methods** (у деяких версіях Magento: **Shipping Methods**),
+блок **Novaposhta Shipping with shipping price calculation and TTN creation**.
+
+![Налаштування модуля: увімкнення, режим фіксованої вартості та відправник](images/readme/admin-settings.png)
+
+*API-ключ, контактна особа та адреса відправника приховані.*
+
+1. У [Nova Poshta Catalog](https://github.com/PerspectiveTeam/NovaposhtaCatalog#readme) увімкніть модуль,
+   введіть API-ключ і налаштуйте оновлення довідників. Дочекайтеся завантаження
+   областей, міст, відділень, вулиць і пакування. Для розкладу потрібен cron Magento.
+2. Перевірте **Directory Map** у Catalog: відповідності областей Нової пошти
+   регіонам Magento використовуються під час вибору адреси.
+3. У налаштуваннях Shipping увімкніть **Enabled**, введіть API-ключ і задайте
+   назву доставки. Ключ задається окремо для Catalog і Shipping.
+4. Налаштуйте **Is Organization** відповідно до типу відправника. Виберіть
+   **Main Sender**, **Contact Person of the Sender** і **Contact Person Address**.
+   Ці списки беруть дані з облікового запису Нової пошти.
+5. У **Cities with Warehouse** виберіть міста, звідки відправляєте товари.
+   Вони потрібні для розрахунку вартості; під час створення ТТН адресу
+   відправника обирають у формі відправлення.
+6. У **Allowed Methods** залиште потрібні способи, перевірте правила вартості
+   й збережіть конфігурацію. Заповніть вагу та габарити товарів.
+
+### Способи доставки
+
+У назвах **Warehouse** означає відділення, а **Client** означає адресу
+відправника або отримувача.
+
+| Спосіб у налаштуваннях | Маршрут | Що вказує покупець |
+| --- | --- | --- |
+| Warehouse to Warehouse (`w2w`) | Відділення → відділення | Відділення отримання |
+| Warehouse to Client (`w2c`) | Відділення → адреса | Вулицю, будинок і квартиру або приватний будинок |
+| Client to Warehouse (`c2w`) | Адреса → відділення | Відділення отримання |
+| Client to Client (`c2c`) | Адреса → адреса | Вулицю, будинок і квартиру або приватний будинок |
+
+### Вартість і дані товарів
+
+| Налаштування | Для чого воно потрібне |
+| --- | --- |
+| Always use default cost | Застосовувати задану вартість замість отриманого тарифу. Підходить також для магазинів, які хочуть встановити фіксовану ціну доставки замість розрахунку за тарифами Нової пошти |
+| Default Cost | Фіксована або резервна вартість, коли розрахунок недоступний |
+| Lathing cost | Доплата за обрешетування в розрахунку вантажу та палет |
+| Free shipping cost | Поріг суми товарів для правил обрешетування й безкоштовної доставки |
+
+Назва **Free shipping cost** не означає, що кожне замовлення понад поріг
+отримає безкоштовну доставку. Правило залежить від результату перевірки
+товарів зі **Special Price**. Перевірте його на своєму асортименті перед запуском;
+**Always use default cost** має пріоритет над розрахованою вартістю.
+
+Для товарів потрібні стандартна **Weight** у кілограмах і додані модулем
+**Width**, **Length**, **Height** у міліметрах. BoxPacker використовує ці дані
+та довідник пакування для розрахунку місць. Для configurable-товарів заповніть
+вагу й габарити також у пов'язаних simple-варіацій. Від сумарної ваги 85 кг код
+розрахунку переходить до типу вантажу **Pallet**.
+
+У двокроковому checkout тариф може уточнюватися після збереження адреси
+та переходу до оплати. Перед запуском перевірте підсумкову вартість у валюті
+магазину, зокрема якщо базова валюта й валюта вітрини відрізняються.
+
+## Для розробника
+
+### Вимоги й сумісність
+
+Для роботи потрібен API-ключ Нової пошти.
+
+### Встановлення
+
+З кореня Magento у PHP-середовищі вашого проєкту:
+
+```bash
+composer require perspectiveteam/module-novaposhtashipping
+php bin/magento module:enable Perspective_NovaposhtaCatalog Perspective_NovaposhtaShipping
+php bin/magento setup:upgrade
+php bin/magento cache:clean config layout block_html eav
+```
+
+Composer встановлює залежності разом із модулем. У production виконайте
+компіляцію DI й розгортання статичних файлів згідно з процесом вашого проєкту.
+
+Для встановлення з вихідного коду розмістіть модуль у
+`app/code/Perspective/NovaposhtaShipping`, встановіть залежності з
+[composer.json](composer.json) і виконайте ті самі кроки активації та оновлення
+Magento. Не встановлюйте одночасно копію в `app/code` і Composer-пакет Shipping.
+
+<details>
+<summary>Точки інтеграції</summary>
+
+### Структура модуля
+
+| Компонент | Призначення |
+| --- | --- |
+| [Model/Carrier/](Model/Carrier/) | Перевізник `novaposhtashipping`, способи, запити тарифів і дат доставки |
+| [Helper/Boxpacker.php](Helper/Boxpacker.php) | Підбір пакування за вагою та габаритами |
+| [Model/Carrier/ShippingSales.php](Model/Carrier/ShippingSales.php) | Правила доплат, порога й фіксованої вартості |
+| [view/frontend/](view/frontend/) | Checkout, пошук адрес і відновлення стану |
+| [Model/CustomerAddress/DeliveryData.php](Model/CustomerAddress/DeliveryData.php) | Відновлення даних Нової пошти зі збереженої адреси |
+| [Model/Shipment/](Model/Shipment/) | Створення інтернет-документа Нової пошти |
+| [etc/extension_attributes.xml](etc/extension_attributes.xml) | Дані Нової пошти в адресі quote |
+| [Test/](Test/) | Наявні PHP unit-тести та JavaScript-тести checkout і Admin |
+
+### REST та збереження адреси
+
+[etc/webapi.xml](etc/webapi.xml) містить публічні POST-маршрути пошуку довідників
+під `/V1/novaposhtashipping/`. Основні маршрути:
+
+| Маршрут | Параметри |
+| --- | --- |
+| `area` | `term` |
+| `city` | `term`, необов'язкові `areaRef`, `includeArea` |
+| `filtered_warehouses` | `cityRef`, `term`, необов'язкові `pageSizes`, `currentPage` |
+| `streets-formatted-for-select` | `cityRef`, `term` |
+
+Підготовлені репозиторії повертають JSON-рядок зі списком `{id, text}`.
+Врахуйте це при обробці відповіді REST. `includeArea` додає `areaRef` і
+`areaLabel` до результатів міст. Для нових виборів доступність записів
+визначає Catalog.
+
+Checkout передає Ref і поля адреси в `extension_attributes` адреси quote
+з префіксом `perspective_novaposhta_shipping_`: `area`, `city`, `warehouse`,
+`street`, `building`, `flat`, `is_private_house`, `method`.
+Дані адресної книги зберігаються в атрибуті `novaposhta_shipping_data`.
+Для адрес без Ref відновлення допускає лише точний однозначний збіг;
+неоднозначні дані потребують нового вибору покупця.
+
+Data patches додають габарити товарів, атрибут адресної книги та метадані
+трьох рядків Street Address. Тип кешу модуля: `novaposhta_operations_cache`.
+Після зміни даних, що впливають на тариф, перевірте актуальність цього кешу.
+
+</details>
+
+## Ліцензія
+
+[MIT](LICENSE.md) · Perspective Studio
