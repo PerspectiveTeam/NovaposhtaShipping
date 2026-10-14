@@ -114,4 +114,9 @@
             <argument name="backendQuoteSession" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
         </arguments>
     </type>
+    <type name="Perspective\NovaposhtaShipping\Block\Adminhtml\Order\Create\AutocompleteScripts">
+        <arguments>
+            <argument name="sessionQuote" xsi:type="object">Magento\Backend\Model\Session\Quote\Proxy</argument>
+        </arguments>
+    </type>
 </config>
